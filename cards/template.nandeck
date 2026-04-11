@@ -1,0 +1,13 @@
+; nanDECK script for Space Agency cards ? print (A4 PDF)
+; Output: cards/output/print/space_agency_deck.pdf
+
+; A4 portrait page with white paper background
+PAGE=21,29.7,"PORTRAIT",,"#FFFFFF"
+
+; White card-face background (print only ? keeps cards readable on white paper)
+; RECTANGLE is in the IMAGE pass so artwork placed after it renders on top.
+RECTANGLE="1-44",0.2,0.2,5.9,8.4,#ffffff,,0
+
+; Shared card design (layout, data link, all card directives)
+INCLUDE="template_card_design.nandeck"
+

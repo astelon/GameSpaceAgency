@@ -1,0 +1,444 @@
+﻿{
+    "GeneratedAt":  "2026-04-10T19:44:57.8636924-06:00",
+    "SourceCsv":  "C:\\Users\\lgmar\\GameSpaceAgency\\cards\\cards.csv",
+    "Decks":  [
+                  {
+                      "DeckType":  "Engine",
+                      "Count":  7,
+                      "Cards":  [
+                                    {
+                                        "CardID":  "E01",
+                                        "Name":  "Merlin-1a",
+                                        "Tier":  "",
+                                        "MissionType":  "",
+                                        "ArtFile":  "art/merlin.webp",
+                                        "AbsoluteArtPath":  "C:\\Users\\lgmar\\GameSpaceAgency\\cards\\art\\\\merlin.webp",
+                                        "ArtExists":  true
+                                    },
+                                    {
+                                        "CardID":  "E02",
+                                        "Name":  "Sterling Booster",
+                                        "Tier":  "",
+                                        "MissionType":  "",
+                                        "ArtFile":  "art/icons/engine.png",
+                                        "AbsoluteArtPath":  "C:\\Users\\lgmar\\GameSpaceAgency\\cards\\art\\\\icons\\\\engine.png",
+                                        "ArtExists":  true
+                                    },
+                                    {
+                                        "CardID":  "E03",
+                                        "Name":  "Hydrogen Core",
+                                        "Tier":  "",
+                                        "MissionType":  "",
+                                        "ArtFile":  "art/icons/engine.png",
+                                        "AbsoluteArtPath":  "C:\\Users\\lgmar\\GameSpaceAgency\\cards\\art\\\\icons\\\\engine.png",
+                                        "ArtExists":  true
+                                    },
+                                    {
+                                        "CardID":  "E04",
+                                        "Name":  "Ion Sustainer",
+                                        "Tier":  "",
+                                        "MissionType":  "",
+                                        "ArtFile":  "art/icons/engine.png",
+                                        "AbsoluteArtPath":  "C:\\Users\\lgmar\\GameSpaceAgency\\cards\\art\\\\icons\\\\engine.png",
+                                        "ArtExists":  true
+                                    },
+                                    {
+                                        "CardID":  "E05",
+                                        "Name":  "Hybrid Cycle",
+                                        "Tier":  "",
+                                        "MissionType":  "",
+                                        "ArtFile":  "art/icons/engine.png",
+                                        "AbsoluteArtPath":  "C:\\Users\\lgmar\\GameSpaceAgency\\cards\\art\\\\icons\\\\engine.png",
+                                        "ArtExists":  true
+                                    },
+                                    {
+                                        "CardID":  "E06",
+                                        "Name":  "Raptor-X",
+                                        "Tier":  "",
+                                        "MissionType":  "",
+                                        "ArtFile":  "art/icons/engine.png",
+                                        "AbsoluteArtPath":  "C:\\Users\\lgmar\\GameSpaceAgency\\cards\\art\\\\icons\\\\engine.png",
+                                        "ArtExists":  true
+                                    },
+                                    {
+                                        "CardID":  "E07",
+                                        "Name":  "Kick Stage",
+                                        "Tier":  "",
+                                        "MissionType":  "",
+                                        "ArtFile":  "art/icons/engine.png",
+                                        "AbsoluteArtPath":  "C:\\Users\\lgmar\\GameSpaceAgency\\cards\\art\\\\icons\\\\engine.png",
+                                        "ArtExists":  true
+                                    }
+                                ]
+                  },
+                  {
+                      "DeckType":  "Tank",
+                      "Count":  6,
+                      "Cards":  [
+                                    {
+                                        "CardID":  "T01",
+                                        "Name":  "Standard Tank",
+                                        "Tier":  "",
+                                        "MissionType":  "",
+                                        "ArtFile":  "art/icons/tank.png",
+                                        "AbsoluteArtPath":  "C:\\Users\\lgmar\\GameSpaceAgency\\cards\\art\\\\icons\\\\tank.png",
+                                        "ArtExists":  true
+                                    },
+                                    {
+                                        "CardID":  "T02",
+                                        "Name":  "Cryo Tank",
+                                        "Tier":  "",
+                                        "MissionType":  "",
+                                        "ArtFile":  "art/icons/tank.png",
+                                        "AbsoluteArtPath":  "C:\\Users\\lgmar\\GameSpaceAgency\\cards\\art\\\\icons\\\\tank.png",
+                                        "ArtExists":  true
+                                    },
+                                    {
+                                        "CardID":  "T03",
+                                        "Name":  "Fuel Pod",
+                                        "Tier":  "",
+                                        "MissionType":  "",
+                                        "ArtFile":  "art/icons/tank.png",
+                                        "AbsoluteArtPath":  "C:\\Users\\lgmar\\GameSpaceAgency\\cards\\art\\\\icons\\\\tank.png",
+                                        "ArtExists":  true
+                                    },
+                                    {
+                                        "CardID":  "T04",
+                                        "Name":  "Expandable Tank",
+                                        "Tier":  "",
+                                        "MissionType":  "",
+                                        "ArtFile":  "art/icons/tank.png",
+                                        "AbsoluteArtPath":  "C:\\Users\\lgmar\\GameSpaceAgency\\cards\\art\\\\icons\\\\tank.png",
+                                        "ArtExists":  true
+                                    },
+                                    {
+                                        "CardID":  "T05",
+                                        "Name":  "Pressurized Tank",
+                                        "Tier":  "",
+                                        "MissionType":  "",
+                                        "ArtFile":  "art/icons/tank.png",
+                                        "AbsoluteArtPath":  "C:\\Users\\lgmar\\GameSpaceAgency\\cards\\art\\\\icons\\\\tank.png",
+                                        "ArtExists":  true
+                                    },
+                                    {
+                                        "CardID":  "T06",
+                                        "Name":  "Long-Range Tank",
+                                        "Tier":  "",
+                                        "MissionType":  "",
+                                        "ArtFile":  "art/icons/tank.png",
+                                        "AbsoluteArtPath":  "C:\\Users\\lgmar\\GameSpaceAgency\\cards\\art\\\\icons\\\\tank.png",
+                                        "ArtExists":  true
+                                    }
+                                ]
+                  },
+                  {
+                      "DeckType":  "Payload",
+                      "Count":  7,
+                      "Cards":  [
+                                    {
+                                        "CardID":  "P01",
+                                        "Name":  "Comm Satellite",
+                                        "Tier":  "",
+                                        "MissionType":  "",
+                                        "ArtFile":  "art/icons/payload.png",
+                                        "AbsoluteArtPath":  "C:\\Users\\lgmar\\GameSpaceAgency\\cards\\art\\\\icons\\\\payload.png",
+                                        "ArtExists":  true
+                                    },
+                                    {
+                                        "CardID":  "P02",
+                                        "Name":  "Imaging Probe",
+                                        "Tier":  "",
+                                        "MissionType":  "",
+                                        "ArtFile":  "art/icons/payload.png",
+                                        "AbsoluteArtPath":  "C:\\Users\\lgmar\\GameSpaceAgency\\cards\\art\\\\icons\\\\payload.png",
+                                        "ArtExists":  true
+                                    },
+                                    {
+                                        "CardID":  "P03",
+                                        "Name":  "Science Module",
+                                        "Tier":  "",
+                                        "MissionType":  "",
+                                        "ArtFile":  "art/icons/payload.png",
+                                        "AbsoluteArtPath":  "C:\\Users\\lgmar\\GameSpaceAgency\\cards\\art\\\\icons\\\\payload.png",
+                                        "ArtExists":  true
+                                    },
+                                    {
+                                        "CardID":  "P04",
+                                        "Name":  "Crew Capsule",
+                                        "Tier":  "",
+                                        "MissionType":  "",
+                                        "ArtFile":  "art/icons/payload.png",
+                                        "AbsoluteArtPath":  "C:\\Users\\lgmar\\GameSpaceAgency\\cards\\art\\\\icons\\\\payload.png",
+                                        "ArtExists":  true
+                                    },
+                                    {
+                                        "CardID":  "P05",
+                                        "Name":  "CubeSat Cluster",
+                                        "Tier":  "",
+                                        "MissionType":  "",
+                                        "ArtFile":  "art/icons/payload.png",
+                                        "AbsoluteArtPath":  "C:\\Users\\lgmar\\GameSpaceAgency\\cards\\art\\\\icons\\\\payload.png",
+                                        "ArtExists":  true
+                                    },
+                                    {
+                                        "CardID":  "P06",
+                                        "Name":  "Landing Lander",
+                                        "Tier":  "",
+                                        "MissionType":  "",
+                                        "ArtFile":  "art/icons/payload.png",
+                                        "AbsoluteArtPath":  "C:\\Users\\lgmar\\GameSpaceAgency\\cards\\art\\\\icons\\\\payload.png",
+                                        "ArtExists":  true
+                                    },
+                                    {
+                                        "CardID":  "P07",
+                                        "Name":  "Cargo Return Capsule",
+                                        "Tier":  "",
+                                        "MissionType":  "",
+                                        "ArtFile":  "art/icons/payload.png",
+                                        "AbsoluteArtPath":  "C:\\Users\\lgmar\\GameSpaceAgency\\cards\\art\\\\icons\\\\payload.png",
+                                        "ArtExists":  true
+                                    }
+                                ]
+                  },
+                  {
+                      "DeckType":  "Support",
+                      "Count":  4,
+                      "Cards":  [
+                                    {
+                                        "CardID":  "S01",
+                                        "Name":  "Heat Shield",
+                                        "Tier":  "",
+                                        "MissionType":  "",
+                                        "ArtFile":  "art/icons/support.png",
+                                        "AbsoluteArtPath":  "C:\\Users\\lgmar\\GameSpaceAgency\\cards\\art\\\\icons\\\\support.png",
+                                        "ArtExists":  true
+                                    },
+                                    {
+                                        "CardID":  "S02",
+                                        "Name":  "Recovery Chutes",
+                                        "Tier":  "",
+                                        "MissionType":  "",
+                                        "ArtFile":  "art/icons/support.png",
+                                        "AbsoluteArtPath":  "C:\\Users\\lgmar\\GameSpaceAgency\\cards\\art\\\\icons\\\\support.png",
+                                        "ArtExists":  true
+                                    },
+                                    {
+                                        "CardID":  "S03",
+                                        "Name":  "Ceramic Tile Shield",
+                                        "Tier":  "",
+                                        "MissionType":  "",
+                                        "ArtFile":  "art/icons/support.png",
+                                        "AbsoluteArtPath":  "C:\\Users\\lgmar\\GameSpaceAgency\\cards\\art\\\\icons\\\\support.png",
+                                        "ArtExists":  true
+                                    },
+                                    {
+                                        "CardID":  "S04",
+                                        "Name":  "Guided Parafoil",
+                                        "Tier":  "",
+                                        "MissionType":  "",
+                                        "ArtFile":  "art/icons/support.png",
+                                        "AbsoluteArtPath":  "C:\\Users\\lgmar\\GameSpaceAgency\\cards\\art\\\\icons\\\\support.png",
+                                        "ArtExists":  true
+                                    }
+                                ]
+                  },
+                  {
+                      "DeckType":  "Mission",
+                      "Count":  12,
+                      "Cards":  [
+                                    {
+                                        "CardID":  "M01",
+                                        "Name":  "LEO Deployment",
+                                        "Tier":  "Tier 1",
+                                        "MissionType":  "Public",
+                                        "ArtFile":  "art/generated/M01.jpg",
+                                        "AbsoluteArtPath":  "C:\\Users\\lgmar\\GameSpaceAgency\\cards\\art\\\\generated\\\\M01.jpg",
+                                        "ArtExists":  true
+                                    },
+                                    {
+                                        "CardID":  "M02",
+                                        "Name":  "Lunar Flyby",
+                                        "Tier":  "Tier 2",
+                                        "MissionType":  "Public",
+                                        "ArtFile":  "art/icons/mission.png",
+                                        "AbsoluteArtPath":  "C:\\Users\\lgmar\\GameSpaceAgency\\cards\\art\\\\icons\\\\mission.png",
+                                        "ArtExists":  true
+                                    },
+                                    {
+                                        "CardID":  "M03",
+                                        "Name":  "Lunar Landing",
+                                        "Tier":  "Tier 2",
+                                        "MissionType":  "Public",
+                                        "ArtFile":  "art/icons/mission.png",
+                                        "AbsoluteArtPath":  "C:\\Users\\lgmar\\GameSpaceAgency\\cards\\art\\\\icons\\\\mission.png",
+                                        "ArtExists":  true
+                                    },
+                                    {
+                                        "CardID":  "M04",
+                                        "Name":  "Mars Orbit Insertion",
+                                        "Tier":  "Tier 3",
+                                        "MissionType":  "Public",
+                                        "ArtFile":  "art/icons/mission.png",
+                                        "AbsoluteArtPath":  "C:\\Users\\lgmar\\GameSpaceAgency\\cards\\art\\\\icons\\\\mission.png",
+                                        "ArtExists":  true
+                                    },
+                                    {
+                                        "CardID":  "M05",
+                                        "Name":  "Deep Space Probe",
+                                        "Tier":  "Tier 3",
+                                        "MissionType":  "Public",
+                                        "ArtFile":  "art/icons/mission.png",
+                                        "AbsoluteArtPath":  "C:\\Users\\lgmar\\GameSpaceAgency\\cards\\art\\\\icons\\\\mission.png",
+                                        "ArtExists":  true
+                                    },
+                                    {
+                                        "CardID":  "M06",
+                                        "Name":  "Crewed Station Visit",
+                                        "Tier":  "Tier 3",
+                                        "MissionType":  "Public",
+                                        "ArtFile":  "art/icons/mission.png",
+                                        "AbsoluteArtPath":  "C:\\Users\\lgmar\\GameSpaceAgency\\cards\\art\\\\icons\\\\mission.png",
+                                        "ArtExists":  true
+                                    },
+                                    {
+                                        "CardID":  "M07",
+                                        "Name":  "Emergency Resupply",
+                                        "Tier":  "Tier 1",
+                                        "MissionType":  "Public",
+                                        "ArtFile":  "art/icons/mission.png",
+                                        "AbsoluteArtPath":  "C:\\Users\\lgmar\\GameSpaceAgency\\cards\\art\\\\icons\\\\mission.png",
+                                        "ArtExists":  true
+                                    },
+                                    {
+                                        "CardID":  "M08",
+                                        "Name":  "Science Relay",
+                                        "Tier":  "Tier 2",
+                                        "MissionType":  "Public",
+                                        "ArtFile":  "art/icons/mission.png",
+                                        "AbsoluteArtPath":  "C:\\Users\\lgmar\\GameSpaceAgency\\cards\\art\\\\icons\\\\mission.png",
+                                        "ArtExists":  true
+                                    },
+                                    {
+                                        "CardID":  "M09",
+                                        "Name":  "Orbital Service Check",
+                                        "Tier":  "Tier 2",
+                                        "MissionType":  "Public",
+                                        "ArtFile":  "art/icons/mission.png",
+                                        "AbsoluteArtPath":  "C:\\Users\\lgmar\\GameSpaceAgency\\cards\\art\\\\icons\\\\mission.png",
+                                        "ArtExists":  true
+                                    },
+                                    {
+                                        "CardID":  "M10",
+                                        "Name":  "Capsule Recovery",
+                                        "Tier":  "Tier 1",
+                                        "MissionType":  "Public",
+                                        "ArtFile":  "art/icons/mission.png",
+                                        "AbsoluteArtPath":  "C:\\Users\\lgmar\\GameSpaceAgency\\cards\\art\\\\icons\\\\mission.png",
+                                        "ArtExists":  true
+                                    },
+                                    {
+                                        "CardID":  "M11",
+                                        "Name":  "Reusable Flight Test",
+                                        "Tier":  "Tier 1",
+                                        "MissionType":  "Public",
+                                        "ArtFile":  "art/icons/mission.png",
+                                        "AbsoluteArtPath":  "C:\\Users\\lgmar\\GameSpaceAgency\\cards\\art\\\\icons\\\\mission.png",
+                                        "ArtExists":  true
+                                    },
+                                    {
+                                        "CardID":  "M12",
+                                        "Name":  "Lunar Sample Return",
+                                        "Tier":  "Tier 3",
+                                        "MissionType":  "Public",
+                                        "ArtFile":  "art/icons/mission.png",
+                                        "AbsoluteArtPath":  "C:\\Users\\lgmar\\GameSpaceAgency\\cards\\art\\\\icons\\\\mission.png",
+                                        "ArtExists":  true
+                                    }
+                                ]
+                  },
+                  {
+                      "DeckType":  "Tech",
+                      "Count":  4,
+                      "Cards":  [
+                                    {
+                                        "CardID":  "C01",
+                                        "Name":  "Reusable Refurb",
+                                        "Tier":  "",
+                                        "MissionType":  "",
+                                        "ArtFile":  "art/icons/tech.png",
+                                        "AbsoluteArtPath":  "C:\\Users\\lgmar\\GameSpaceAgency\\cards\\art\\\\icons\\\\tech.png",
+                                        "ArtExists":  true
+                                    },
+                                    {
+                                        "CardID":  "C02",
+                                        "Name":  "Cryo Handling",
+                                        "Tier":  "",
+                                        "MissionType":  "",
+                                        "ArtFile":  "art/icons/tech.png",
+                                        "AbsoluteArtPath":  "C:\\Users\\lgmar\\GameSpaceAgency\\cards\\art\\\\icons\\\\tech.png",
+                                        "ArtExists":  true
+                                    },
+                                    {
+                                        "CardID":  "C03",
+                                        "Name":  "Precision Guidance",
+                                        "Tier":  "",
+                                        "MissionType":  "",
+                                        "ArtFile":  "art/icons/tech.png",
+                                        "AbsoluteArtPath":  "C:\\Users\\lgmar\\GameSpaceAgency\\cards\\art\\\\icons\\\\tech.png",
+                                        "ArtExists":  true
+                                    },
+                                    {
+                                        "CardID":  "C04",
+                                        "Name":  "Modular Payloads",
+                                        "Tier":  "",
+                                        "MissionType":  "",
+                                        "ArtFile":  "art/icons/tech.png",
+                                        "AbsoluteArtPath":  "C:\\Users\\lgmar\\GameSpaceAgency\\cards\\art\\\\icons\\\\tech.png",
+                                        "ArtExists":  true
+                                    }
+                                ]
+                  },
+                  {
+                      "DeckType":  "Event",
+                      "Count":  4,
+                      "Cards":  [
+                                    {
+                                        "CardID":  "EV01",
+                                        "Name":  "Solar Storm",
+                                        "Tier":  "",
+                                        "MissionType":  "",
+                                        "ArtFile":  "art/icons/event.png",
+                                        "AbsoluteArtPath":  "C:\\Users\\lgmar\\GameSpaceAgency\\cards\\art\\\\icons\\\\event.png",
+                                        "ArtExists":  true
+                                    },
+                                    {
+                                        "CardID":  "EV02",
+                                        "Name":  "Funding Boost",
+                                        "Tier":  "",
+                                        "MissionType":  "",
+                                        "ArtFile":  "art/icons/event.png",
+                                        "AbsoluteArtPath":  "C:\\Users\\lgmar\\GameSpaceAgency\\cards\\art\\\\icons\\\\event.png",
+                                        "ArtExists":  true
+                                    },
+                                    {
+                                        "CardID":  "EV03",
+                                        "Name":  "Supply Delay",
+                                        "Tier":  "",
+                                        "MissionType":  "",
+                                        "ArtFile":  "art/icons/event.png",
+                                        "AbsoluteArtPath":  "C:\\Users\\lgmar\\GameSpaceAgency\\cards\\art\\\\icons\\\\event.png",
+                                        "ArtExists":  true
+                                    },
+                                    {
+                                        "CardID":  "EV04",
+                                        "Name":  "Tech Breakthrough",
+                                        "Tier":  "",
+                                        "MissionType":  "",
+                                        "ArtFile":  "art/icons/event.png",
+                                        "AbsoluteArtPath":  "C:\\Users\\lgmar\\GameSpaceAgency\\cards\\art\\\\icons\\\\event.png",
+                                        "ArtExists":  true
+                                    }
+                                ]
+                  }
+              ]
+}

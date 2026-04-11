@@ -1,0 +1,11 @@
+; nanDECK script for Space Agency cards — Tabletop Simulator PNG export
+; Output: cards/output/cards/card_N.png  (one file per card)
+;
+; PAGE == CARDSIZE so each card becomes its own page — /CREATEPNG produces one PNG per card.
+; No background color = transparent canvas; undrawn pixels become alpha in the output PNG.
+PAGE=6.3,8.8,"PORTRAIT",
+
+; Shared card design (layout, data link, all card directives)
+; No white card-face RECTANGLE here — background stays transparent for TTS import.
+INCLUDE="template_card_design.nandeck"
+

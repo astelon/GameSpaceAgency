@@ -1,0 +1,12 @@
+﻿{
+    "CardID":  "M01",
+    "Name":  "LEO Deployment",
+    "Type":  "Mission",
+    "Prompt":  "Uncrewed satellite deployment in low Earth orbit above the blue curve of Earth, solar panels unfolding, optimistic space program poster style, bright cinematic lighting",
+    "PromptField":  "ImageDescription",
+    "NegativePrompt":  "",
+    "Model":  "black-forest-labs/FLUX.1-schnell",
+    "Seed":  0,
+    "ArtFile":  "art/generated/M01.jpg",
+    "GeneratedAt":  "2026-04-10T18:59:13.3339391-06:00"
+}

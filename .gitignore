@@ -1,0 +1,10 @@
+# Generated images
+*.png
+*.svg
+
+# AI-generated card art
+cards/art/generated/
+
+# Rendered output (nanDECK export)
+cards/output/cards/
+cards/output/print/

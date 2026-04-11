@@ -1,0 +1,139 @@
+{
+  "version": "2.0.0",
+  "inputs": [
+    {
+      "id": "hfToken",
+      "type": "promptString",
+      "description": "Hugging Face API Token (hf_...)",
+      "password": true
+    },
+    {
+      "id": "cardId",
+      "type": "promptString",
+      "description": "Card ID to generate (e.g. P07, M01, S03)"
+    }
+  ],
+  "tasks": [
+    {
+      "label": "AI Art: Store HF Token",
+      "detail": "Saves your Hugging Face token to Windows Credential Manager (run once)",
+      "type": "shell",
+      "command": "[void][Windows.Security.Credentials.PasswordVault, Windows.Security.Credentials, ContentType=WindowsRuntime]; $v = New-Object Windows.Security.Credentials.PasswordVault; try { $v.Remove($v.Retrieve('GameSpaceAgency','HuggingFace')) } catch {}; $v.Add((New-Object Windows.Security.Credentials.PasswordCredential('GameSpaceAgency','HuggingFace','${input:hfToken}'))); Write-Host 'Token stored in Windows Credential Manager.'",
+      "options": {
+        "shell": {
+          "executable": "powershell.exe",
+          "args": ["-NoProfile", "-Command"]
+        }
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "AI Art: Generate Missing Cards",
+      "type": "shell",
+      "command": "Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass; .\\generate_ai_art.ps1 -MissingOnly -UpdateCsvArtFile",
+      "options": {
+        "cwd": "${workspaceFolder}/cards",
+        "shell": {
+          "executable": "powershell.exe",
+          "args": ["-NoProfile", "-Command"]
+        }
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "group": "build"
+    },
+    {
+      "label": "AI Art: Generate Specific Card",
+      "type": "shell",
+      "command": "Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass; .\\generate_ai_art.ps1 -CardId ${input:cardId} -Force -UpdateCsvArtFile",
+      "options": {
+        "cwd": "${workspaceFolder}/cards",
+        "shell": {
+          "executable": "powershell.exe",
+          "args": ["-NoProfile", "-Command"]
+        }
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "group": "build"
+    },
+    {
+      "label": "Cards: Build Deck (nanDECK)",
+      "detail": "Validates and renders cards to PDF in output/print/. Update 'command' with your nandeck.exe path if needed.",
+      "type": "shell",
+      "command": "New-Item -ItemType Directory -Force -Path output\\print | Out-Null; & 'C:\\Program Files (x86)\\nanDECK\\nanDECK.exe' '${workspaceFolder}\\cards\\template.nandeck' /EXEC /CREATEPDF /OUTPUT=\"output\\print\\space_agency_deck\"",
+      "options": {
+        "cwd": "${workspaceFolder}/cards",
+        "shell": {
+          "executable": "powershell.exe",
+          "args": ["-NoProfile", "-Command"]
+        }
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "group": "build"
+    },
+    {
+      "label": "Cards: Export TTS Cards (PNG)",
+      "detail": "Exports one PNG per card to output/cards/ using the same design as the print version.",
+      "type": "shell",
+      "command": "New-Item -ItemType Directory -Force -Path output\\cards | Out-Null; & 'C:\\Program Files (x86)\\nanDECK\\nanDECK.exe' '${workspaceFolder}\\cards\\template_tts.nandeck' /EXEC /CREATEPNG /OUTPUT=\"output\\cards\\card\"",
+      "options": {
+        "cwd": "${workspaceFolder}/cards",
+        "shell": {
+          "executable": "powershell.exe",
+          "args": ["-NoProfile", "-Command"]
+        }
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "group": "build"
+    },
+    {
+      "label": "Cards: Convert SVG Icons to PNG",
+      "detail": "Converts all SVGs in art/icons/ to PNG using ImageMagick or Inkscape",
+      "type": "shell",
+      "command": "Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass; .\\convert_svgs.ps1",
+      "options": {
+        "cwd": "${workspaceFolder}/cards",
+        "shell": {
+          "executable": "powershell.exe",
+          "args": ["-NoProfile", "-Command"]
+        }
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "group": "build"
+    },
+    {
+      "label": "AI Art: Export Asset Manifests",
+      "type": "shell",
+      "command": "Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass; .\\export_asset_manifest.ps1",
+      "options": {
+        "cwd": "${workspaceFolder}/cards",
+        "shell": {
+          "executable": "powershell.exe",
+          "args": ["-NoProfile", "-Command"]
+        }
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "group": "build"
+    }
+  ]
+}

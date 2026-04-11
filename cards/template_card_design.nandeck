@@ -1,0 +1,77 @@
+; Shared card design for Space Agency.
+; Included by template.nandeck (print) and template_tts.nandeck (TTS PNG export).
+; Do NOT add PAGE or output-specific directives here.
+
+UNIT=CM
+CARDSIZE=6.3,8.8
+
+CARDS=44
+
+; CSV data � all 19 columns mapped explicitly
+LINK="cards.csv","CARDID","TYPE","MISSIONTYPE","TIER","NAME","COST","THRUST","RANGE","PAYLOADSIZE","RELIABILITY","VP","TAGS","TEXT","FLAVOR","DESCRIPTION","ARTFILE","COLOR","IMAGEDESCRIPTION","ICONFILE"
+
+; Rounded card border
+BORDER=ROUNDED,#d9e2ef,0.12
+
+; Colored mission-type stripe at the top
+HTMLTEXT="1-44","<div style='background:[COLOR];border-radius:10px 10px 0 0;height:100%'></div>",0.2,0.2,5.9,0.28,#ffffff,0,,100
+
+; Type label
+HTMLTEXT="1-44","<div style='font-family:Arial,sans-serif;font-size:7pt;letter-spacing:1px;color:#556070;padding:5px 46px 0 5px;text-transform:uppercase'><b>[TYPE]</b></div>",0.2,0.36,5.9,0.42,#ffffff,0,,100
+
+; Type icon � proportional, PNG transparency preserved
+IMAGE="1-44","[ICONFILE]",0.35,0.78,0.50,0.50,0,"PN",100
+
+; Card name � aligned with type label (y=0.36), T flag keeps canvas transparent so icon shows through
+HTMLTEXT="1-44","<div style='font-family:Arial,sans-serif;font-size:11pt;color:#152033;padding:2px 47px 0 50px'><b>[NAME]</b></div>",0.2,0.36,5.9,0.72,#ffffff,0,"T",100
+
+; Program ID sub-label
+HTMLTEXT="1-44","<div style='font-family:Arial,sans-serif;font-size:7pt;color:#6a7486;padding:0 12px'>Program: [CARDID]</div>",0.2,1.3,5.9,0.28,#ffffff,0,,100
+
+; Cost badge (circular, color-keyed) � T flag makes canvas transparent; box is 1.05�1.05 cm so the circle is never clipped
+HTMLTEXT="1-44","<div style='width:100%;height:100%;background:[COLOR];border-radius:999px;border:3px solid rgba(0,0,0,0.35);color:#ffffff;font-family:Arial,sans-serif;text-align:center;padding-top:6px'><b style='font-size:20pt'>[COST]</b></div>",4.88,0.25,1.05,1.05,#ffffff,0,"T",100
+
+; Art window � RECTANGLE stays in the IMAGE pass so artwork renders on top of it
+RECTANGLE="1-44",0.35,1.7,5.6,3.35,#eef2f8,#dbe3ee,0.05
+; C = crop-fill the frame, A = antialiasing
+IMAGE="1-44","[ARTFILE]",0.5,1.85,5.3,3.05,0,"CA",100
+
+; Type / tags line under art
+HTMLTEXT="1-44","<div style='font-family:Arial,sans-serif;font-size:7pt;color:#344155;padding:3px 8px'><b>[TYPE]</b> <span style='color:#8a96aa'>//</span> [MISSIONTYPE] [TIER] [TAGS]</div>",0.35,5.15,5.6,0.35,#f5f7fb,0,,100
+
+; Stat badges � layer 1: colored backgrounds
+HTMLTEXT="1-44","<div style='width:100%;height:100%'></div>",0.35,5.6,0.82,0.62,#2b6cb0,0,,100
+HTMLTEXT="1-44","<div style='width:100%;height:100%'></div>",1.28,5.6,0.82,0.62,#2f855a,0,,100
+HTMLTEXT="1-44","<div style='width:100%;height:100%'></div>",2.21,5.6,0.82,0.62,#dd6b20,0,,100
+HTMLTEXT="1-44","<div style='width:100%;height:100%'></div>",3.14,5.6,0.82,0.62,#6b46c1,0,,100
+HTMLTEXT="1-44","<div style='width:100%;height:100%'></div>",4.07,5.6,0.82,0.62,#c53030,0,,100
+HTMLTEXT="1-44","<div style='width:100%;height:100%'></div>",5.00,5.6,0.82,0.62,#4a5568,0,,100
+
+; Stat badges � layer 2: icons centered in upper portion (0.28�0.28 cm, 0.03 cm from top)
+IMAGE="1-44","art/icons/thrust.png",     0.62,5.63,0.28,0.28,0,"PN",100
+IMAGE="1-44","art/icons/range.png",      1.55,5.63,0.28,0.28,0,"PN",100
+IMAGE="1-44","art/icons/size.png",       2.48,5.63,0.28,0.28,0,"PN",100
+IMAGE="1-44","art/icons/reliability.png",3.41,5.63,0.28,0.28,0,"PN",100
+IMAGE="1-44","art/icons/vp.png",         4.34,5.63,0.28,0.28,0,"PN",100
+IMAGE="1-44","art/icons/class.png",      5.27,5.63,0.28,0.28,0,"PN",100
+
+; Stat badges � layer 3: value numbers in lower portion (T = transparent canvas)
+HTMLTEXT="1-44","<div style='font-family:Arial,sans-serif;font-size:10pt;font-weight:bold;color:#ffffff;text-align:center;line-height:1;padding-top:2px'>[THRUST]</div>",     0.35,5.91,0.82,0.31,#ffffff,0,"T",100
+HTMLTEXT="1-44","<div style='font-family:Arial,sans-serif;font-size:10pt;font-weight:bold;color:#ffffff;text-align:center;line-height:1;padding-top:2px'>[RANGE]</div>",       1.28,5.91,0.82,0.31,#ffffff,0,"T",100
+HTMLTEXT="1-44","<div style='font-family:Arial,sans-serif;font-size:10pt;font-weight:bold;color:#ffffff;text-align:center;line-height:1;padding-top:2px'>[PAYLOADSIZE]</div>", 2.21,5.91,0.82,0.31,#ffffff,0,"T",100
+HTMLTEXT="1-44","<div style='font-family:Arial,sans-serif;font-size:10pt;font-weight:bold;color:#ffffff;text-align:center;line-height:1;padding-top:2px'>[RELIABILITY]</div>", 3.14,5.91,0.82,0.31,#ffffff,0,"T",100
+HTMLTEXT="1-44","<div style='font-family:Arial,sans-serif;font-size:10pt;font-weight:bold;color:#ffffff;text-align:center;line-height:1;padding-top:2px'>[VP]</div>",           4.07,5.91,0.82,0.31,#ffffff,0,"T",100
+HTMLTEXT="1-44","<div style='font-family:Arial,sans-serif;font-size:10pt;font-weight:bold;color:#ffffff;text-align:center;line-height:1;padding-top:2px'>[COST]</div>",         5.00,5.91,0.82,0.31,#ffffff,0,"T",100
+
+; Rules text panel
+HTMLTEXT="1-44","<div style='background:#fbfcfe;border:1px solid #dde5f0;border-radius:10px;padding:8px;color:#17212f;font-family:Arial,sans-serif;font-size:8pt;line-height:1.18'>[TEXT]</div>",0.35,6.35,5.6,1.35,#ffffff,0,,100
+
+; Separator line before flavor text
+HTMLTEXT="1-44","<div style='border-top:1px solid #cfd7e3'></div>",0.55,7.78,5.2,0.05,#ffffff,0,,100
+
+; Flavor text
+HTMLTEXT="1-44","<div style='font-family:Arial,sans-serif;font-size:7pt;color:#6d7787;padding:2px 8px;font-style:italic'>[FLAVOR]</div>",0.35,7.88,5.6,0.42,#ffffff,0,,100
+
+; Footer
+HTMLTEXT="1-44","<div style='font-family:Arial,sans-serif;font-size:6pt;color:#98a3b6;padding:0 8px'>Space Agency prototype deck</div>",0.35,8.28,3.0,0.28,#ffffff,0,,100
+HTMLTEXT="1-44","<div style='font-family:Arial,sans-serif;font-size:6pt;color:#98a3b6;text-align:right;padding:0 8px'>[CARDID]</div>",3.45,8.28,2.5,0.28,#ffffff,0,,100
