@@ -839,7 +839,7 @@
       </div>
       <div>
         <div class="card-type-name" style="color:var(--payload-col)">Payload Cards</div>
-        <div class="card-type-desc">Satellites, probes, crew capsules, landers, and return capsules. Payloads come in three sizes — <strong>Light, Medium, Heavy</strong> — and must be matched to an engine with sufficient Thrust. Satellites and Stations remain on the orbital board as persistent assets after delivery.</div>
+        <div class="card-type-desc">Satellites, probes, crew capsules, landers, and return capsules. Payloads come in three sizes — <strong>L</strong> (Light), <strong>M</strong> (Medium), <strong>H</strong> (Heavy) — and must be matched to an engine with sufficient Thrust. Satellites and Stations remain on the orbital board as persistent assets after delivery.</div>
       </div>
     </div>
     <div class="card-type-row">
@@ -883,12 +883,61 @@
   <h2>Card Stats at a Glance</h2>
 
   <div class="stat-grid">
-    <div class="stat-card"><div class="stat-name">Cost</div><p>Credits required to acquire this card from the market.</p></div>
-    <div class="stat-card"><div class="stat-name">Thrust</div><p>Engine lifting power. Must meet the minimum for your payload size.</p></div>
-    <div class="stat-card"><div class="stat-name">Range</div><p>Orbital steps a craft can travel. Spent 1 per node crossed.</p></div>
-    <div class="stat-card"><div class="stat-name">Payload Size</div><p>Light · Medium · Heavy. Must match your engine's Thrust tier.</p></div>
-    <div class="stat-card"><div class="stat-name">Reliability</div><p>Engine stat only (1–10). Represents hardware failure risk. Roll 1d10 once when your craft claims a mission — success if roll ≤ Engine Reliability + Tech bonuses − Event penalties.</p></div>
-    <div class="stat-card"><div class="stat-name">VP</div><p>Victory Points awarded on mission completion.</p></div>
+    <div class="stat-card">
+      <div class="stat-name" style="display:flex;align-items:center;gap:6px">
+        <img src="../cards/art/icons/thrust.png" style="width:18px;height:18px;object-fit:contain" alt="">
+        Thrust
+      </div>
+      <p>Engine lifting power. Must meet the minimum for your payload size.</p>
+    </div>
+    <div class="stat-card">
+      <div class="stat-name" style="display:flex;align-items:center;gap:6px">
+        <img src="../cards/art/icons/range.png" style="width:18px;height:18px;object-fit:contain" alt="">
+        Range
+      </div>
+      <p>Orbital steps a craft can travel. Spent 1 per node crossed.</p>
+    </div>
+    <div class="stat-card">
+      <div class="stat-name" style="display:flex;align-items:center;gap:6px">
+        <img src="../cards/art/icons/size.png" style="width:18px;height:18px;object-fit:contain" alt="">
+        Payload Size
+      </div>
+      <p><strong>L</strong> (Light) · <strong>M</strong> (Medium) · <strong>H</strong> (Heavy). Must match your engine's Thrust tier. Cards display the initial only.</p>
+    </div>
+    <div class="stat-card">
+      <div class="stat-name" style="display:flex;align-items:center;gap:6px">
+        <img src="../cards/art/icons/reliability.png" style="width:18px;height:18px;object-fit:contain" alt="">
+        Reliability
+      </div>
+      <p>Engine stat only (1–10). Represents hardware failure risk. Roll 1d10 once when your craft claims a mission — success if roll ≤ Engine Reliability + Tech bonuses − Event penalties.</p>
+    </div>
+    <div class="stat-card">
+      <div class="stat-name" style="display:flex;align-items:center;gap:6px">
+        <img src="../cards/art/icons/vp.png" style="width:18px;height:18px;object-fit:contain" alt="">
+        VP
+      </div>
+      <p>Victory Points awarded on mission completion.</p>
+    </div>
+    <div class="stat-card">
+      <div class="stat-name" style="display:flex;align-items:center;gap:6px">
+        <img src="../cards/art/icons/credits.png" style="width:18px;height:18px;object-fit:contain" alt="">
+        Cost
+      </div>
+      <p>Credits required to acquire this card from the market.</p>
+    </div>
+  </div>
+
+  <h2>In-Card Text Icons</h2>
+  <p style="font-size:.85rem;color:var(--text-muted);margin:0 0 12px">Card rule text uses these inline badges instead of writing out keyword names in full:</p>
+  <div style="display:flex;flex-wrap:wrap;gap:10px;margin:0 0 16px">
+    <div class="stat-card" style="display:flex;align-items:center;gap:12px;padding:10px 14px;flex:1;min-width:180px">
+      <span style="display:inline-block;background:#c53030;color:#fff;border-radius:4px;padding:2px 8px;font-size:.8rem;font-weight:bold;white-space:nowrap">VP</span>
+      <span style="font-size:.85rem;color:var(--text-muted)"><strong style="color:var(--text-primary)">Victory Points</strong> — scored on mission completion.</span>
+    </div>
+    <div class="stat-card" style="display:flex;align-items:center;gap:12px;padding:10px 14px;flex:1;min-width:180px">
+      <span style="display:inline-block;background:#b7791f;color:#fff;border-radius:4px;padding:2px 8px;font-size:.8rem;font-weight:bold;white-space:nowrap">CR</span>
+      <span style="font-size:.85rem;color:var(--text-muted)"><strong style="color:var(--text-primary)">Credits (CR)</strong> — the game currency used to draft cards and pay costs.</span>
+    </div>
   </div>
 
   <h2>Other Components</h2>
@@ -1051,9 +1100,9 @@
       <tr><th>Payload Size</th><th>Minimum Thrust Required</th></tr>
     </thead>
     <tbody>
-      <tr><td><span class="tag">Light</span></td><td>Any Engine (Thrust 1+)</td></tr>
-      <tr><td><span class="tag">Medium</span></td><td>Thrust 5 or higher</td></tr>
-      <tr><td><span class="tag">Heavy</span></td><td>Thrust 7 or higher</td></tr>
+      <tr><td><span class="tag">L</span> Light</td><td>Any Engine (Thrust 1+)</td></tr>
+      <tr><td><span class="tag">M</span> Medium</td><td>Thrust 5 or higher</td></tr>
+      <tr><td><span class="tag">H</span> Heavy</td><td>Thrust 7 or higher</td></tr>
     </tbody>
   </table>
 
@@ -1108,7 +1157,7 @@
       </div>
       <div class="mini-card-art" style="background:linear-gradient(160deg,#101000,#201800); font-size:28px;">🛰️</div>
       <div class="mini-card-name">Comm Satellite</div>
-      <div class="mini-card-stats">Size: Medium<br><span class="tag" style="font-size:.62rem">Satellite</span> <span class="tag" style="font-size:.62rem">Uncrewed</span></div>
+      <div class="mini-card-stats">Size: M<br><span class="tag" style="font-size:.62rem">Satellite</span> <span class="tag" style="font-size:.62rem">Uncrewed</span></div>
       <div class="mini-card-text">Remains on board as an on-orbit asset after delivery.</div>
     </div>
     <!-- Support -->
