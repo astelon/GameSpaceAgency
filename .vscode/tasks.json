@@ -172,6 +172,25 @@
         "focus": true
       },
       "group": "build"
+    },
+    {
+      "label": "TTS: Convert Board SVG to PNG",
+      "detail": "Converts tts/board.svg → tts/board.png (3072×1920). Requires Inkscape or ImageMagick.",
+      "type": "shell",
+      "command": "if (Get-Command inkscape -ErrorAction SilentlyContinue) { inkscape --export-type=png --export-width=3072 --export-height=1920 tts\\board.svg -o tts\\board.png; Write-Host 'Saved tts/board.png via Inkscape.' } elseif (Get-Command magick -ErrorAction SilentlyContinue) { magick -size 3072x1920 tts\\board.svg tts\\board.png; Write-Host 'Saved tts/board.png via ImageMagick.' } else { Write-Error 'Neither Inkscape nor ImageMagick found. Install one to convert the board SVG.' }",
+      "options": {
+        "cwd": "${workspaceFolder}",
+        "shell": {
+          "executable": "powershell.exe",
+          "args": ["-NoProfile", "-Command"]
+        }
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "focus": true
+      },
+      "group": "build"
     }
   ]
 }

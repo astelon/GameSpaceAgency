@@ -37,6 +37,7 @@ local CARD_BACK_URL  = BASE_IMAGE_URL .. "card_back.png"
 -- Update BASE_IMAGE_URL and this follows automatically.
 local REPO_ROOT_URL    = BASE_IMAGE_URL:match("^(.*/)cards/output/cards/$") or BASE_IMAGE_URL
 local RULEBOOK_PDF_URL = REPO_ROOT_URL .. "docs/rulebook.pdf"
+local BOARD_IMAGE_URL  = REPO_ROOT_URL .. "tts/board.png"
 
 -- ── CARD DATA ────────────────────────────────────────────────
 -- card_index: sequential position in cards.csv → determines PNG filename
@@ -222,6 +223,53 @@ local PLAYER_SEATS = {
     { color="Green", pos={-12, 1.5,  0},  rotY=90  },
 }
 
+-- ── BOARD / TRACKER DATA ─────────────────────────────────────
+-- Board: Custom_Board scale {24,1,15}, centre world {0,1.5,-1}
+-- Pixel → world:  X = px_x * 0.0078125 − 12
+--                 Z = px_y * 0.0078125 − 8.5  (includes board Z offset -1)
+
+local BOARD_POS   = { x=0,  y=1.5, z=-1 }
+local BOARD_SCALE = { x=24, y=1,   z=15 }
+
+-- World-space centre of each orbital node (for craft token placement)
+local ORBITAL_NODES = {
+    Earth           = { x=-10.789, z=-2.563, name="Earth"            },
+    SubOrbitalEarth = { x= -8.914, z=-2.563, name="Sub-Orbital Earth" },
+    LEO             = { x= -6.922, z=-2.563, name="LEO"               },
+    HighOrbit       = { x= -4.734, z=-2.563, name="High Orbit"        },
+    MoonTransfer    = { x= -2.703, z=-4.398, name="Moon Transfer"     },
+    MoonOrbit       = { x= -0.516, z=-5.648, name="Moon Orbit"        },
+    SubOrbitalMoon  = { x=  1.711, z=-6.273, name="Sub-Orbital Moon"  },
+    Moon            = { x=  3.938, z=-6.273, name="Moon"              },
+    SolarOrbit      = { x= -2.703, z= -0.727, name="Solar Orbit"     },
+    MarsTransfer    = { x= -0.516, z=  0.406, name="Mars Transfer"    },
+    MarsOrbit       = { x=  1.672, z=  1.031, name="Mars Orbit"       },
+    LMO             = { x=  3.820, z=  1.305, name="LMO"              },
+    SubOrbitalMars  = { x=  5.930, z=  1.305, name="Sub-Orbital Mars" },
+    Mars            = { x=  8.117, z=  1.305, name="Mars"             },
+}
+
+-- VP track: 31 positions (0–30).  SVG y=1635 → board.png row.
+-- world_Z = 4.273,  world_X_i = -10.945 + i * 0.730
+local VP_TRACK_Z    =  4.273
+local VP_TRACK_X0   = -10.945
+local VP_TRACK_STEP =  0.730
+
+-- Credit track: 21 positions (0–20).  SVG y=1820 → board.png row.
+-- world_Z = 5.719,  world_X_i = -10.828 + i * 0.938
+local CREDIT_TRACK_Z    =  5.719
+local CREDIT_TRACK_X0   = -10.828
+local CREDIT_TRACK_STEP =  0.938
+local CREDIT_START      =  5   -- each player begins with 5 Credits
+
+-- Per-player tracker token colours (flat cylinders on the board tracks)
+local PLAYER_TINTS = {
+    { name="White", r=0.90, g=0.90, b=0.90 },
+    { name="Red",   r=0.90, g=0.10, b=0.10 },
+    { name="Blue",  r=0.15, g=0.35, b=1.00 },
+    { name="Green", r=0.10, g=0.80, b=0.20 },
+}
+
 -- ── HELPERS ──────────────────────────────────────────────────
 
 local function cardFaceURL(card_index)
@@ -339,7 +387,7 @@ local function setupGame()
     -- 1. Destroy all unlocked objects, plus any locked zone labels from a previous setup
     for _, obj in ipairs(getAllObjects()) do
         local name = obj.getName()
-        if not obj.getLock() or name:sub(1, 10) == "ZoneLabel:" then
+        if not obj.getLock() or name:sub(1, 10) == "ZoneLabel:" or name == "Orbital Map" then
             obj.destruct()
         end
     end
@@ -414,6 +462,36 @@ local function setupGame()
             local die = spawnObject({ type="Die_10", position={dp[1], dp[2], dp[3]} })
             die.setColorTint({ r=dc[1], g=dc[2], b=dc[3] })
             die.setName("Reliability Die")
+        end
+
+        -- 8. Game board
+        local board = spawnObject({
+            type     = "Custom_Board",
+            position = { BOARD_POS.x, BOARD_POS.y, BOARD_POS.z },
+            scale    = { BOARD_SCALE.x, BOARD_SCALE.y, BOARD_SCALE.z },
+        })
+        board.setCustomObject({ image = BOARD_IMAGE_URL, image_secondary = BOARD_IMAGE_URL })
+        board.setLock(true)
+        board.setName("Orbital Map")
+
+        -- 9. Player tracker tokens — flat cylinders stacked slightly on VP and Credit tracks
+        for i, pc in ipairs(PLAYER_TINTS) do
+            local y_off = 1.63 + (i - 1) * 0.04
+            local vp_token = spawnObject({
+                type     = "Cylinder",
+                position = { VP_TRACK_X0, y_off, VP_TRACK_Z },
+                scale    = { 0.45, 0.10, 0.45 },
+            })
+            vp_token.setColorTint({ r=pc.r, g=pc.g, b=pc.b })
+            vp_token.setName("VP - " .. pc.name)
+
+            local cr_token = spawnObject({
+                type     = "Cylinder",
+                position = { CREDIT_TRACK_X0 + CREDIT_START * CREDIT_TRACK_STEP, y_off, CREDIT_TRACK_Z },
+                scale    = { 0.45, 0.10, 0.45 },
+            })
+            cr_token.setColorTint({ r=pc.r, g=pc.g, b=pc.b })
+            cr_token.setName("Credits - " .. pc.name)
         end
 
         broadcastToAll("Space Agency Race is set up! Deal starting hands when all players are seated.", "Yellow")
