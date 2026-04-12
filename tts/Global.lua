@@ -26,7 +26,7 @@
 
 -- ── CONFIGURATION ────────────────────────────────────────────
 
-local BASE_IMAGE_URL = "https://raw.githubusercontent.com/YOUR_USERNAME/GameSpaceAgency/main/cards/output/cards/"
+local BASE_IMAGE_URL = "https://raw.githubusercontent.com/astelon/GameSpaceAgency/main/cards/output/cards/"
 -- Replace YOUR_USERNAME above with your GitHub username.
 
 local CARD_BACK_URL  = BASE_IMAGE_URL .. "card_back.png"
