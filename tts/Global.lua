@@ -33,6 +33,11 @@ local CARD_BACK_URL  = BASE_IMAGE_URL .. "card_back.png"
 -- Replace if you have a dedicated card-back image at a different URL.
 -- A plain dark colour works too; you can use any publicly-hosted image.
 
+-- Derived from BASE_IMAGE_URL by stripping the cards/output/cards/ suffix.
+-- Update BASE_IMAGE_URL and this follows automatically.
+local REPO_ROOT_URL    = BASE_IMAGE_URL:match("^(.*/)cards/output/cards/$") or BASE_IMAGE_URL
+local RULEBOOK_PDF_URL = REPO_ROOT_URL .. "docs/rulebook.pdf"
+
 -- ── CARD DATA ────────────────────────────────────────────────
 -- card_index: sequential position in cards.csv → determines PNG filename
 -- (template_tts_{card_index}.png)
@@ -389,16 +394,27 @@ local function setupGame()
             nc.setLock(true)
             nc.setValue(text)
         end
-        placeLabel("ENGINES",         {-8,   1.6,  10.5})
-        placeLabel("TANKS",           {-4.5, 1.6,  10.5})
-        placeLabel("PAYLOADS",        {-1,   1.6,  10.5})
-        placeLabel("SUPPORT",         { 2.5, 1.6,  10.5})
-        placeLabel("TECH",            { 6,   1.6,  10.5})
-        placeLabel("EVENTS",          { 9,   1.6,  10.5})
-        placeLabel("TIER 1\nMISSIONS",{-4,   1.6,   2.5})
-        placeLabel("TIER 2\nMISSIONS",{ 0,   1.6,   2.5})
-        placeLabel("TIER 3\nMISSIONS",{ 4,   1.6,   2.5})
-        placeLabel("MISSION DISPLAY", { 0,   1.6,  -0.5})
+        placeLabel("ENGINES",         {-8,   0.8,  9})
+        placeLabel("TANKS",           {-4.5, 0.8,  9})
+        placeLabel("PAYLOADS",        {-1,   0.8,  9})
+        placeLabel("SUPPORT",         { 2.5, 0.8,  9})
+        placeLabel("TECH",            { 6,   0.8,  9})
+        placeLabel("EVENTS",          { 9,   0.8,  9})
+        placeLabel("TIER 1\nMISSIONS",{-4,   0.8,  1})
+        placeLabel("TIER 2\nMISSIONS",{ 0,   0.8,  1})
+        placeLabel("TIER 3\nMISSIONS",{ 4,   0.8,  1})
+        placeLabel("MISSION DISPLAY", { 0,   0.8, -2})
+
+        -- 7. Reliability dice — one d10 per player seat, placed in the centre
+        local die_positions = { {-3, 1.5, -7}, {-1, 1.5, -7}, {1, 1.5, -7}, {3, 1.5, -7} }
+        local die_colors    = { {1,1,1}, {1,0.2,0.2}, {0.2,0.4,1}, {0.2,0.8,0.2} }
+        for i = 1, 4 do
+            local dp = die_positions[i]
+            local dc = die_colors[i]
+            local die = spawnObject({ type="Die_10", position={dp[1], dp[2], dp[3]} })
+            die.setColorTint({ r=dc[1], g=dc[2], b=dc[3] })
+            die.setName("Reliability Die")
+        end
 
         broadcastToAll("Space Agency Race is set up! Deal starting hands when all players are seated.", "Yellow")
     end, 0.3)
@@ -508,6 +524,37 @@ function onLoad(save_state)
     Wait.time(function()
         createButton("Reset Table",          "onResetClicked",    {-14, 1.5, -10})
         createButton("Deal Starting Hands",  "onDealHandsClicked",{-14, 1.5, -12})
+
+        -- Spawn the rulebook PDF once; survives resets (locked, not a ZoneLabel)
+        local hasRulebook = false
+        for _, obj in ipairs(getAllObjects()) do
+            if obj.getName() == "Rulebook" then hasRulebook = true; break end
+        end
+        if not hasRulebook then
+            local pdf = spawnObjectJSON({
+                json = JSON.encode({
+                    Name        = "Custom_PDF",
+                    Nickname    = "Rulebook",
+                    Description = "Space Agency Race — Rulebook",
+                    Transform   = {
+                        posX=12, posY=1.5, posZ=-6,
+                        rotX=0,  rotY=0,  rotZ=0,
+                        scaleX=2, scaleY=1, scaleZ=2,
+                    },
+                    CustomPDF = {
+                        PDFUrl        = RULEBOOK_PDF_URL,
+                        PDFPassword   = "",
+                        PDFPage       = 0,
+                        PDFPageOffset = 0,
+                    },
+                    Locked=false, Grid=true, Snap=true,
+                    Autoraise=true, Sticky=true, Tooltip=true,
+                }),
+                sound = false,
+                snap_to_grid = true,
+            })
+            if pdf then pdf.setLock(true) end
+        end
     end, 1.0)
 
     -- Auto-setup only on a completely fresh table (no saved state)

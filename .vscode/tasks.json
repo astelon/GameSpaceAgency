@@ -134,6 +134,44 @@
         "panel": "shared"
       },
       "group": "build"
+    },
+    {
+      "label": "TTS: Reload Global Script",
+      "detail": "Sends tts/Global.lua to the running TTS instance (Save & Play). TTS must be open.",
+      "type": "shell",
+      "command": "Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass; .\\tts\\push_to_tts.ps1",
+      "options": {
+        "cwd": "${workspaceFolder}",
+        "shell": {
+          "executable": "powershell.exe",
+          "args": ["-NoProfile", "-Command"]
+        }
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "focus": false
+      },
+      "group": "build"
+    },
+    {
+      "label": "TTS: Git Push & Reload",
+      "detail": "Commits nothing but pushes the current branch, then reloads Global.lua in TTS.",
+      "type": "shell",
+      "command": "git push; Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass; .\\tts\\push_to_tts.ps1",
+      "options": {
+        "cwd": "${workspaceFolder}",
+        "shell": {
+          "executable": "powershell.exe",
+          "args": ["-NoProfile", "-Command"]
+        }
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "focus": true
+      },
+      "group": "build"
     }
   ]
 }
