@@ -19,7 +19,7 @@
 --      (works only when TTS and the server run on the same machine)
 --
 -- CARD IMAGE FILENAMES expected at BASE_IMAGE_URL:
---   template_tts_1.png  through  template_tts_44.png
+--   template_tts_01.png  through  template_tts_44.png
 --   (these are the files nanDECK wrote to cards/output/cards/)
 --
 -- ============================================================
@@ -220,7 +220,7 @@ local PLAYER_SEATS = {
 -- ── HELPERS ──────────────────────────────────────────────────
 
 local function cardFaceURL(card_index)
-    return BASE_IMAGE_URL .. string.format("template_tts_%d.png", card_index)
+    return BASE_IMAGE_URL .. string.format("template_tts_%02d.png", card_index)
 end
 
 -- Build the TTS JSON state table for a custom deck or single card.
@@ -331,9 +331,12 @@ end
 
 -- Central game setup function.
 local function setupGame()
-    -- 1. Destroy everything on the table that isn't locked
+    -- 1. Destroy all unlocked objects, plus any locked zone labels from a previous setup
     for _, obj in ipairs(getAllObjects()) do
-        if not obj.getLock() then obj.destruct() end
+        local name = obj.getName()
+        if not obj.getLock() or name:sub(1, 10) == "ZoneLabel:" then
+            obj.destruct()
+        end
     end
 
     Wait.time(function()
@@ -348,7 +351,7 @@ local function setupGame()
         local event_cards = filterCards(function(c) return c.type == "Event" end)
         local ev_sp = SPAWN_POSITIONS["Event"]
         local event_obj = spawnFromState(buildDeckState(event_cards, "Event Deck", ev_sp.pos, ev_sp.rotY, ev_sp.faceDown))
-        Wait.time(function() if event_obj and event_obj.valid then event_obj.shuffle() end end, 0.8)
+        Wait.time(function() if event_obj then event_obj.shuffle() end end, 0.8)
 
         -- 4. Mission decks split by tier (each face-down & shuffled)
         for tier_key, tier_label in pairs({["Mission T1"]="Tier 1", ["Mission T2"]="Tier 2", ["Mission T3"]="Tier 3"}) do
@@ -359,12 +362,12 @@ local function setupGame()
             -- Shuffle only Tier 1 now; Tier 2 and 3 unlock later
             if tier_key == "Mission T1" then
                 Wait.time(function()
-                    if deck_obj and deck_obj.valid then
+                    if deck_obj then
                         deck_obj.shuffle()
                         -- 5. Reveal 3 Tier-1 mission cards face-up into the display row
                         Wait.time(function()
                             for i = 1, 3 do
-                                if deck_obj and deck_obj.valid then
+                                if deck_obj then
                                     local dpos = MISSION_DISPLAY_POSITIONS[i]
                                     deck_obj.takeObject({
                                         position = {dpos[1], dpos[2] + 0.5, dpos[3]},
@@ -382,6 +385,7 @@ local function setupGame()
         -- 6. Zone labels using Notecards
         local function placeLabel(text, pos)
             local nc = spawnObject({ type="Notecard", position=pos })
+            nc.setName("ZoneLabel:" .. text)
             nc.setLock(true)
             nc.setValue(text)
         end
