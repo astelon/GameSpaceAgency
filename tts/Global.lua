@@ -37,7 +37,7 @@ local CARD_BACK_URL  = BASE_IMAGE_URL .. "card_back.png"
 -- Update BASE_IMAGE_URL and this follows automatically.
 local REPO_ROOT_URL    = BASE_IMAGE_URL:match("^(.*/)cards/output/cards/$") or BASE_IMAGE_URL
 local RULEBOOK_PDF_URL = REPO_ROOT_URL .. "docs/rulebook.pdf"
-local BOARD_IMAGE_URL  = REPO_ROOT_URL .. "tts/board.png"
+local BOARD_IMAGE_URL  = REPO_ROOT_URL .. "tts/board_v2.png"
 
 -- ── CARD DATA ────────────────────────────────────────────────
 -- card_index: sequential position in cards.csv → determines PNG filename
@@ -193,23 +193,24 @@ local TYPE_COLOR = {
 -- Mission display runs across the centre (z ≈ +2 … +4).
 
 local SPAWN_POSITIONS = {
-    Engine       = { pos={-8,  1.5,  9},  rotY=0,  faceDown=false },
-    Tank         = { pos={-4.5,1.5,  9},  rotY=0,  faceDown=false },
-    Payload      = { pos={-1,  1.5,  9},  rotY=0,  faceDown=false },
-    Support      = { pos={ 2.5,1.5,  9},  rotY=0,  faceDown=false },
-    Tech         = { pos={ 6,  1.5,  9},  rotY=0,  faceDown=false },
-    Event        = { pos={ 9,  1.5,  9},  rotY=0,  faceDown=true  },
-    -- Mission decks by tier (draw piles, all face-down)
-    ["Mission T1"] = { pos={-4,  1.5,  1},  rotY=0,  faceDown=true  },
-    ["Mission T2"] = { pos={ 0,  1.5,  1},  rotY=0,  faceDown=true  },
-    ["Mission T3"] = { pos={ 4,  1.5,  1},  rotY=0,  faceDown=true  },
+    -- Component build decks along the far edge, outside the board (Z = -10)
+    Engine       = { pos={-10,  1.5, -10},  rotY=0,  faceDown=false },
+    Tank         = { pos={-5.5, 1.5, -10},  rotY=0,  faceDown=false },
+    Payload      = { pos={-1,   1.5, -10},  rotY=0,  faceDown=false },
+    Support      = { pos={ 3.5, 1.5, -10},  rotY=0,  faceDown=false },
+    Tech         = { pos={ 8,   1.5, -10},  rotY=0,  faceDown=false },
+    Event        = { pos={ 11,  1.5, -10},  rotY=0,  faceDown=true  },
+    -- Mission decks by tier — right side of board (X = 14)
+    ["Mission T1"] = { pos={14, 1.5, -3},   rotY=90, faceDown=true  },
+    ["Mission T2"] = { pos={14, 1.5,  0},   rotY=90, faceDown=true  },
+    ["Mission T3"] = { pos={14, 1.5,  3},   rotY=90, faceDown=true  },
 }
 
--- Positions for the 3 revealed Tier-1 missions in the display row
+-- Revealed Tier-1 mission display — on the board, between orbital map and VP track
 local MISSION_DISPLAY_POSITIONS = {
-    {-4, 1.5, -2},
-    { 0, 1.5, -2},
-    { 4, 1.5, -2},
+    {-4.5, 1.5, 2},
+    { 0,   1.5, 2},
+    { 4.5, 1.5, 2},
 }
 
 -- Starting hand — one card of each type dealt to each player seat
@@ -224,7 +225,7 @@ local PLAYER_SEATS = {
 }
 
 -- ── BOARD / TRACKER DATA ─────────────────────────────────────
--- Board: Custom_Board scale {24,1,15}, centre world {0,1.5,-1}
+-- Board v2: Custom_Board scale {24,1,15}, centre world {0,1.5,-1}
 -- Pixel → world:  X = px_x * 0.0078125 − 12
 --                 Z = px_y * 0.0078125 − 8.5  (includes board Z offset -1)
 
@@ -232,21 +233,22 @@ local BOARD_POS   = { x=0,  y=1.5, z=-1 }
 local BOARD_SCALE = { x=24, y=1,   z=15 }
 
 -- World-space centre of each orbital node (for craft token placement)
+-- Moon Transfer is visually absorbed into Earth's influence zone on board v2.
 local ORBITAL_NODES = {
-    Earth           = { x=-10.789, z=-2.563, name="Earth"            },
-    SubOrbitalEarth = { x= -8.914, z=-2.563, name="Sub-Orbital Earth" },
-    LEO             = { x= -6.922, z=-2.563, name="LEO"               },
-    HighOrbit       = { x= -4.734, z=-2.563, name="High Orbit"        },
-    MoonTransfer    = { x= -2.703, z=-4.398, name="Moon Transfer"     },
-    MoonOrbit       = { x= -0.516, z=-5.648, name="Moon Orbit"        },
-    SubOrbitalMoon  = { x=  1.711, z=-6.273, name="Sub-Orbital Moon"  },
-    Moon            = { x=  3.938, z=-6.273, name="Moon"              },
-    SolarOrbit      = { x= -2.703, z= -0.727, name="Solar Orbit"     },
-    MarsTransfer    = { x= -0.516, z=  0.406, name="Mars Transfer"    },
-    MarsOrbit       = { x=  1.672, z=  1.031, name="Mars Orbit"       },
-    LMO             = { x=  3.820, z=  1.305, name="LMO"              },
-    SubOrbitalMars  = { x=  5.930, z=  1.305, name="Sub-Orbital Mars" },
-    Mars            = { x=  8.117, z=  1.305, name="Mars"             },
+  Earth           = { x=-10.438, z=-0.297, name="Earth"              },
+  SubOrbitalEarth = { x= -9.500, z=-0.297, name="Sub-Orbital Earth"  },
+  LEO             = { x= -8.523, z=-0.297, name="LEO"                },
+  HighOrbit       = { x= -7.297, z=-0.297, name="High Orbit"         },
+  MoonTransfer    = { x= -4.344, z=-1.000, name="Moon Transfer"      },
+  MoonOrbit       = { x= -9.500, z=-5.500, name="Moon Orbit"         },
+  SubOrbitalMoon  = { x= -9.500, z=-5.891, name="Sub-Orbital Moon"   },
+  Moon            = { x= -9.500, z=-6.625, name="Moon"               },
+  SolarOrbit      = { x= -2.430, z=-0.297, name="Solar Orbit"        },
+  MarsTransfer    = { x= -0.008, z=-0.297, name="Mars Transfer"      },
+  MarsOrbit       = { x=  6.125, z=-0.297, name="Mars Orbit"         },
+  LMO             = { x=  7.414, z=-0.297, name="LMO"                },
+  SubOrbitalMars  = { x=  8.703, z=-0.297, name="Sub-Orbital Mars"   },
+  Mars            = { x= 10.422, z=-0.297, name="Mars"               },
 }
 
 -- VP track: 31 positions (0–30).  SVG y=1635 → board.png row.
@@ -442,19 +444,19 @@ local function setupGame()
             nc.setLock(true)
             nc.setValue(text)
         end
-        placeLabel("ENGINES",         {-8,   0.8,  9})
-        placeLabel("TANKS",           {-4.5, 0.8,  9})
-        placeLabel("PAYLOADS",        {-1,   0.8,  9})
-        placeLabel("SUPPORT",         { 2.5, 0.8,  9})
-        placeLabel("TECH",            { 6,   0.8,  9})
-        placeLabel("EVENTS",          { 9,   0.8,  9})
-        placeLabel("TIER 1\nMISSIONS",{-4,   0.8,  1})
-        placeLabel("TIER 2\nMISSIONS",{ 0,   0.8,  1})
-        placeLabel("TIER 3\nMISSIONS",{ 4,   0.8,  1})
-        placeLabel("MISSION DISPLAY", { 0,   0.8, -2})
+        placeLabel("ENGINES",          {-10,  0.8, -10})
+        placeLabel("TANKS",            {-5.5, 0.8, -10})
+        placeLabel("PAYLOADS",         {-1,   0.8, -10})
+        placeLabel("SUPPORT",          { 3.5, 0.8, -10})
+        placeLabel("TECH",             { 8,   0.8, -10})
+        placeLabel("EVENTS",           { 11,  0.8, -10})
+        placeLabel("TIER 1\nMISSIONS", {14,   0.8,  -3})
+        placeLabel("TIER 2\nMISSIONS", {14,   0.8,   0})
+        placeLabel("TIER 3\nMISSIONS", {14,   0.8,   3})
+        placeLabel("MISSION DISPLAY",  { 0,   0.8,   2})
 
         -- 7. Reliability dice — one d10 per player seat, placed in the centre
-        local die_positions = { {-3, 1.5, -7}, {-1, 1.5, -7}, {1, 1.5, -7}, {3, 1.5, -7} }
+        local die_positions = { {-6, 1.5, 7.5}, {-2, 1.5, 7.5}, {2, 1.5, 7.5}, {6, 1.5, 7.5} }
         local die_colors    = { {1,1,1}, {1,0.2,0.2}, {0.2,0.4,1}, {0.2,0.8,0.2} }
         for i = 1, 4 do
             local dp = die_positions[i]
@@ -465,30 +467,41 @@ local function setupGame()
         end
 
         -- 8. Game board
-        local board = spawnObject({
-            type     = "Custom_Board",
-            position = { BOARD_POS.x, BOARD_POS.y, BOARD_POS.z },
-            scale    = { BOARD_SCALE.x, BOARD_SCALE.y, BOARD_SCALE.z },
+        local board = spawnObjectJSON({
+            json = JSON.encode({
+                Name     = "Custom_Board",
+                Nickname = "Orbital Map",
+                Transform = {
+                    posX=BOARD_POS.x, posY=BOARD_POS.y, posZ=BOARD_POS.z,
+                    rotX=0, rotY=0, rotZ=0,
+                    scaleX=BOARD_SCALE.x, scaleY=BOARD_SCALE.y, scaleZ=BOARD_SCALE.z,
+                },
+                CustomBoard = {
+                    FaceURL = BOARD_IMAGE_URL,
+                    BackURL = BOARD_IMAGE_URL,
+                },
+                Locked=true, Grid=true, Snap=true,
+                Autoraise=true, Sticky=true, Tooltip=true,
+            }),
+            sound = false,
+            snap_to_grid = false,
         })
-        board.setCustomObject({ image = BOARD_IMAGE_URL, image_secondary = BOARD_IMAGE_URL })
-        board.setLock(true)
-        board.setName("Orbital Map")
 
         -- 9. Player tracker tokens — flat cylinders stacked slightly on VP and Credit tracks
         for i, pc in ipairs(PLAYER_TINTS) do
             local y_off = 1.63 + (i - 1) * 0.04
             local vp_token = spawnObject({
-                type     = "Cylinder",
+                type     = "Chip_10",
                 position = { VP_TRACK_X0, y_off, VP_TRACK_Z },
-                scale    = { 0.45, 0.10, 0.45 },
+                scale    = { 0.6, 0.6, 0.6 },
             })
             vp_token.setColorTint({ r=pc.r, g=pc.g, b=pc.b })
             vp_token.setName("VP - " .. pc.name)
 
             local cr_token = spawnObject({
-                type     = "Cylinder",
+                type     = "Chip_10",
                 position = { CREDIT_TRACK_X0 + CREDIT_START * CREDIT_TRACK_STEP, y_off, CREDIT_TRACK_Z },
-                scale    = { 0.45, 0.10, 0.45 },
+                scale    = { 0.6, 0.6, 0.6 },
             })
             cr_token.setColorTint({ r=pc.r, g=pc.g, b=pc.b })
             cr_token.setName("Credits - " .. pc.name)
