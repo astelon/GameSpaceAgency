@@ -23,8 +23,8 @@
     <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
   </filter>
   <filter id="earth-glow" x="-100%" y="-100%" width="300%" height="300%">
-    <feGaussianBlur stdDeviation="12" result="blur"/>
-    <feColorMatrix type="matrix" values="0 0 0 0 0.20 0 0 0 0 0.85 0 0 0 0 0.60 0 0 0 0.85 0"/>
+    <feGaussianBlur stdDeviation="8" result="blur"/>
+    <feColorMatrix type="matrix" values="0 0 0 0 0.25 0 0 0 0 0.70 0 0 0 0 0.90 0 0 0 0.6 0"/>
     <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
   </filter>
   <filter id="moon-glow" x="-120%" y="-120%" width="340%" height="340%">
@@ -60,6 +60,67 @@
   <clipPath id="map-area">
     <rect x="0" y="0" width="3072" height="1530"/>
   </clipPath>
+
+  <!-- planet detail clip paths -->
+  <clipPath id="earth-clip"><circle cx="200" cy="1050" r="55"/></clipPath>
+  <clipPath id="moon-clip"><circle cx="320" cy="240" r="42"/></clipPath>
+  <clipPath id="mars-clip"><circle cx="2870" cy="1050" r="55"/></clipPath>
+
+  <!-- ocean base for earth -->
+  <radialGradient id="earth-ocean" cx="40%" cy="38%" r="65%">
+    <stop offset="0%" stop-color="#3b8fd4"/>
+    <stop offset="70%" stop-color="#1a5fa0"/>
+    <stop offset="100%" stop-color="#0c2d54"/>
+  </radialGradient>
+
+  <!-- earth atmosphere band (rim on planet body) -->
+  <radialGradient id="earth-atmo" cx="35%" cy="35%" r="55%">
+    <stop offset="80%" stop-color="#60ccf8" stop-opacity="0"/>
+    <stop offset="95%" stop-color="#60ccf8" stop-opacity="0.25"/>
+    <stop offset="100%" stop-color="#3090d0" stop-opacity="0.45"/>
+  </radialGradient>
+
+  <!-- earth atmosphere zone: dense at surface (r=55), thins to nothing at sub-orbital boundary (r=185) -->
+  <radialGradient id="earth-atmo-zone" cx="50%" cy="50%" r="50%">
+    <!-- inside planet body (covered by planet art, but gives a base) -->
+    <stop offset="24%" stop-color="#40a8e0" stop-opacity="0.35"/>
+    <!-- planet edge (r≈55): densest visible atmosphere -->
+    <stop offset="30%" stop-color="#50c0f0" stop-opacity="0.30"/>
+    <!-- lower sub-orbital (r≈90): still visible haze -->
+    <stop offset="48%" stop-color="#48b0e8" stop-opacity="0.18"/>
+    <!-- mid sub-orbital (r≈120): thinning -->
+    <stop offset="65%" stop-color="#40a0d8" stop-opacity="0.09"/>
+    <!-- upper sub-orbital (r≈155): very thin -->
+    <stop offset="84%" stop-color="#3890c0" stop-opacity="0.03"/>
+    <!-- sub-orbital boundary (r=185): gone -->
+    <stop offset="100%" stop-color="#3080b0" stop-opacity="0"/>
+  </radialGradient>
+
+  <!-- cloud blur -->
+  <filter id="cloud-blur" x="-10%" y="-10%" width="120%" height="120%">
+    <feGaussianBlur stdDeviation="2.5"/>
+  </filter>
+
+  <!-- mars atmosphere haze -->
+  <radialGradient id="mars-atmo" cx="50%" cy="50%" r="50%">
+    <stop offset="75%" stop-color="#ff6040" stop-opacity="0"/>
+    <stop offset="92%" stop-color="#ff8050" stop-opacity="0.18"/>
+    <stop offset="100%" stop-color="#cc4020" stop-opacity="0.35"/>
+  </radialGradient>
+
+  <!-- mars terrain base -->
+  <radialGradient id="mars-terrain" cx="38%" cy="36%" r="68%">
+    <stop offset="0%" stop-color="#e08050"/>
+    <stop offset="50%" stop-color="#c04020"/>
+    <stop offset="100%" stop-color="#501008"/>
+  </radialGradient>
+
+  <!-- moon terrain base -->
+  <radialGradient id="moon-terrain" cx="36%" cy="34%" r="70%">
+    <stop offset="0%" stop-color="#d8dce4"/>
+    <stop offset="40%" stop-color="#b0b8c4"/>
+    <stop offset="100%" stop-color="#505868"/>
+  </radialGradient>
 </defs>
 
 <!-- Background -->
@@ -137,7 +198,10 @@
   <circle cx="2870" cy="1050" r="900" fill="#e06030" opacity="0.02"/>
 
   <!-- Earth node spaces (full annular bands) -->
-  <circle cx="200" cy="1050" r="120" fill="none" stroke="#8de7c3" stroke-width="130" opacity="0.26"/>
+  <circle cx="200" cy="1050" r="120" fill="none" stroke="#9db8cc" stroke-width="130" opacity="0.22"/>
+
+  <!-- Earth atmosphere zone overlay: fades from planet surface to sub-orbital boundary -->
+  <circle cx="200" cy="1050" r="185" fill="url(#earth-atmo-zone)"/>
   <circle cx="200" cy="1050" r="270" fill="none" stroke="#9ddffc" stroke-width="170" opacity="0.18"/>
   <circle cx="200" cy="1050" r="462" fill="none" stroke="#f5c842" stroke-width="215" opacity="0.16"/>
 
@@ -173,9 +237,146 @@
   <line x1="1690" y1="0" x2="1690" y2="1530" stroke="#f5a6cf" stroke-width="4" opacity="0.8"/>
 
   <!-- planet bodies -->
-  <circle cx="200" cy="1050" r="55" fill="url(#earth-fill)" filter="url(#earth-glow)"/>
-  <circle cx="320" cy="240" r="42" fill="url(#moon-fill)" filter="url(#moon-glow)"/>
-  <circle cx="2870" cy="1050" r="55" fill="url(#mars-fill)" filter="url(#mars-glow)"/>
+
+  <!-- ═══ EARTH ═══ -->
+  <g filter="url(#earth-glow)">
+    <!-- ocean base -->
+    <circle cx="200" cy="1050" r="55" fill="url(#earth-ocean)"/>
+    <!-- land masses (clipped to planet) -->
+    <g clip-path="url(#earth-clip)" fill="#2d9e55">
+      <!-- North America -->
+      <ellipse cx="178" cy="1025" rx="18" ry="14" fill="#34a85a"/>
+      <ellipse cx="172" cy="1018" rx="10" ry="7" fill="#3cb864"/>
+      <!-- South America -->
+      <ellipse cx="184" cy="1058" rx="9" ry="16" fill="#2e9a50"/>
+      <ellipse cx="186" cy="1066" rx="7" ry="10" fill="#34a85a"/>
+      <!-- Europe / Africa -->
+      <ellipse cx="208" cy="1028" rx="7" ry="6" fill="#38b060"/>
+      <ellipse cx="212" cy="1048" rx="10" ry="18" fill="#2d9050"/>
+      <ellipse cx="210" cy="1040" rx="8" ry="12" fill="#34a85a"/>
+      <!-- Asia -->
+      <ellipse cx="228" cy="1022" rx="16" ry="11" fill="#30a456"/>
+      <ellipse cx="236" cy="1030" rx="10" ry="8" fill="#38b060"/>
+      <!-- Australia -->
+      <ellipse cx="240" cy="1062" rx="8" ry="6" fill="#3cb864"/>
+    </g>
+    <!-- polar ice caps (clipped) -->
+    <g clip-path="url(#earth-clip)">
+      <ellipse cx="200" cy="997" rx="28" ry="6" fill="#e8f4f8" opacity="0.75"/>
+      <ellipse cx="200" cy="1103" rx="22" ry="5" fill="#e0f0f4" opacity="0.65"/>
+    </g>
+    <!-- cloud layer (clipped, blurred) -->
+    <g clip-path="url(#earth-clip)" filter="url(#cloud-blur)" opacity="0.55">
+      <ellipse cx="182" cy="1030" rx="22" ry="5" fill="white" transform="rotate(-15 182 1030)"/>
+      <ellipse cx="220" cy="1050" rx="18" ry="4" fill="white" transform="rotate(10 220 1050)"/>
+      <ellipse cx="196" cy="1068" rx="25" ry="5" fill="white" transform="rotate(-8 196 1068)"/>
+      <ellipse cx="210" cy="1020" rx="14" ry="3.5" fill="white" transform="rotate(20 210 1020)"/>
+      <ellipse cx="175" cy="1052" rx="12" ry="3" fill="white" transform="rotate(-25 175 1052)"/>
+      <ellipse cx="230" cy="1040" rx="10" ry="3" fill="white" transform="rotate(5 230 1040)"/>
+    </g>
+    <!-- atmosphere rim -->
+    <circle cx="200" cy="1050" r="55" fill="url(#earth-atmo)"/>
+    <!-- specular highlight -->
+    <ellipse cx="182" cy="1028" rx="20" ry="18" fill="white" opacity="0.12"/>
+  </g>
+
+  <!-- ═══ MOON ═══ -->
+  <g filter="url(#moon-glow)">
+    <!-- terrain base -->
+    <circle cx="320" cy="240" r="42" fill="url(#moon-terrain)"/>
+    <!-- maria (dark patches) clipped -->
+    <g clip-path="url(#moon-clip)" opacity="0.5">
+      <ellipse cx="310" cy="230" rx="14" ry="12" fill="#6a7080"/>
+      <ellipse cx="330" cy="225" rx="8" ry="10" fill="#707888"/>
+      <ellipse cx="325" cy="248" rx="12" ry="8" fill="#68707c"/>
+      <ellipse cx="340" cy="238" rx="6" ry="7" fill="#727a88"/>
+      <ellipse cx="305" cy="252" rx="9" ry="6" fill="#6e7684"/>
+    </g>
+    <!-- craters -->
+    <g clip-path="url(#moon-clip)">
+      <!-- large craters with rims -->
+      <circle cx="312" cy="234" r="6" fill="#8890a0" opacity="0.4"/>
+      <circle cx="312" cy="234" r="6" fill="none" stroke="#c0c8d4" stroke-width="0.8" opacity="0.5"/>
+      <circle cx="332" cy="250" r="5" fill="#8088a0" opacity="0.35"/>
+      <circle cx="332" cy="250" r="5" fill="none" stroke="#bcc4d0" stroke-width="0.7" opacity="0.45"/>
+      <!-- Tycho-style bright ray crater -->
+      <circle cx="322" cy="262" r="4" fill="#c8ccd4" opacity="0.6"/>
+      <circle cx="322" cy="262" r="4" fill="none" stroke="#e0e4ec" stroke-width="1" opacity="0.7"/>
+      <!-- rays from Tycho -->
+      <line x1="322" y1="262" x2="310" y2="272" stroke="#d0d4dc" stroke-width="0.6" opacity="0.3"/>
+      <line x1="322" y1="262" x2="334" y2="270" stroke="#d0d4dc" stroke-width="0.6" opacity="0.25"/>
+      <line x1="322" y1="262" x2="318" y2="275" stroke="#d0d4dc" stroke-width="0.5" opacity="0.25"/>
+      <line x1="322" y1="262" x2="330" y2="258" stroke="#d0d4dc" stroke-width="0.5" opacity="0.2"/>
+      <!-- small craters -->
+      <circle cx="305" cy="245" r="3" fill="#8890a0" opacity="0.3"/>
+      <circle cx="305" cy="245" r="3" fill="none" stroke="#b8c0cc" stroke-width="0.5" opacity="0.4"/>
+      <circle cx="338" cy="228" r="2.5" fill="#8890a0" opacity="0.3"/>
+      <circle cx="338" cy="228" r="2.5" fill="none" stroke="#b8c0cc" stroke-width="0.5" opacity="0.35"/>
+      <circle cx="318" cy="218" r="2" fill="#9098a8" opacity="0.3"/>
+      <circle cx="328" cy="240" r="2" fill="#8890a0" opacity="0.25"/>
+      <circle cx="342" cy="248" r="1.8" fill="#8890a0" opacity="0.25"/>
+      <circle cx="300" cy="238" r="1.5" fill="#9098a8" opacity="0.2"/>
+      <circle cx="326" cy="230" r="1.5" fill="#9098a8" opacity="0.2"/>
+    </g>
+    <!-- soil texture (subtle noise) -->
+    <g clip-path="url(#moon-clip)" opacity="0.15">
+      <circle cx="308" cy="222" r="0.8" fill="#a0a8b4"/>
+      <circle cx="315" cy="255" r="0.7" fill="#98a0b0"/>
+      <circle cx="335" cy="235" r="0.9" fill="#a0a8b4"/>
+      <circle cx="320" cy="245" r="0.6" fill="#98a0b0"/>
+      <circle cx="340" cy="255" r="0.7" fill="#a0a8b4"/>
+      <circle cx="302" cy="248" r="0.8" fill="#98a0b0"/>
+      <circle cx="328" cy="220" r="0.6" fill="#a0a8b4"/>
+      <circle cx="312" cy="260" r="0.7" fill="#98a0b0"/>
+    </g>
+    <!-- specular highlight -->
+    <ellipse cx="310" cy="224" rx="16" ry="14" fill="white" opacity="0.10"/>
+  </g>
+
+  <!-- ═══ MARS ═══ -->
+  <g filter="url(#mars-glow)">
+    <!-- terrain base -->
+    <circle cx="2870" cy="1050" r="55" fill="url(#mars-terrain)"/>
+    <!-- terrain features (clipped) -->
+    <g clip-path="url(#mars-clip)">
+      <!-- dark highland regions -->
+      <ellipse cx="2858" cy="1045" rx="18" ry="12" fill="#903018" opacity="0.4"/>
+      <ellipse cx="2882" cy="1060" rx="14" ry="10" fill="#983820" opacity="0.35"/>
+      <ellipse cx="2860" cy="1065" rx="10" ry="8" fill="#882c14" opacity="0.35"/>
+      <!-- Valles Marineris (dark canyon slash) -->
+      <line x1="2845" y1="1046" x2="2885" y2="1050" stroke="#601808" stroke-width="2.5" opacity="0.5" stroke-linecap="round"/>
+      <line x1="2848" y1="1048" x2="2882" y2="1051" stroke="#501005" stroke-width="1.2" opacity="0.35" stroke-linecap="round"/>
+      <!-- Olympus Mons (lighter circular feature, upper left quadrant) -->
+      <circle cx="2850" cy="1030" r="8" fill="#d08050" opacity="0.35"/>
+      <circle cx="2850" cy="1030" r="4" fill="#d89060" opacity="0.25"/>
+      <circle cx="2850" cy="1030" r="1.5" fill="#a06030" opacity="0.3"/>
+      <!-- smaller volcanoes (Tharsis region) -->
+      <circle cx="2842" cy="1038" r="3" fill="#c87848" opacity="0.25"/>
+      <circle cx="2846" cy="1042" r="2.5" fill="#c87848" opacity="0.2"/>
+      <circle cx="2856" cy="1036" r="2.8" fill="#c87848" opacity="0.22"/>
+      <!-- southern highlands (rougher, darker terrain) -->
+      <ellipse cx="2870" cy="1075" rx="30" ry="12" fill="#782010" opacity="0.25"/>
+      <!-- northern lowlands (slightly smoother, lighter) -->
+      <ellipse cx="2870" cy="1025" rx="28" ry="10" fill="#d08858" opacity="0.15"/>
+    </g>
+    <!-- polar ice caps (clipped) -->
+    <g clip-path="url(#mars-clip)">
+      <!-- north polar cap -->
+      <ellipse cx="2870" cy="997" rx="20" ry="5" fill="#f0e8e0" opacity="0.7"/>
+      <ellipse cx="2870" cy="999" rx="16" ry="3.5" fill="#ffffff" opacity="0.5"/>
+      <!-- south polar cap (smaller) -->
+      <ellipse cx="2870" cy="1103" rx="14" ry="4" fill="#f0e8e0" opacity="0.6"/>
+      <ellipse cx="2870" cy="1102" rx="10" ry="2.5" fill="#ffffff" opacity="0.4"/>
+    </g>
+    <!-- thin atmosphere rim -->
+    <circle cx="2870" cy="1050" r="55" fill="url(#mars-atmo)"/>
+    <!-- dust haze (very subtle warm band) -->
+    <g clip-path="url(#mars-clip)">
+      <ellipse cx="2870" cy="1055" rx="55" ry="8" fill="#e08040" opacity="0.08"/>
+    </g>
+    <!-- specular highlight -->
+    <ellipse cx="2852" cy="1028" rx="18" ry="16" fill="white" opacity="0.08"/>
+  </g>
 
   <!-- labels -->
   <text x="200" y="1056" text-anchor="middle" font-family="Arial,sans-serif" font-size="20" font-weight="bold" fill="#ecfff4">EARTH</text>
@@ -204,15 +405,6 @@
   <text x="400" y="1454" font-family="Arial,sans-serif" font-size="38" fill="#74f8cd" opacity="0.28" font-weight="bold" letter-spacing="4">EARTH SYSTEM</text>
   <text x="418" y="208" font-family="Arial,sans-serif" font-size="32" fill="#b9cae0" opacity="0.32" font-weight="bold" letter-spacing="3">LUNAR SYSTEM</text>
   <text x="2258" y="1454" font-family="Arial,sans-serif" font-size="38" fill="#ff9f7f" opacity="0.30" font-weight="bold" letter-spacing="4">MARS SYSTEM</text>
-
-  <!-- flavor icon -->
-  <g transform="translate(1468 1138)" opacity="0.74">
-    <path d="M 0 -22 L 10 0 L 0 18 L -10 0 Z" fill="#f9e2f2"/>
-    <path d="M 0 -8 L 18 10 L 6 10 Z" fill="#ff9fcf"/>
-    <path d="M 0 -8 L -18 10 L -6 10 Z" fill="#ff9fcf"/>
-    <rect x="-2" y="18" width="4" height="10" fill="#ffd27d"/>
-    <path d="M -2 28 L 0 36 L 2 28 Z" fill="#ff8f42"/>
-  </g>
 </g>
 
 <!-- track section panels -->
