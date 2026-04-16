@@ -38,6 +38,7 @@ local CARD_BACK_URL  = BASE_IMAGE_URL .. "card_back.png"
 local REPO_ROOT_URL    = BASE_IMAGE_URL:match("^(.*/)cards/output/cards/$") or BASE_IMAGE_URL
 local RULEBOOK_PDF_URL = REPO_ROOT_URL .. "docs/rulebook.pdf"
 local BOARD_IMAGE_URL  = REPO_ROOT_URL .. "tts/board_v2.png"
+local SHIP_MODEL_URL   = REPO_ROOT_URL .. "models/spaceship.obj"
 
 -- ── CARD DATA ────────────────────────────────────────────────
 -- card_index: sequential position in cards.csv → determines PNG filename
@@ -215,6 +216,9 @@ local MISSION_DISPLAY_POSITIONS = {
 
 -- Starting hand — one card of each type dealt to each player seat
 local STARTING_CARDS = { "E02", "T01", "C03" }  -- Sterling Booster, Standard Tank, Precision Guidance
+
+-- Ship token bag position (near the board, accessible to all players)
+local SHIP_BAG_POS = {-14, 1.5, -6}
 
 -- Player seat positions (Z near-side, facing -Z = toward camera)
 local PLAYER_SEATS = {
@@ -506,6 +510,54 @@ local function setupGame()
             cr_token.setColorTint({ r=pc.r, g=pc.g, b=pc.b })
             cr_token.setName("Credits - " .. pc.name)
         end
+
+        -- 10. Ship token bag — one custom-model spaceship per player colour
+        local ship_contained = {}
+        for i, pc in ipairs(PLAYER_TINTS) do
+            table.insert(ship_contained, {
+                Name     = "Custom_Model",
+                Nickname = "Ship - " .. pc.name,
+                GMNotes  = "",
+                ColorDiffuse = { r=pc.r, g=pc.g, b=pc.b },
+                Transform = {
+                    posX=0, posY=0, posZ=0,
+                    rotX=0, rotY=0, rotZ=0,
+                    scaleX=0.04, scaleY=0.04, scaleZ=0.04,
+                },
+                CustomMesh = {
+                    MeshURL       = SHIP_MODEL_URL,
+                    DiffuseURL    = "",
+                    NormalURL     = "",
+                    ColliderURL   = "",
+                    Convex        = true,
+                    MaterialIndex = 0,   -- Plastic
+                    TypeIndex     = 0,   -- Generic
+                    CastShadows   = true,
+                },
+                Locked=false, Grid=true, Snap=true,
+                Autoraise=true, Sticky=true, Tooltip=true,
+            })
+        end
+
+        spawnObjectJSON({
+            json = JSON.encode({
+                Name     = "Bag",
+                Nickname = "Ship Tokens",
+                GMNotes  = "",
+                ColorDiffuse = { r=0.2, g=0.2, b=0.4 },
+                Transform = {
+                    posX=SHIP_BAG_POS[1], posY=SHIP_BAG_POS[2], posZ=SHIP_BAG_POS[3],
+                    rotX=0, rotY=0, rotZ=0,
+                    scaleX=1, scaleY=1, scaleZ=1,
+                },
+                Locked=false, Grid=true, Snap=true,
+                Autoraise=true, Sticky=true, Tooltip=true,
+                ContainedObjects = ship_contained,
+            }),
+            sound = false,
+            snap_to_grid = true,
+        })
+        placeLabel("SHIPS", {SHIP_BAG_POS[1], 0.8, SHIP_BAG_POS[3]})
 
         broadcastToAll("Space Agency Race is set up! Deal starting hands when all players are seated.", "Yellow")
     end, 0.3)

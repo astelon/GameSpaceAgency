@@ -390,9 +390,10 @@
   <text x="320" y="325" text-anchor="middle" font-family="Arial,sans-serif" font-size="17" fill="#eef4fb" font-weight="bold">SUB-ORBITAL</text>
   <text x="320" y="400" text-anchor="middle" font-family="Arial,sans-serif" font-size="17" fill="#e7eff8" font-weight="bold">MOON ORBIT</text>
 
-  <text x="2650" y="1058" text-anchor="end" font-family="Arial,sans-serif" font-size="17" fill="#ffe6db" font-weight="bold">SUB-ORBITAL MARS</text>
-  <text x="2485" y="1058" text-anchor="end" font-family="Arial,sans-serif" font-size="19" fill="#ffd4c0" font-weight="bold">LMO</text>
-  <text x="2320" y="1058" text-anchor="end" font-family="Arial,sans-serif" font-size="19" fill="#ffc6ae" font-weight="bold">MARS ORBIT</text>
+  <text x="2810" y="1058" text-anchor="end" font-family="Arial,sans-serif" font-size="17" fill="#ffe6db" font-weight="bold">SUB-ORBITAL</text>
+  <text x="2620" y="1058" text-anchor="end" font-family="Arial,sans-serif" font-size="17" fill="#ffe6db" font-weight="bold">LMO</text>
+  <text x="2430" y="1058" text-anchor="end" font-family="Arial,sans-serif" font-size="19" fill="#ffd4c0" font-weight="bold">HMO</text>
+  <text x="2240" y="1058" text-anchor="end" font-family="Arial,sans-serif" font-size="19" fill="#ffc6ae" font-weight="bold">MARS INFLUENCE ZONE</text>
 
   <text x="1225" y="208" text-anchor="middle" font-family="Arial,sans-serif" font-size="24" fill="#ffe2b5" font-weight="bold">SOLAR ORBIT</text>
   <text x="1225" y="238" text-anchor="middle" font-family="Arial,sans-serif" font-size="14" fill="#ffe2b5" opacity="0.88" font-weight="bold">EARTH</text>
@@ -418,8 +419,54 @@
 <text x="52" y="1870" font-family="Arial,sans-serif" font-size="28" fill="#4ade80" font-weight="bold" letter-spacing="1">CR</text>
 <text x="2710" y="1870" font-family="Arial,sans-serif" font-size="18" fill="#4ade80" opacity="0.70">start: 5 ▶</text>
 
-<!-- title -->
-<text x="1536" y="65" text-anchor="middle"
+<!-- title panel -->
+<g>
+  <!-- outer glow halo -->
+  <rect x="1076" y="12" width="920" height="120" rx="6" ry="6"
+        fill="none" stroke="#f5c842" stroke-width="1.5" opacity="0.15"
+        filter="url(#glow)"/>
+
+  <!-- dark panel background -->
+  <rect x="1086" y="16" width="900" height="112" rx="5" ry="5"
+        fill="#06101e" opacity="0.92"/>
+
+  <!-- outer gold border -->
+  <rect x="1086" y="16" width="900" height="112" rx="5" ry="5"
+        fill="none" stroke="#806010" stroke-width="2.5"/>
+
+  <!-- inner inset line -->
+  <rect x="1094" y="24" width="884" height="96" rx="3" ry="3"
+        fill="none" stroke="#f5c842" stroke-width="0.8" opacity="0.45"/>
+
+  <!-- corner accents — top-left -->
+  <line x1="1086" y1="36" x2="1100" y2="36" stroke="#f5c842" stroke-width="1.5" opacity="0.7"/>
+  <line x1="1106" y1="16" x2="1106" y2="30" stroke="#f5c842" stroke-width="1.5" opacity="0.7"/>
+  <!-- corner accents — top-right -->
+  <line x1="1972" y1="36" x2="1986" y2="36" stroke="#f5c842" stroke-width="1.5" opacity="0.7"/>
+  <line x1="1966" y1="16" x2="1966" y2="30" stroke="#f5c842" stroke-width="1.5" opacity="0.7"/>
+  <!-- corner accents — bottom-left -->
+  <line x1="1086" y1="108" x2="1100" y2="108" stroke="#f5c842" stroke-width="1.5" opacity="0.7"/>
+  <line x1="1106" y1="114" x2="1106" y2="128" stroke="#f5c842" stroke-width="1.5" opacity="0.7"/>
+  <!-- corner accents — bottom-right -->
+  <line x1="1972" y1="108" x2="1986" y2="108" stroke="#f5c842" stroke-width="1.5" opacity="0.7"/>
+  <line x1="1966" y1="114" x2="1966" y2="128" stroke="#f5c842" stroke-width="1.5" opacity="0.7"/>
+
+  <!-- horizontal rule between title and subtitle -->
+  <line x1="1320" y1="83" x2="1752" y2="83"
+        stroke="#806010" stroke-width="1" opacity="0.5"/>
+  <!-- diamond centre mark -->
+  <rect x="1532" y="79" width="8" height="8" rx="1"
+        fill="#f5c842" opacity="0.55"
+        transform="rotate(45 1536 83)"/>
+
+  <!-- side wing lines — left -->
+  <line x1="1100" y1="72" x2="1140" y2="72" stroke="#f5c842" stroke-width="1" opacity="0.35"/>
+  <!-- side wing lines — right -->
+  <line x1="1932" y1="72" x2="1972" y2="72" stroke="#f5c842" stroke-width="1" opacity="0.35"/>
+</g>
+
+<!-- title text -->
+<text x="1536" y="68" text-anchor="middle"
       font-family="Arial,sans-serif" font-size="50" font-weight="bold"
       fill="#f5c842" letter-spacing="6">SPACE AGENCY RACE</text>
 <text x="1536" y="108" text-anchor="middle"
