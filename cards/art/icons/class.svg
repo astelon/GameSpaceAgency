@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+  <!--
+    Class — gem/diamond outline representing tier classification.
+    Outer diamond (45° rotated square) with a horizontal cut line
+    separating the upper crown facet from the lower pavilion,
+    giving a jewel-like depth read that implies "tier/grade".
+  -->
+  <!-- Outer diamond -->
+  <path fill="none" stroke="white" stroke-width="2" stroke-linejoin="round"
+    d="M12 2 L22 12 L12 22 L2 12 Z"/>
+  <!-- Crown / pavilion cut line (horizontal through center) -->
+  <line x1="2" y1="12" x2="22" y2="12" stroke="white" stroke-width="1" opacity="0.55"/>
+  <!-- Upper-left facet crease -->
+  <line x1="2" y1="12" x2="12" y2="2"  stroke="white" stroke-width="0.75" opacity="0.4"/>
+  <!-- Upper-right facet crease -->
+  <line x1="12" y1="2" x2="22" y2="12" stroke="white" stroke-width="0.75" opacity="0.4"/>
+</svg>

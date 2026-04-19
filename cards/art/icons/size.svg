@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+  <!--
+    Size (Payload) — cargo container outline: three equal bays
+    with a small handle/hatch tab on top.
+  -->
+  <!-- Container body -->
+  <rect x="2" y="7" width="20" height="12" rx="1.5"
+        fill="none" stroke="white" stroke-width="2"/>
+  <!-- Bay dividers -->
+  <line x1="8.67" y1="7"  x2="8.67" y2="19" stroke="white" stroke-width="1.5"/>
+  <line x1="15.33" y1="7" x2="15.33" y2="19" stroke="white" stroke-width="1.5"/>
+  <!-- Hatch handle on top -->
+  <path d="M9 7 V5 C9 4.4 9.4 4 10 4 H14 C14.6 4 15 4.4 15 5 V7"
+        fill="none" stroke="white" stroke-width="1.5" stroke-linejoin="round"/>
+</svg>

@@ -55,12 +55,10 @@ Accumulate the **most Victory Points (VP)** by the end of the game through:
 | **Engine Cards**             | Define rocket thrust, reusability, special abilities |
 | **Fuel Tank Cards**          | Provide range, payload support, and stability        |
 | **Payload Cards**            | Satellites, probes, crew, experiments                |
-| **Support Cards**            | Heat shields, parachutes, and landing gear           |
+| **Support Cards**            | Heat shields, parachutes, docking adapters, and other hardware |
 | **Mission Cards**            | Public contract opportunities tied to destinations   |
 | **Technology Cards**         | Permanent upgrades and rule‑breakers                 |
-| **Event Cards** *(optional)* | Global effects, limited randomness                   |
-
-> ⚠️ *Event cards are optional and currently excluded from the core loop to maintain strategic control.*
+| **Event Cards**              | Global effects, timing pressure, limited randomness  |
 
 ### 3.2 Player Area
 
@@ -75,8 +73,10 @@ Each player maintains:
 
 ### 3.3 Shared Areas
 
-* Orbital Board with **VP Track** and **Orbital Node Map**
+* Orbital Board with **VP Track**, **Orbital Node Map**, and **Transfer Window Track**
+* **Card Market** (face-up row of component cards available for purchase)
 * Mission Deck & Display
+* Event Deck
 * Discard Piles
 
 ### 3.4 Orbital Board (First Draft)
@@ -85,11 +85,44 @@ The orbital board combines the **VP track** with a simple **orbital node map** f
 
 Prototype node map:
 
-* `Earth` -> `Sub-Orbital Earth` -> `LEO` -> `High Orbit`
-* `High Orbit` -> `Moon Transfer` -> `Moon Orbit` -> `Sub-Orbital Moon` -> `Moon`
-* `High Orbit` -> `Solar Orbit` -> `Mars Transfer` -> `Mars Orbit` -> `LMO` -> `Sub-Orbital Mars` -> `Mars`
+**Earth branch:**
+`Earth` → `Sub-Orbital Earth` → `LEO` → `High Orbit` → `Earth ZOI`
 
-Each line between nodes costs **1 Range** to cross.
+**Moon branch (from Earth ZOI):**
+`Earth ZOI` → `Moon Orbit` → `Sub-Orbital Moon` → `Moon`
+
+**Mars branch (from Earth ZOI):**
+`Earth ZOI` → `Sun Orbit` →*Transfer Window*→ `Mars ZOI` → `Mars High Orbit` → `Mars Low Orbit` → `Sub-Orbital Mars` → `Mars Surface`
+
+Each line between nodes costs **1 Range** to cross, except the **Transfer Window** crossing (Sun Orbit → Mars ZOI) which costs **0–5 Range** depending on planetary alignment.
+
+#### Transfer Window
+
+The Transfer Window represents planetary alignment for interplanetary transfers. Its cost (**TW**, range 0–5) changes each round according to a track printed on the board. Event cards may also modify TW for a round.
+
+* **TW 0** – Perfect window; the crossing is free.
+* **TW 5** – Worst alignment; costs 5 extra Range.
+
+> Design intent: Mars missions reward timing. A launch during TW 0 saves up to 5 Range compared to TW 5, creating strategic windows that players plan around.
+
+#### Node Distances from Earth
+
+| Node | Distance | Notes |
+| ---- | -------- | ----- |
+| Sub-Orbital Earth | 1 | |
+| LEO | 2 | |
+| High Orbit | 3 | |
+| Earth ZOI | 4 | Boundary of Earth's influence |
+| Moon Orbit | 5 | |
+| Sub-Orbital Moon | 6 | |
+| Moon (surface) | 7 | |
+| Sun Orbit | 5 | Shared with Moon branch start |
+| Transfer Window | 5 + TW | TW = 0–5 per round |
+| Mars ZOI | 6 + TW | |
+| Mars High Orbit | 7 + TW | |
+| Mars Low Orbit | 8 + TW | |
+| Sub-Orbital Mars | 9 + TW | |
+| Mars Surface | 10 + TW | |
 
 ---
 
@@ -97,12 +130,14 @@ Each line between nodes costs **1 Range** to cross.
 
 ### 4.1 Resources (Abstracted)
 
-| Resource             | Meaning                            |
-| -------------------- | ---------------------------------- |
-| **Credits**          | Funding, actions, card acquisition |
-| **Range**            | How many orbital steps it can move |
-| **Payload Size**     | How heavy the payload is           |
-| **Reliability**      | Engine hardware failure risk       |
+| Resource             | Meaning                                  |
+| -------------------- | ---------------------------------------- |
+| **Credits**          | Funding, actions, card acquisition       |
+| **Thrust**           | Engine lift capacity; must ≥ total Mass  |
+| **Range**            | How many orbital steps a craft can move  |
+| **Mass**             | Weight of tanks and payloads             |
+| **Payload Size**     | Light (1), Medium (2), or Heavy (3)      |
+| **Reliability**      | Engine hardware failure risk             |
 
 > Design choice: Resources are **mostly embedded in cards**, not tracked as loose tokens, reducing bookkeeping.
 
@@ -118,25 +153,32 @@ Tracking note:
 
 1. Each player chooses a color and receives:
 
-   * 1 Starting Engine
-   * 1 Basic Fuel Tank
-   * 1 Starting Technology
+   * **Sterling Booster** (E02) – Starting Engine (`Basic`)
+   * **Standard Tank** (T01) – Starting Fuel Tank (`Basic`)
+   * **Heat Shield** (S01) – Starting Support (`Basic`)
    * 5 Credits
    * 1 Credit marker and 1 VP marker
    * 1 Agency Level marker set to **Level 1**
    * 6 craft markers for rockets and in-space assets
+
+   Cards with the `Basic` tag are always available to any player at their printed cost, even if none are in the market. A player may buy a Basic card as an Acquire Card action at any time.
 
 2. Shuffle each deck separately.
 
    * Separate Mission cards by **Tier 1**, **Tier 2**, and **Tier 3** before shuffling.
    * Shuffle only the **Tier 1 Mission** stack at setup.
    * Keep Tier 2 and Tier 3 Missions face-down beside the board until they unlock.
+   * Shuffle all component cards (Engines, Tanks, Payloads, Support, Technology) into one **Component Deck**.
+   * Shuffle the **Event Deck** separately.
 
 3. Reveal:
 
-   * 3 Tier 1 Mission cards
+   * 3 Tier 1 Mission cards in the Mission display
+   * 5 Component cards in the **Card Market**
 
-4. Determine first player randomly.
+4. **Hand size limit:** Each player may hold at most **5 cards** in hand. If you ever exceed 5, immediately discard down to 5.
+
+5. Determine first player randomly.
 
 ---
 
@@ -148,8 +190,9 @@ The game proceeds over a series of **Rounds**.
 
 1. **Planning Phase**
 2. **Action Phase**
-3. **Launch & Resolution Phase**
-4. **Maintenance Phase**
+3. **Maintenance Phase**
+
+Launches and in-flight activations resolve **immediately** during the Action Phase. There is no separate resolution phase.
 
 The game ends after a fixed number of rounds **or** when the Mission deck is depleted (final trigger TBD).
 
@@ -159,12 +202,12 @@ The game ends after a fixed number of rounds **or** when the Mission deck is dep
 
 ### 7.1 Planning Phase
 
-Players simultaneously:
+1. **Reveal Event:** Flip the top card of the Event Deck. Its effect applies for the entire round. If the Event Deck is empty, skip this step.
+2. **Advance Transfer Window:** Move the TW marker one step along its track.
+3. **Draw Cards:** Each player draws **2 cards** from the Component Deck into their hand (hand limit is **5**).
+4. **Emergency Sell:** Each player may discard 1 card from hand to gain 1 Credit.
 
-* Draw cards (up to hand limit)
-* May discard 1 card to gain 1 Credit as an emergency fallback
-
-> Design intent: Encourage cycling without heavy randomness.
+> Design intent: The Event reveal creates round-to-round variety and timing pressure. Drawing 2 cards keeps hands flowing without flooding.
 
 ---
 
@@ -178,14 +221,14 @@ Each individual craft may be activated at most **once per Action Phase**.
 
 #### Available Actions
 
-* **Acquire Card** – Pay cost, add to hand
+* **Acquire Card** – Buy one face-up card from the **Card Market** (or any `Basic` card) by paying its Credit cost; add it to your hand. Immediately refill the empty market slot from the Component Deck.
 * **Sell Part** – On your turn, discard a card from your hand and gain Credits equal to half its cost, rounded down
-* **Develop Technology** – Play a Technology card
+* **Develop Technology** – Pay the Technology card's Credit cost and place it face-up in your **Agency Tableau**. It applies to **all your craft** from now on. Technology cards remain in your tableau permanently unless another card effect removes them. There is no limit to the number of technologies in your tableau.
 * **Assemble Rocket** – Attach Engine, Fuel, Payload, and optional Support cards
 * **Upgrade Rocket** – Replace components
 * **Accept Mission** – Claim one eligible Exclusive or Secret mission, or commit to a Public mission in the display
-* **Launch New Craft** – Put one assembled rocket onto the orbital board and move it from its start node
-* **Activate Craft** – Move one of your rockets, satellites, or stations on the orbital board
+* **Launch New Craft** – Place an assembled rocket at `Earth`, perform the Lift check, optionally Stage, then fly it along the orbital map spending Range. Resolve the mission immediately if the craft reaches its destination. (See §7.3 Launch Resolution.)
+* **Activate Craft** – Spend remaining Range to move one of your in-flight craft along the orbital map. May resolve a mission if it reaches the destination.
 * **Expand Agency** – Increase your Agency Level by paying Credits
 
 > Action economy is intentionally tight: you get only a few command turns, and larger agencies can coordinate more craft each round.
@@ -215,17 +258,19 @@ New Agency Levels take effect at the start of your next round.
 
 ---
 
-### 7.3 Launch & Resolution Phase
+### 7.3 Launch Resolution
 
-Launched and activated craft resolve in order:
+When a craft is launched or activated, resolve the flight immediately:
 
-1. Check **Lift**: match the payload to the engine using the simple lift tiers.
-2. Optionally **Stage** one card with the `Stageable` tag to gain its printed bonus Range for this launch.
-3. Spend **1 Range** for each node crossed on the orbital board.
-4. Check whether the craft has reached the mission route's required node.
-5. Check **Mission Requirements** (payload size, tags, special conditions).
-6. Apply special effects.
-7. Score VP and rewards.
+1. **Lift Check:** Verify Engine Thrust ≥ Total Rocket Mass (sum of all Fuel Tank Mass values + Payload Mass).
+2. **Reliability Check:** Roll a d10. If the result is **≤ the Engine's Reliability value** (after modifiers from Technology cards and Events), the launch succeeds. If the roll is **above** Reliability, the launch **fails** — the craft does not move, and any non-Reusable Engine is discarded. Reusable Engines survive a failed check but the craft still does not launch this action. *(Skip this step when activating a craft already in flight. A Rocket-as-Lander relaunching from a surface must pass a new Reliability Check.)*
+3. Optionally **Stage** one card with the `Stageable` tag to gain its printed bonus Range for this launch.
+4. The player chooses a path on the orbital map. The craft moves along this path, spending **1 Range per node** crossed. The player may **stop at any node**, preserving unspent Range for future activations.
+5. **Mid-Flight Staging:** At any point during movement (between nodes), a player may stage a `Stageable` card (typically an empty Fuel Tank) to gain its stage bonus Range. The staged card is discarded. This also reduces the craft's Mass for future relaunch checks.
+6. Track the craft's **remaining Range** with a token or small die beside its marker on the board.
+7. If the craft reaches the mission route's required destination, check **Mission Requirements** (payload size, tags, special conditions).
+8. Apply special effects.
+9. Score VP and rewards.
 
 #### Failure
 
@@ -241,6 +286,7 @@ If requirements are not met:
 * Non-Reusable parts do not return to your hand unless another card effect says they do.
 * Reusable recovery parts should usually cost about **1 Credit more** than their disposable versions because they trade higher setup cost for better long-term efficiency.
 * If a craft remains in space, its parts stay with that craft and do not return to your hand.
+* A craft with **0 remaining Range** cannot move but remains on the board as a persistent asset (if applicable).
 
 > Design choice: Failures are costly but not game‑ending.
 
@@ -249,8 +295,10 @@ If requirements are not met:
 ### 7.4 Maintenance Phase
 
 * Reusable parts from craft that returned to `Earth` return to hand if they were not staged
-* Ongoing effects trigger
-* Refill the Mission display if needed
+* Ongoing technology effects trigger
+* Discard the current round's Event card
+* Refill the Mission display to 3 cards if needed
+* Refill the **Card Market** to 5 cards from the Component Deck
 
 ---
 
@@ -309,49 +357,61 @@ Mission economy note:
 A rocket consists of:
 
 * **0–1 Engine**
-* **1 Fuel Tank**
+* **1–3 Fuel Tanks**
 * **0–1 Payload**
 * **0–2 Support Cards**
 
-Some rockets may also use **staging** effects printed on cards to discard part of the rocket mid-flight for extra Range.
+A rocket's **total Range** equals the sum of all its Fuel Tank Range values. Some rockets may also use **staging** effects printed on cards to discard part of the rocket mid-flight for extra Range.
 
 A rocket launched from a planet must have an Engine.
 An Engine-free craft is only legal if it is already **in flight** or **in orbit** because of a mission, card, or ongoing asset effect.
 
 ### Qualification Rules
 
-* **Thrust** measures lift.
+* Every Fuel Tank and Payload card has a numeric **Mass** value (tanks 1–4, payloads 1–3).
+* **Total Rocket Mass** = sum of all Fuel Tank Mass values + Payload Mass.
+* An Engine's **Thrust** must be **≥ Total Rocket Mass** for the rocket to launch.
 * If your rocket has **no Engine**, it may not launch from a planet.
-* If your craft has **no Engine** but is already in flight or in orbit, it may carry only a **Light** payload.
-* **Light** payloads can be launched by any Engine.
-* **Medium** payloads require **Thrust 5+**.
-* **Heavy** payloads require **Thrust 7+**.
-* **Fuel Tanks are not treated as payload** for lift checks. Their mass is already abstracted into their Range, Reliability, and card effects.
-* **Support Cards are not treated as payload** for lift checks. Their mass is abstracted into their card effects.
-* **Range** measures remaining travel potential. It represents the fuel and momentum already available to the craft.
+* If your craft has **no Engine** but is already in flight or in orbit, its Total Rocket Mass must be **≤ 3**.
+* Engines and Support Cards have no Mass for lift purposes (already abstracted into their stats).
+* **Range** measures remaining travel potential. A rocket's total Range = sum of all Fuel Tank Range values.
 * To **maneuver**, a craft must have an Engine to turn that Range into orbital changes.
+* Missions with the `Docking` tag require a `Docking`-tagged support card on the rocket (e.g., Docking Adapter or Orbital Tug).
 * Missions with the `Docking` or `Maneuver` tags require a rocket with an Engine.
 * Missions with the `In-Flight` or `On-Orbit` tags may be attempted by legal Engine-free craft that are already in space.
-* A rocket must satisfy both the Lift check and the Range check before it can attempt a mission.
-* If a rocket has no payload, ignore the Lift check unless a card effect says otherwise.
+* A rocket must satisfy both the Thrust/Mass check and the Range check before it can attempt a mission.
+* If a rocket has no payload, only Fuel Tank Mass counts toward Total Rocket Mass.
 
 ### Orbital Node Travel
 
 * The game treats **Range** as **delta-v** in a simple form.
 * Travel happens on a graph of **nodes** connected by lines.
-* Each line crossed costs **1 Range**.
-* A mission's Range requirement is the total number of node-to-node moves in its route.
-* Add more nodes wherever you want a longer or more difficult trip.
-* Return trips are allowed. Count the steps for the way back too.
-* If a mission is a round trip, its card should include the full out-and-back route in the Range cost.
-* A craft moves **one node per activation** unless a card effect says otherwise.
+* Each line crossed costs **1 Range**, except the **Transfer Window** crossing which costs the current **TW value** (0–5).
+* When launched or activated, a craft may move **any number of nodes** up to its remaining Range in a single action.
+* A player may voluntarily **stop at any node**, preserving unspent Range for future activations.
+* Track each craft’s **remaining Range** with a token or small die beside its marker on the board.
+* A craft with 0 remaining Range cannot move but stays on the board as a persistent asset (if applicable).
+* Return trips are allowed. Count the steps for the way back too. The Transfer Window cost applies each time the craft crosses it.
+* Mission cards that cross the Transfer Window show route Range at TW 0. Players must add the current TW cost when planning.
 
 ### Landing Rules
 
-* Reaching a **Sub-Orbital** node is enough to land.
-* To land from a Sub-Orbital node, use one `Heat Shield` or `Parachute` effect and discard or stage it after use.
-* If you do not use a `Heat Shield` or `Parachute`, you may perform a **propulsive landing** by spending **1 extra Range** and using an Engine.
-* Each landing uses its own landing support. A return trip to Mars usually needs one set for arrival and another set for the trip home.
+* To land on a body, a craft must be at the adjacent **Sub-Orbital** node and spend **1 Range** to cross to the surface.
+* **Earth reentry** (Sub-Orbital Earth → Earth): use a `Heat Shield` or `Parachute` card (discard after use), or perform a **propulsive landing** by spending **1 extra Range** with an Engine.
+* **Moon landing** (Sub-Orbital Moon → Moon): spend 1 Range. The Moon has no atmosphere, so landing always requires an Engine (propulsive). A dedicated Landing Lander payload **or** the rocket itself may serve as the lander (see Rocket-as-Lander below).
+* **Mars landing** (Sub-Orbital Mars → Mars Surface): spend 1 Range. Mars has a thin atmosphere: use a `Heat Shield` or `Parachute` to assist, or perform a fully propulsive landing (1 extra Range + Engine). A dedicated Landing Lander **or** the rocket itself may serve as the lander.
+* Each landing uses its own support. A Moon return trip needs propulsive lunar landing plus Earth-reentry support for the trip home.
+
+### Rocket-as-Lander
+
+A rocket does **not** need a separate Landing Lander payload to land. If the rocket has:
+
+1. An **Engine** (for propulsive landing capability), and
+2. Enough **remaining Range** to land and later relaunch,
+
+then it may land on the surface directly. To **relaunch from a surface**, the craft must pass a new Lift Check (Thrust ≥ current Total Mass, accounting for any cards staged away) and a new **Reliability Check**. It then continues flight using its remaining Range.
+
+> Design intent: This makes surface missions possible without a Landing Lander, but more expensive in fuel. Dedicated landers are still valuable because they free up Range for the rest of the trip. Players can stage away empty tanks before relaunching to reduce Mass.
 
 ### Persistent Assets
 
@@ -362,10 +422,10 @@ An Engine-free craft is only legal if it is already **in flight** or **in orbit*
 ### Staging Rules
 
 * Some cards have the `Stageable` tag and a printed **Stage** effect.
-* During Launch, after the Lift check and before the Range check, you may Stage **one** `Stageable` card in your rocket.
-* If the staged card is an **Engine**, it counts for the Lift check and still counts as your rocket's Engine for the rest of that mission.
-* When you Stage a card, gain the printed bonus Range for that launch.
-* Staging never changes **Payload Size**. It only changes how much Range your rocket can reach on that launch.
+* **Pre-flight staging:** During Launch, after the Lift check and before movement, you may Stage **one** `Stageable` card. If the staged card is an Engine, it still counts for the Lift check.
+* **Mid-flight staging:** At any point during movement (between nodes), a player may stage one `Stageable` card (typically an empty Fuel Tank) to gain its stage bonus Range. This also reduces the craft's current Mass, which matters for relaunch Lift checks.
+* When you Stage a card, gain the printed bonus Range for that flight.
+* Staging never changes **Payload Size**. It only changes how much Range your rocket can reach and the craft's current Mass.
 * Fuel use is abstracted into the card values. The printed Stage bonus already represents the efficiency gained by dropping spent parts.
 * A staged card is discarded after launch and cannot be recovered unless another effect returns it.
 * Once a card is staged, you lose any future benefit from that card, including reusability or passive effects.
@@ -375,7 +435,9 @@ Design note:
 * These thresholds are intentionally simple so launch qualification stays readable at a glance rather than becoming a math exercise.
 * Stageable Engines are the game's simple version of the rocket equation: the card represents a booster plus sustainer, so it helps you lift the rocket early, then turns into extra Range once the spent booster part is dropped.
 * A craft already in orbit does not need an Engine just to remain there. It needs one only if it must maneuver again.
-* Range is not a separate fuel mini-game. Players only count simple node moves and a few extra costs such as propulsive landings.
+* Range is not a separate fuel mini-game. Players count node moves plus Transfer Window costs and propulsive landings.
+* Flights resolve immediately when launched or activated. Players choose how far to fly, and remaining Range is tracked on the board.
+* Multiple tanks let players build heavier rockets for longer missions, but each tank adds Mass that the Engine must lift.
 
 ### Tags
 
@@ -394,6 +456,7 @@ Cards use **tags** instead of keywords:
 * `Parachute`
 * `Satellite`
 * `Station`
+* `Basic`
 
 > Tags allow flexible design space and future expansions.
 
@@ -453,15 +516,17 @@ Stageable engine example:
 
 Fuel tanks should:
 
-* Define mission reach
-* Interact with engine type
+* Define mission reach via Range (summed across all tanks)
+* Create meaningful Mass vs Range trade-offs (heavier tanks eat Thrust budget)
+* Interact with engine type (e.g., Cryogenic requirements)
 * Occasionally offer a simple staging decision
 
-Example ideas:
+Design axes:
 
-* Lightweight tank: less payload
-* Cryogenic tank: setup cost, higher range
-* Drop tank: discard mid-flight for bonus range
+* **Range/Mass ratio** – Efficient tanks give more Range per Mass but may cost more Credits
+* **Staging potential** – Stageable tanks trade reuse for bonus Range
+* **Compatibility** – Specialized tanks (Cryo, Pressurized) unlock better engines or crewed missions
+* **Stacking strategy** – Multiple small tanks vs one large tank shapes the Mass budget differently
 
 ---
 
@@ -485,19 +550,26 @@ Technologies should:
 
 ---
 
-## 13. Design Status & Known Open Questions
+## 12. Design Status & Known Open Questions
 
 ### Locked In
 
-* Core turn structure
-* Rocket assembly system
-* Mission‑driven scoring
+* Core turn structure (Planning → Action → Maintenance)
+* Rocket assembly system (multi-tank, Mass-based Thrust check)
+* Mission‑driven scoring and economy
+* Card Market for component acquisition
+* Event cards integrated into Planning Phase
+* Technology tableau (permanent until removed)
+* Reliability check on launch (d10 ≤ Reliability)
+* Rocket-as-Lander and mid-flight staging
+* Hand size limit of 5
+* Transfer Window mechanic for Mars timing
 
 ### Under Evaluation
 
-* Transfer windows as timing constraints
-* Optional Event cards
 * Player asymmetry
+* Exact TW track schedule per round
+* Final round count / end-game trigger tuning
 
 ### Next Iteration Goals
 
@@ -507,7 +579,7 @@ Technologies should:
 
 ---
 
-## 14. Closing Notes
+## 13. Closing Notes
 
 This draft prioritizes:
 

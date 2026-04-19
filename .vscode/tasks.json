@@ -175,9 +175,9 @@
     },
     {
       "label": "TTS: Convert Board SVG to PNG",
-      "detail": "Converts tts/board.svg → tts/board.png (3072×1920). Requires Inkscape or ImageMagick.",
+      "detail": "Converts tts/board.svg and tts/board_v2.svg → PNG (3072×1920). Requires Inkscape or ImageMagick.",
       "type": "shell",
-      "command": "if (Get-Command inkscape -ErrorAction SilentlyContinue) { inkscape --export-type=png --export-width=3072 --export-height=1920 tts\\board.svg -o tts\\board.png; Write-Host 'Saved tts/board.png via Inkscape.' } elseif (Get-Command magick -ErrorAction SilentlyContinue) { magick -size 3072x1920 tts\\board.svg tts\\board.png; Write-Host 'Saved tts/board.png via ImageMagick.' } else { Write-Error 'Neither Inkscape nor ImageMagick found. Install one to convert the board SVG.' }",
+      "command": "if (Get-Command inkscape -ErrorAction SilentlyContinue) { inkscape --export-type=png --export-width=3072 --export-height=1920 tts\\board.svg -o tts\\board.png; Write-Host 'Saved tts/board.png via Inkscape.'; inkscape --export-type=png --export-width=3072 --export-height=1920 tts\\board_v2.svg -o tts\\board_v2.png; Write-Host 'Saved tts/board_v2.png via Inkscape.' } elseif (Get-Command magick -ErrorAction SilentlyContinue) { magick -size 3072x1920 tts\\board.svg tts\\board.png; Write-Host 'Saved tts/board.png via ImageMagick.'; magick -size 3072x1920 tts\\board_v2.svg tts\\board_v2.png; Write-Host 'Saved tts/board_v2.png via ImageMagick.' } else { Write-Error 'Neither Inkscape nor ImageMagick found. Install one to convert the board SVG.' }",
       "options": {
         "cwd": "${workspaceFolder}",
         "shell": {

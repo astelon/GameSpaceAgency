@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300" viewBox="0 0 400 300">
+  <defs>
+    <linearGradient id="bodyGrad" x1="0" x2="0" y1="0" y2="1">
+      <stop offset="0%" stop-color="#ffd88a" />
+      <stop offset="100%" stop-color="#ff9b3b" />
+    </linearGradient>
+    <linearGradient id="panelGrad" x1="0" x2="1">
+      <stop offset="0%" stop-color="#5a8fd6" />
+      <stop offset="100%" stop-color="#2f6fbf" />
+    </linearGradient>
+  </defs>
+
+  <rect width="100%" height="100%" fill="#2b1f5b" />
+
+  <!-- centered composition -->
+  <g transform="translate(200,120)">
+    <!-- plate background -->
+    <rect x="-170" y="-80" width="340" height="200" rx="14" fill="#513f9b" />
+
+    <!-- satellite body (center) -->
+    <g>
+      <rect x="-30" y="-20" width="60" height="60" rx="6" fill="url(#bodyGrad)" stroke="#6b4b1f" stroke-width="1" />
+      <!-- antenna -->
+      <rect x="8" y="-36" width="6" height="14" rx="2" fill="#ded1b0" />
+      <circle cx="11" cy="-40" r="3" fill="#fff5d6" />
+      <!-- solar panels -->
+      <rect x="-120" y="-14" width="80" height="28" rx="4" fill="url(#panelGrad)" stroke="#254f86" stroke-width="2" />
+      <rect x="40" y="-14" width="80" height="28" rx="4" fill="url(#panelGrad)" stroke="#254f86" stroke-width="2" />
+      <!-- panel grid lines -->
+      <g stroke="#133a6b" stroke-width="1" opacity="0.6">
+        <line x1="-110" y1="-6" x2="-50" y2="-6" />
+        <line x1="-110" y1="-2" x2="-50" y2="-2" />
+        <line x1="50" y1="-6" x2="110" y2="-6" />
+        <line x1="50" y1="-2" x2="110" y2="-2" />
+      </g>
+      <!-- small detail bolts -->
+      <circle cx="-10" cy="-10" r="2" fill="#6b4b1f" />
+      <circle cx="10" cy="10" r="2" fill="#6b4b1f" />
+    </g>
+  </g>
+
+  <!-- label centered below -->
+  <text x="200" y="260" font-size="18" font-family="Arial" fill="#ffffff" text-anchor="middle">Payload</text>
+</svg>

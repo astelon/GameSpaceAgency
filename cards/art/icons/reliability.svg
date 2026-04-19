@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+  <!--
+    Reliability — shield outline with checkmark inside.
+    The shield = protection/quality; the check = verified/passed.
+  -->
+  <!-- Shield -->
+  <path fill="none" stroke="white" stroke-width="2" stroke-linejoin="round"
+    d="M12 2 L4 6 V12.5
+       C4 16.8 7.5 20.7 12 22
+       C16.5 20.7 20 16.8 20 12.5
+       V6 Z"/>
+  <!-- Checkmark -->
+  <path fill="none" stroke="white" stroke-width="2.5"
+        stroke-linecap="round" stroke-linejoin="round"
+    d="M7.5 12.5 L10.5 15.5 L16.5 9"/>
+</svg>

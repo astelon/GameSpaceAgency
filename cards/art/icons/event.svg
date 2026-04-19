@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300" viewBox="0 0 400 300">
+  <defs>
+    <linearGradient id="evtBg" x1="0" x2="0" y1="0" y2="1">
+      <stop offset="0%" stop-color="#3b2f2a" />
+      <stop offset="100%" stop-color="#241912" />
+    </linearGradient>
+    <linearGradient id="cloudGrad" x1="0" x2="0" y1="0" y2="1">
+      <stop offset="0%" stop-color="#cfd8e3" />
+      <stop offset="100%" stop-color="#9fb0c6" />
+    </linearGradient>
+    <linearGradient id="bolt" x1="0" x2="0" y1="0" y2="1">
+      <stop offset="0%" stop-color="#fff06b" />
+      <stop offset="100%" stop-color="#ff8a00" />
+    </linearGradient>
+  </defs>
+
+  <rect width="100%" height="100%" fill="url(#evtBg)" />
+
+  <!-- centered plate -->
+  <g transform="translate(200,120)">
+    <rect x="-170" y="-80" width="340" height="200" rx="14" fill="#2b1f1a" />
+
+    <!-- cloud group -->
+    <g>
+      <ellipse cx="-30" cy="-10" rx="44" ry="28" fill="url(#cloudGrad)" />
+      <ellipse cx="30" cy="-10" rx="56" ry="34" fill="url(#cloudGrad)" />
+      <ellipse cx="0" cy="6" rx="70" ry="34" fill="url(#cloudGrad)" />
+      <ellipse cx="-40" cy="6" rx="28" ry="16" fill="url(#cloudGrad)" />
+    </g>
+
+    <!-- lightning bolt -->
+    <g transform="translate(0,30)">
+      <path d="M -6 -10 L 8 2 L -2 2 L 12 24 L -8 6 L 2 6 Z" fill="url(#bolt)" stroke="#e06b00" stroke-width="1" />
+      <path d="M -2 26 L 6 36" stroke="#ffd98a" stroke-width="2" stroke-linecap="round" opacity="0.6" />
+    </g>
+
+    <!-- small sparkles/stars -->
+    <g fill="#ffd98a" opacity="0.9">
+      <circle cx="-120" cy="-40" r="1.2" />
+      <circle cx="140" cy="-50" r="1" />
+      <circle cx="100" cy="30" r="1" />
+    </g>
+  </g>
+
+  <!-- label centered below -->
+  <text x="200" y="265" font-size="18" font-family="Arial" fill="#ffffff" text-anchor="middle">Event</text>
+</svg>

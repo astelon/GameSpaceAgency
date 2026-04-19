@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300" viewBox="0 0 400 300">
+  <defs>
+    <radialGradient id="spaceGrad" cx="50%" cy="30%" r="80%">
+      <stop offset="0%" stop-color="#2a3f66" />
+      <stop offset="100%" stop-color="#0f2540" />
+    </radialGradient>
+    <linearGradient id="planetGrad" x1="0" x2="1">
+      <stop offset="0%" stop-color="#9fd8ff" />
+      <stop offset="100%" stop-color="#5aaed6" />
+    </linearGradient>
+    <linearGradient id="probeGlow" x1="0" x2="1">
+      <stop offset="0%" stop-color="#fff2b2" />
+      <stop offset="100%" stop-color="#ffd6a6" />
+    </linearGradient>
+  </defs>
+
+  <rect width="100%" height="100%" fill="url(#spaceGrad)" />
+
+  <!-- centered card plate -->
+  <g transform="translate(200,120)">
+    <rect x="-180" y="-90" width="360" height="200" rx="12" fill="#1f4068" />
+
+    <!-- planet with subtle surface shapes -->
+    <g>
+      <circle cx="0" cy="-10" r="60" fill="url(#planetGrad)" />
+      <path d="M -30 -20 C -10 -30 10 -28 30 -20" fill="#8ac4e6" opacity="0.35" />
+      <path d="M -40 10 C -20 0 20 0 40 10" fill="#6fb6d6" opacity="0.25" />
+    </g>
+
+    <!-- orbit ring -->
+    <ellipse rx="110" ry="60" fill="none" stroke="#9ecff2" stroke-opacity="0.28" stroke-width="2" transform="rotate(-18)" />
+
+    <!-- small probe on orbit with trail -->
+    <g transform="translate(80,-20)">
+      <path d="M -18 6 C -10 -8 -6 -20 0 -22" stroke="#ffd6a6" stroke-width="4" fill="none" stroke-linecap="round" opacity="0.9" />
+      <circle cx="6" cy="-18" r="6" fill="url(#probeGlow)" stroke="#fff" stroke-opacity="0.6" stroke-width="1" />
+      <rect x="2" y="-10" width="8" height="6" rx="1" fill="#ffffff" opacity="0.9" transform="rotate(-22)" />
+    </g>
+
+    <!-- stars -->
+    <g fill="#ffffff" fill-opacity="0.9">
+      <circle cx="-120" cy="-50" r="2" />
+      <circle cx="140" cy="-70" r="1.5" />
+      <circle cx="100" cy="30" r="1.2" />
+      <circle cx="-60" cy="60" r="1.4" />
+    </g>
+  </g>
+
+  <!-- label centered below card -->
+  <text x="200" y="265" font-size="18" font-family="Arial" fill="#ffffff" text-anchor="middle">Mission</text>
+</svg>

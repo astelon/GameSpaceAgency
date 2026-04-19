@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+  <!--
+    Range — bold double-headed horizontal arrow.
+    Shaft runs y=10..14; arrowheads reach y=7 and y=17.
+  -->
+  <path fill="white"
+    d="M2 12 L7 7 V10 H17 V7 L22 12 L17 17 V14 H7 V17 Z"/>
+</svg>

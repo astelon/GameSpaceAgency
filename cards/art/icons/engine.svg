@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300" viewBox="0 0 400 300">
+  <defs>
+    <linearGradient id="bg" x1="0" x2="0" y1="0" y2="1">
+      <stop offset="0%" stop-color="#0d3f9a" />
+      <stop offset="100%" stop-color="#072a66" />
+    </linearGradient>
+    <linearGradient id="nozzleGrad" x1="0" x2="0" y1="0" y2="1">
+      <stop offset="0%" stop-color="#555c6b" />
+      <stop offset="100%" stop-color="#2b3240" />
+    </linearGradient>
+    <linearGradient id="flame" x1="0" x2="0" y1="0" y2="1">
+      <stop offset="0%" stop-color="#ffd966" />
+      <stop offset="50%" stop-color="#ff8a00" />
+      <stop offset="100%" stop-color="#d33b00" />
+    </linearGradient>
+  </defs>
+
+  <rect width="100%" height="100%" fill="url(#bg)" />
+
+  <!-- centered plate -->
+  <g transform="translate(200,120)">
+    <rect x="-170" y="-80" width="340" height="200" rx="12" fill="#123a6b" />
+
+    <!-- engine bell (nozzle) centered at (0,0) -->
+    <g transform="translate(0,10)">
+      <!-- bell outer -->
+      <path d="M -70 -10 C -50 -80 -10 -100 0 -100 C 10 -100 50 -80 70 -10 L 50 60 L -50 60 Z" fill="url(#nozzleGrad)" />
+      <!-- inner opening -->
+      <path d="M -40 -5 C -30 -55 -10 -70 0 -70 C 10 -70 30 -55 40 -5 L 30 40 L -30 40 Z" fill="#0b1320" />
+      <!-- nozzle tip -->
+      <ellipse cx="0" cy="48" rx="22" ry="8" fill="#1a222b" />
+      <!-- flame/exhaust -->
+      <g transform="translate(0,60)">
+        <path d="M -30 -10 C -20 20  -10 40 0 60 C 10 40 20 20 30 -10 C 10 5  -10 5 -30 -10 Z" fill="url(#flame)" opacity="0.95" />
+        <path d="M -18 0 C -10 18 -5 30 0 42 C 5 30 10 18 18 0 C 6 8 -6 8 -18 0 Z" fill="#fff1c6" opacity="0.6" />
+      </g>
+      <!-- small details -->
+      <rect x="-72" y="-2" width="6" height="6" fill="#2b323a" rx="1" />
+      <rect x="66" y="-2" width="6" height="6" fill="#2b323a" rx="1" />
+    </g>
+  </g>
+
+  <!-- label centered below -->
+  <text x="200" y="260" font-size="18" font-family="Arial" fill="#ffffff" text-anchor="middle">Engine</text>
+</svg>

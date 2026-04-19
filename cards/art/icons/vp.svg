@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+  <!--
+    VP (Victory Points) — solid 5-pointed star.
+    Points calculated with outer R=9, inner r=3.6, center (12,12).
+    Outer tip angles: -90°, -18°, 54°, 126°, 198°.
+    Inner notch angles (offset +36°): -54°, 18°, 90°, 162°, 234°.
+  -->
+  <polygon fill="white"
+    points="12,3
+            14.12,9.09
+            20.56,9.22
+            15.42,13.11
+            17.29,19.28
+            12,15.6
+            6.71,19.28
+            8.58,13.11
+            3.44,9.22
+            9.88,9.09"/>
+</svg>
