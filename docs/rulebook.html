@@ -853,7 +853,7 @@
       </div>
       <div>
         <div class="card-type-name" style="color:var(--mission-col)">Mission Cards</div>
-        <div class="card-type-desc">Contracts that score VP and Credits. Each mission specifies a destination, route, hardware requirements, and rewards. Missions come in three types — Public, Exclusive, and Secret — and three Tiers of difficulty.</div>
+        <div class="card-type-desc">Contracts that score VP and Credits. Each mission shows a Conditions list (destination route + hardware requirements), while reward badges show VP and Credits. Missions come in three types — Public, Exclusive, and Secret — and three Tiers of difficulty.</div>
       </div>
     </div>
     <div class="card-type-row">
@@ -895,10 +895,17 @@
     </div>
     <div class="stat-card">
       <div class="stat-name" style="display:flex;align-items:center;gap:6px">
-        <img src="../cards/art/icons/size.png" style="width:18px;height:18px;object-fit:contain" alt="">
+        <img src="../cards/art/icons/mass.png" style="width:18px;height:18px;object-fit:contain" alt="">
         Mass
       </div>
       <p>Weight of tanks (1–4) and payloads (1–3). Engine Thrust must be ≥ total Mass to launch.</p>
+    </div>
+    <div class="stat-card">
+      <div class="stat-name" style="display:flex;align-items:center;gap:6px">
+        <img src="../cards/art/icons/energy.png" style="width:18px;height:18px;object-fit:contain" alt="">
+        Energy
+      </div>
+      <p>Electricity used by active systems. Generators add Energy at the start of the Action Phase; batteries store Energy between rounds.</p>
     </div>
     <div class="stat-card">
       <div class="stat-name" style="display:flex;align-items:center;gap:6px">
@@ -944,6 +951,7 @@
     <li><strong>Agency Level Markers</strong> (1 per player) — Start at Level 1</li>
     <li><strong>Craft Markers</strong> (6 per player) — Represent rockets and in-orbit assets on the board</li>
     <li><strong>Range Tokens / Small Dice</strong> — Track remaining Range per craft on the board</li>
+    <li><strong>Energy Tokens</strong> — Track generated Energy on in-flight craft and stored Energy on Battery cards</li>
     <li><strong>Transfer Window Marker</strong> — Tracks the current TW cost (0–5) on the board track</li>
     <li><strong>1 First Player Token</strong></li>
   </ul>
@@ -1005,7 +1013,7 @@
     <div class="phase-card">
       <div class="phase-num">Phase 02</div>
       <div class="phase-name">Action</div>
-      <div class="phase-desc">Players alternate Command Turns equal to their Agency Level. Launch, build, buy, and fly. Missions resolve immediately on arrival.</div>
+      <div class="phase-desc">Players alternate Command Turns equal to their Agency Level. In-flight craft first generate Energy, then launch, build, buy, and fly. Missions resolve immediately on arrival.</div>
     </div>
     <div class="phase-card">
       <div class="phase-num">Phase 03</div>
@@ -1026,9 +1034,19 @@
   <ul>
     <li>Reusable parts from craft that returned to Earth go back to hand (if not staged).</li>
     <li>Ongoing technology effects trigger.</li>
+    <li>Each Battery card may store up to 1 unused generated Energy from its craft, up to its capacity.</li>
+    <li>Discard all other unused generated Energy tokens from in-flight craft.</li>
     <li>Discard the current round's Event card.</li>
     <li>Refill the Mission display to 3 cards if needed.</li>
     <li>Refill the <strong>Card Market</strong> to 5 cards from the Component Deck.</li>
+  </ul>
+
+  <h3>Energy Timing</h3>
+  <ul>
+    <li><strong>Start of Action Phase:</strong> Each in-flight craft gains generated Energy equal to the total generation of its attached cards.</li>
+    <li><strong>Spend Energy:</strong> When a card tells you to spend Energy, remove that many Energy tokens from the craft or from its Battery cards.</li>
+    <li><strong>Stored Energy:</strong> Battery cards keep stored Energy between rounds and enter play full when their craft launches.</li>
+    <li><strong>Unused Energy:</strong> Generated Energy is lost during Maintenance unless a Battery stores it.</li>
   </ul>
 
 
@@ -1059,7 +1077,7 @@
     </div>
     <div class="action-item">
       <div class="action-name">&#9670; Develop Technology</div>
-      <p>Pay a Technology card's Credit cost and place it face-up in your <strong>Agency Tableau</strong>. It applies to all your craft permanently. No limit to technologies in your tableau.</p>
+      <p>Pay a Technology card's Credit cost and place it face-up in your <strong>Agency Tableau</strong>. It applies to all your craft permanently. You cannot have two developed Technology cards with the same <strong>Name</strong>.</p>
     </div>
     <div class="action-item">
       <div class="action-name">&#9670; Upgrade Rocket</div>
@@ -1071,7 +1089,7 @@
     </div>
     <div class="action-item">
       <div class="action-name">&#9670; Activate Craft</div>
-      <p>Spend remaining Range to move one of your in-flight craft along the orbital map. Each craft may be activated only once per Action Phase. May resolve a mission on arrival.</p>
+      <p>Spend remaining Range to move one of your in-flight craft along the orbital map. Spend Energy too if an attached card requires it for that activation. Each craft may be activated only once per Action Phase. May resolve a mission on arrival.</p>
     </div>
     <div class="action-item">
       <div class="action-name">&#9670; Expand Agency</div>
@@ -1107,8 +1125,18 @@
   <div class="box gold">
     <div class="box-title">&#9888; Mission Tier Unlocks</div>
     <p>When the <em>first</em> agency reaches Level 2, immediately shuffle all <strong>Tier 2 Missions</strong> into the Mission deck.<br>
-    When the <em>first</em> agency reaches Level 3, immediately shuffle all <strong>Tier 3 Missions</strong> into the Mission deck.<br>
+    When the <em>first</em> agency reaches Level 3, immediately shuffle all <strong>Tier 3 Missions</strong> into the Mission deck and that player gains <strong>+2 VP</strong>.<br>
     Each unlock happens only once per game. The player with the lowest VP gains a <strong>Government Catch-Up Grant</strong> at each unlock: <strong>+3 Credits</strong> at Tier 2, <strong>+4 Credits</strong> at Tier 3. If tied on VP, the tied player with fewest Credits gains the grant — or each tied player gains 2 Credits if still tied.</p>
+  </div>
+
+  <div class="box cyan">
+    <div class="box-title">&#127757; Milestone VP Bonuses</div>
+    <ul style="margin-bottom:0">
+      <li><strong>First to Moon branch</strong> (Moon Orbit or farther): <strong>+2 VP</strong></li>
+      <li><strong>First to Mars branch</strong> (Mars ZOI or farther): <strong>+4 VP</strong></li>
+      <li><strong>Tech pace bonus:</strong> first player to develop 4 Technologies gains <strong>+2 VP</strong></li>
+      <li><strong>Orbit-linked innovation:</strong> if you develop a Technology while you control an on-orbit Satellite or Station, gain <strong>+1 VP</strong> (max once per round)</li>
+    </ul>
   </div>
 
 
@@ -1123,28 +1151,40 @@
     <li><strong>0–1 Engine</strong> (required to launch from a planet)</li>
     <li><strong>1–3 Fuel Tanks</strong> (total Range = sum of all tanks)</li>
     <li><strong>0–1 Payload</strong></li>
-    <li><strong>0–2 Support Cards</strong></li>
+    <li><strong>0–3 Support Cards</strong></li>
   </ul>
 
   <h2>Mass &amp; Thrust</h2>
 
-  <p>Every Fuel Tank and Payload has a numeric <strong>Mass</strong> value. To launch, the Engine's <strong>Thrust</strong> must be <strong>≥ Total Rocket Mass</strong>.</p>
+  <p>Every Fuel Tank and Payload has a numeric <strong>Mass</strong> value. Some Support cards also print Mass. To launch, the Engine's <strong>Thrust</strong> must be <strong>≥ Total Rocket Mass</strong>.</p>
 
   <div class="box">
-    <p style="margin:0;font-size:.95rem"><strong style="color:var(--accent-gold)">Total Rocket Mass</strong> = sum of all Fuel Tank Mass values + Payload Mass</p>
+    <p style="margin:0;font-size:.95rem"><strong style="color:var(--accent-gold)">Total Rocket Mass</strong> = sum of all Fuel Tank Mass values + Payload Mass + any printed Support Mass</p>
     <p style="margin:8px 0 0;font-size:.95rem"><strong style="color:var(--accent-gold)">Lift Check</strong> = Engine Thrust ≥ Total Rocket Mass</p>
   </div>
 
-  <p>Engines and Support Cards have no Mass for lift purposes — their weight is already abstracted into their stats. If a rocket has no Payload, only tank Mass counts.</p>
+  <p>Engines have no Mass for lift purposes. Support cards count only if they print a Mass value. If a rocket has no Payload, only tank Mass and printed Support Mass count.</p>
 
   <table>
     <thead><tr><th>Component</th><th>Mass Range</th><th>Examples</th></tr></thead>
     <tbody>
       <tr><td>Fuel Tanks</td><td>1 – 4</td><td>Fuel Pod (1), Standard (2), Cryo (3), Long-Range (4)</td></tr>
       <tr><td>Payloads</td><td>1 – 3</td><td>CubeSat (1), Comm Satellite (2), Science Module (3)</td></tr>
+      <tr><td>Supports</td><td>usually —</td><td>Most have no Mass; RTG has Mass 1</td></tr>
       <tr><td>Engines</td><td>—</td><td>Thrust 3–9; no Mass value</td></tr>
     </tbody>
   </table>
+
+  <h2>Energy Systems</h2>
+
+  <p>Some Support and Payload cards use <strong>Energy</strong>. Energy is tracked with tokens on each craft.</p>
+
+  <ul>
+    <li><strong>Generation:</strong> Solar Panels and RTGs add Energy at the start of the Action Phase.</li>
+    <li><strong>Use:</strong> Cards such as Docking Adapters, Orbital Tugs, Sensors, and Flight Computers spend Energy when activated.</li>
+    <li><strong>Storage:</strong> Battery cards keep stored Energy between rounds and can hold unused generated Energy.</li>
+    <li><strong>Battery recharge:</strong> During Maintenance, each Battery may store up to 1 unused generated Energy from its craft.</li>
+  </ul>
 
   <h2>Staging</h2>
 
@@ -1154,7 +1194,7 @@
     <li><strong>Pre-flight staging:</strong> After the Lift check, before movement, you may Stage one Stageable card. Gain its printed bonus Range. The staged card is discarded.</li>
     <li><strong>Mid-flight staging:</strong> At any point during movement (between nodes), you may Stage one Stageable card (typically an empty tank). Gain its bonus Range and reduce the craft's current Mass — important for relaunch Lift checks.</li>
     <li>A staged Engine still counts for the initial Lift check.</li>
-    <li>Staging never changes Payload Size — only Range and Mass.</li>
+    <li>Staging reduces the craft's current Mass (important for relaunch Lift checks) and increases Range.</li>
     <li>A staged card is <strong>discarded</strong> and cannot be recovered, even if Reusable.</li>
   </ul>
 
@@ -1366,7 +1406,7 @@
   <div class="section-divider"><span class="num">09</span><span class="line"></span></div>
   <h1>Missions</h1>
 
-  <p>Mission cards are your agency's contract system. Each card shows a destination, required route, hardware requirements, and rewards.</p>
+  <p>Mission cards are your agency's contract system. Each card shows a Conditions list for destination route and hardware requirements. Rewards are shown as VP and Credits badges.</p>
 
   <h2>Mission Types</h2>
 
@@ -1458,7 +1498,7 @@
   <div class="section-divider"><span class="num">10</span><span class="line"></span></div>
   <h1>Technology</h1>
 
-  <p>Technology cards are permanent upgrades. Pay the card's Credit cost and place it face-up in your <strong>Agency Tableau</strong>. Once active, it applies to all your craft for the rest of the game. There is no limit to the number of technologies in your tableau. Technologies are removed only by another card effect.</p>
+  <p>Technology cards are permanent upgrades. Pay the card's Credit cost and place it face-up in your <strong>Agency Tableau</strong>. Once active, it applies to all your craft for the rest of the game. You cannot develop another Technology with the same <strong>Name</strong>. Technologies are removed only by another card effect.</p>
 
   <div class="box cyan">
     <div class="box-title">&#x1F4A1; Example Technologies</div>
@@ -1482,6 +1522,7 @@
   <ul>
     <li>Missions completed during the game</li>
     <li>Technologies that award end-game VP</li>
+    <li>Milestone bonuses (first to Moon/Mars, first to Level 3, and technology milestones)</li>
     <li>Any bonuses from persistent orbital assets</li>
   </ul>
 

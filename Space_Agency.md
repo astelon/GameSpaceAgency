@@ -135,8 +135,8 @@ The Transfer Window represents planetary alignment for interplanetary transfers.
 | **Credits**          | Funding, actions, card acquisition       |
 | **Thrust**           | Engine lift capacity; must ≥ total Mass  |
 | **Range**            | How many orbital steps a craft can move  |
-| **Mass**             | Weight of tanks and payloads             |
-| **Payload Size**     | Light (1), Medium (2), or Heavy (3)      |
+| **Mass**             | Numeric weight of tanks (1–4) and payloads (1–3). Engine Thrust must ≥ total Mass to launch. |
+| **Energy**           | Electricity used by active systems. Generators add Energy each Action Phase; batteries store it between rounds. |
 | **Reliability**      | Engine hardware failure risk             |
 
 > Design choice: Resources are **mostly embedded in cards**, not tracked as loose tokens, reducing bookkeeping.
@@ -145,6 +145,7 @@ Tracking note:
 
 * **Credits** are tracked openly on a personal player track.
 * **VP** are tracked openly on the shared board and updated immediately when earned.
+* **Energy** is tracked with tokens on each in-flight craft and on Battery cards.
 * **Completing missions is the main source of Credits**. Other sources should stay smaller or situational.
 
 ---
@@ -219,16 +220,18 @@ Starting with the first player, players alternate taking **one Command Turn at a
 
 Each individual craft may be activated at most **once per Action Phase**.
 
+At the **start of the Action Phase**, each in-flight craft gains Energy equal to the total Energy generation of its attached cards. Place that many Energy tokens beside the craft. Stored Energy on Battery cards remains where it is.
+
 #### Available Actions
 
 * **Acquire Card** – Buy one face-up card from the **Card Market** (or any `Basic` card) by paying its Credit cost; add it to your hand. Immediately refill the empty market slot from the Component Deck.
 * **Sell Part** – On your turn, discard a card from your hand and gain Credits equal to half its cost, rounded down
-* **Develop Technology** – Pay the Technology card's Credit cost and place it face-up in your **Agency Tableau**. It applies to **all your craft** from now on. Technology cards remain in your tableau permanently unless another card effect removes them. There is no limit to the number of technologies in your tableau.
+* **Develop Technology** – Pay the Technology card's Credit cost and place it face-up in your **Agency Tableau**. It applies to **all your craft** from now on. Technology cards remain in your tableau permanently unless another card effect removes them. A player may not have two developed Technology cards with the same **Name**.
 * **Assemble Rocket** – Attach Engine, Fuel, Payload, and optional Support cards
 * **Upgrade Rocket** – Replace components
 * **Accept Mission** – Claim one eligible Exclusive or Secret mission, or commit to a Public mission in the display
 * **Launch New Craft** – Place an assembled rocket at `Earth`, perform the Lift check, optionally Stage, then fly it along the orbital map spending Range. Resolve the mission immediately if the craft reaches its destination. (See §7.3 Launch Resolution.)
-* **Activate Craft** – Spend remaining Range to move one of your in-flight craft along the orbital map. May resolve a mission if it reaches the destination.
+* **Activate Craft** – Spend remaining Range to move one of your in-flight craft along the orbital map. Spend Energy if any attached card requires it for this activation. May resolve a mission if it reaches the destination.
 * **Expand Agency** – Increase your Agency Level by paying Credits
 
 > Action economy is intentionally tight: you get only a few command turns, and larger agencies can coordinate more craft each round.
@@ -245,6 +248,7 @@ New Agency Levels take effect at the start of your next round.
 
 * The first time any player reaches **Agency Level 2**, shuffle all **Tier 2 Missions** into the Mission deck.
 * The first time any player reaches **Agency Level 3**, shuffle all **Tier 3 Missions** into the Mission deck.
+* The first player to reach **Agency Level 3** gains **+2 VP**.
 * Each tier unlock happens only once per game.
 * When a new Mission Tier is added, immediately resolve a **Government Catch-Up Grant**.
 * Tier intent: **Tier 1** teaches Earth return and LEO jobs, **Tier 2** adds asset-management and lunar missions, and **Tier 3** adds long-range crewed or return-heavy prestige missions.
@@ -255,6 +259,18 @@ New Agency Levels take effect at the start of your next round.
 * When **Tier 3** unlocks, the player with the **lowest VP** gains **4 Credits**.
 * If multiple players are tied for lowest VP, the tied player with the **fewest Credits** gains the grant.
 * If there is still a tie, each tied player gains **2 Credits** instead.
+
+#### Exploration Milestone Bonuses
+
+* The first player to reach the **Moon branch** (`Moon Orbit` or farther) gains **+2 VP**.
+* The first player to reach the **Mars branch** (`Mars ZOI` or farther) gains **+4 VP**.
+* Each exploration milestone is awarded once per game.
+
+#### Technology Milestone Bonuses
+
+* The first time a player develops their **second Technology**, they gain **+1 VP**.
+* The first player to develop their **fourth Technology** gains **+2 VP**.
+* If you develop a Technology while you control an `On-Orbit` `Satellite` or `Station`, gain **+1 VP** (max once per round).
 
 ---
 
@@ -268,9 +284,19 @@ When a craft is launched or activated, resolve the flight immediately:
 4. The player chooses a path on the orbital map. The craft moves along this path, spending **1 Range per node** crossed. The player may **stop at any node**, preserving unspent Range for future activations.
 5. **Mid-Flight Staging:** At any point during movement (between nodes), a player may stage a `Stageable` card (typically an empty Fuel Tank) to gain its stage bonus Range. The staged card is discarded. This also reduces the craft's Mass for future relaunch checks.
 6. Track the craft's **remaining Range** with a token or small die beside its marker on the board.
-7. If the craft reaches the mission route's required destination, check **Mission Requirements** (payload size, tags, special conditions).
-8. Apply special effects.
-9. Score VP and rewards.
+7. If a card on the craft says to **Spend Energy**, remove that many Energy tokens from the craft or from its attached Battery cards when the effect is used.
+8. If the craft reaches the mission route's required destination, check **Mission Requirements** (Mass, tags, special conditions).
+9. Apply special effects.
+10. Score VP and rewards.
+
+#### Energy Timing
+
+* **Generated Energy** is placed on a craft at the **start of the Action Phase**.
+* **Stored Energy** remains on Battery cards between rounds.
+* When a card says to **Spend X Energy**, remove that many tokens from the craft. You may spend generated Energy or stored Battery Energy.
+* **Generated Energy that is still unused during Maintenance is lost**, unless a Battery card stores it.
+* Each **Battery Pack** may store **up to 1 unused generated Energy per round**, up to its printed capacity.
+* A Battery card enters play **full** when its craft is launched.
 
 #### Failure
 
@@ -296,6 +322,8 @@ If requirements are not met:
 
 * Reusable parts from craft that returned to `Earth` return to hand if they were not staged
 * Ongoing technology effects trigger
+* On each Battery card, you may store up to **1 unused generated Energy** from that craft, up to the card's capacity
+* Discard any other unused generated Energy tokens from in-flight craft
 * Discard the current round's Event card
 * Refill the Mission display to 3 cards if needed
 * Refill the **Card Market** to 5 cards from the Component Deck
@@ -310,7 +338,7 @@ Mission cards define:
 * **Mission Type** (Public, Exclusive, Secret)
 * **Tier** (1, 2, or 3)
 * **Route** (the orbital path or landing path to complete)
-* **Requirements** (Range, Payload Size, Tags)
+* **Requirements** (Range, Mass, Tags)
 * **Rewards** (VP, Credits, Tech bonuses)
 
 In this prototype, **Mission cards are the game's contract system**. Accepting a mission represents taking a public job offer from a government, commercial client, or scientific program.
@@ -318,8 +346,11 @@ In this prototype, **Mission cards are the game's contract system**. Accepting a
 Mission economy note:
 
 * Completing missions is the primary way players earn Credits.
-* Harder or longer missions should usually pay more Credits.
+* Some missions should be **credit-heavy** (Credits > VP) to fuel expansion turns.
+* Some missions should be **prestige-heavy** (VP > Credits) to reward long-range risk.
+* Harder or longer missions should usually pay more total rewards.
 * Event-based Credits should be occasional bonuses, not the default economy.
+* Event cards may grant additional funding, but this should remain situational.
 
 ### Mission Types
 
@@ -338,6 +369,8 @@ Mission economy note:
 * When a mission is completed, reveal it if needed, score its rewards immediately, then discard it.
 * Empty slots in the public Mission display are refilled during Maintenance.
 * Mission cards should display their Mission Type and Tier clearly on the card face.
+* Mission cards should show a short **Conditions list** (route + requirements) in rules text.
+* Mission reward badges should show **VP** and **Credits** only; route Range remains a requirement, not a reward stat.
 
 ### Mission Design Philosophy
 
@@ -359,7 +392,7 @@ A rocket consists of:
 * **0–1 Engine**
 * **1–3 Fuel Tanks**
 * **0–1 Payload**
-* **0–2 Support Cards**
+* **0–3 Support Cards**
 
 A rocket's **total Range** equals the sum of all its Fuel Tank Range values. Some rockets may also use **staging** effects printed on cards to discard part of the rocket mid-flight for extra Range.
 
@@ -369,12 +402,14 @@ An Engine-free craft is only legal if it is already **in flight** or **in orbit*
 ### Qualification Rules
 
 * Every Fuel Tank and Payload card has a numeric **Mass** value (tanks 1–4, payloads 1–3).
-* **Total Rocket Mass** = sum of all Fuel Tank Mass values + Payload Mass.
+* Some Support cards also have printed **Mass**.
+* **Total Rocket Mass** = sum of all Fuel Tank Mass values + Payload Mass + any printed Support Mass.
 * An Engine's **Thrust** must be **≥ Total Rocket Mass** for the rocket to launch.
 * If your rocket has **no Engine**, it may not launch from a planet.
 * If your craft has **no Engine** but is already in flight or in orbit, its Total Rocket Mass must be **≤ 3**.
-* Engines and Support Cards have no Mass for lift purposes (already abstracted into their stats).
+* Engines have no Mass for lift purposes. Support cards count only if they print a Mass value.
 * **Range** measures remaining travel potential. A rocket's total Range = sum of all Fuel Tank Range values.
+* **Energy** powers activated systems such as docking hardware, advanced sensors, and computer assists. A craft gains generated Energy at the start of each Action Phase and may spend it or stored Battery Energy during that round.
 * To **maneuver**, a craft must have an Engine to turn that Range into orbital changes.
 * Missions with the `Docking` tag require a `Docking`-tagged support card on the rocket (e.g., Docking Adapter or Orbital Tug).
 * Missions with the `Docking` or `Maneuver` tags require a rocket with an Engine.
@@ -416,6 +451,7 @@ then it may land on the surface directly. To **relaunch from a surface**, the cr
 ### Persistent Assets
 
 * Payloads with the `Satellite` or `Station` tags remain on the orbital board after a successful delivery mission.
+* If a delivered payload remains in space, its attached Support cards remain attached to that persistent craft unless they were staged or discarded.
 * These assets use your craft markers and may be activated on future turns like any other craft.
 * Satellites and stations count against your available commands during the Action Phase.
 
@@ -425,7 +461,7 @@ then it may land on the surface directly. To **relaunch from a surface**, the cr
 * **Pre-flight staging:** During Launch, after the Lift check and before movement, you may Stage **one** `Stageable` card. If the staged card is an Engine, it still counts for the Lift check.
 * **Mid-flight staging:** At any point during movement (between nodes), a player may stage one `Stageable` card (typically an empty Fuel Tank) to gain its stage bonus Range. This also reduces the craft's current Mass, which matters for relaunch Lift checks.
 * When you Stage a card, gain the printed bonus Range for that flight.
-* Staging never changes **Payload Size**. It only changes how much Range your rocket can reach and the craft's current Mass.
+* Staging reduces the craft's current **Mass** (important for relaunch Lift checks) and increases how much Range your rocket can reach.
 * Fuel use is abstracted into the card values. The printed Stage bonus already represents the efficiency gained by dropping spent parts.
 * A staged card is discarded after launch and cannot be recovered unless another effect returns it.
 * Once a card is staged, you lose any future benefit from that card, including reusability or passive effects.
@@ -468,6 +504,8 @@ VP sources:
 
 * Missions
 * Technologies
+* Exploration milestones (first to Moon / first to Mars)
+* Agency milestones (first to Level 3)
 * End‑game bonuses
 
 ### End Game Trigger (Current)

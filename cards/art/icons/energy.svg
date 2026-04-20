@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+  <!--
+    Energy — lightning bolt inside a rounded power cell outline.
+    Designed to stay readable at small card-icon sizes.
+  -->
+  <rect x="3" y="5" width="16" height="14" rx="2"
+        fill="none" stroke="white" stroke-width="2"/>
+  <rect x="19" y="9" width="2" height="6" rx="1"
+        fill="white"/>
+  <path d="M12.7 7.5 L8.8 12.4 H11.3 L10.7 16.5 L14.9 11.3 H12.2 Z"
+        fill="white" stroke="white" stroke-width="0.6" stroke-linejoin="round"/>
+</svg>
