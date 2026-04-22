@@ -3,7 +3,7 @@
 -- ============================================================
 --
 -- INITIAL SETUP (required before first use):
---   1. Host the 44 card PNGs from cards/output/cards/ at an
+--   1. Host the card PNGs from cards/output/cards/ at an
 --      accessible URL (options below) and set BASE_IMAGE_URL.
 --   2. Optionally provide a CARD_BACK_URL for a custom card back.
 --   3. Paste this script into TTS: Scripting → Global Script.
@@ -19,8 +19,9 @@
 --      (works only when TTS and the server run on the same machine)
 --
 -- CARD IMAGE FILENAMES expected at BASE_IMAGE_URL:
---   template_tts_01.png  through  template_tts_44.png
---   (these are the files nanDECK wrote to cards/output/cards/)
+--   template_tts_001.png  through  template_tts_136.png
+--   (55 unique designs × copies = 136 total; nanDECK writes to cards/output/cards/)
+--   Only the first copy of each unique design is referenced by TTS (see card_index values).
 --
 -- ============================================================
 
@@ -41,139 +42,174 @@ local BOARD_IMAGE_URL  = REPO_ROOT_URL .. "tts/board_v2.png"
 local SHIP_MODEL_URL   = REPO_ROOT_URL .. "models/spaceship.obj"
 
 -- ── CARD DATA ────────────────────────────────────────────────
--- card_index: sequential position in cards.csv → determines PNG filename
--- (template_tts_{card_index}.png)
+-- card_index: first physical slot in the 136-card LINKMULTI layout → determines PNG filename
+-- (template_tts_{card_index:03d}.png — first copy of each unique design)
 
 local CARDS = {
-    -- Engine cards (PNGs 1–7)
+    -- Engine cards (slots 1–24 in 136-card layout; PNG indices: 1,4,12,14,17,20,22)
     { id="E01", name="Merlin-1a",              type="Engine",  tier="",       card_index=1,
       description="If this craft returns to Earth, return this card to hand.",
       cost=4, tags="Reusable;Experimental" },
-    { id="E02", name="Sterling Booster",       type="Engine",  tier="",       card_index=2,
+    { id="E02", name="Sterling Booster",       type="Engine",  tier="",       card_index=4,
       description="High reliability, single-use.",
-      cost=3, tags="Disposable;Reliable" },
-    { id="E03", name="Hydrogen Core",          type="Engine",  tier="",       card_index=3,
-      description="Requires Cryo Tank.",
+      cost=3, tags="Disposable;Reliable;Basic" },
+    { id="E03", name="Hydrogen Core",          type="Engine",  tier="",       card_index=12,
+      description="Requires Cryo Tank. High thrust.",
       cost=5, tags="HighThrust;Cryogenic" },
-    { id="E04", name="Ion Sustainer",          type="Engine",  tier="",       card_index=4,
+    { id="E04", name="Ion Sustainer",          type="Engine",  tier="",       card_index=14,
       description="Low thrust but very reliable and efficient.",
       cost=2, tags="LowThrust;Efficient" },
-    { id="E05", name="Hybrid Cycle",           type="Engine",  tier="",       card_index=5,
+    { id="E05", name="Hybrid Cycle",           type="Engine",  tier="",       card_index=17,
       description="If this craft returns to Earth, return this card to hand.",
       cost=4, tags="Reusable;Balanced" },
-    { id="E06", name="Raptor-X",               type="Engine",  tier="",       card_index=6,
+    { id="E06", name="Raptor-X",               type="Engine",  tier="",       card_index=20,
       description="High risk, high reward. May cause major failure on roll.",
       cost=6, tags="Experimental;HighThrust" },
-    { id="E07", name="Kick Stage",             type="Engine",  tier="",       card_index=7,
+    { id="E07", name="Kick Stage",             type="Engine",  tier="",       card_index=22,
       description="Stage: +2 Range for this launch. Discard after launch.",
       cost=4, tags="Disposable;Stageable" },
 
-    -- Tank cards (PNGs 8–13)
-    { id="T01", name="Standard Tank",          type="Tank",    tier="",       card_index=8,
-      description="Compatible with most engines.",
-      cost=2, tags="Stable" },
-    { id="T02", name="Cryo Tank",              type="Tank",    tier="",       card_index=9,
-      description="Required for Hydrogen Core engine.",
+    -- Tank cards (slots 25–49; PNG indices: 25,33,36,41,45,48)
+    { id="T01", name="Standard Tank",          type="Tank",    tier="",       card_index=25,
+      description="Range 5. Mass 2. Compatible with most engines.",
+      cost=2, tags="Stable;Basic" },
+    { id="T02", name="Cryo Tank",              type="Tank",    tier="",       card_index=33,
+      description="Range 8. Mass 3. Required for Hydrogen Core engine.",
       cost=4, tags="Cryogenic;Extended" },
-    { id="T03", name="Fuel Pod",               type="Tank",    tier="",       card_index=10,
-      description="Stage: +1 Range for this launch. Discard after launch.",
+    { id="T03", name="Fuel Pod",               type="Tank",    tier="",       card_index=36,
+      description="Range 3. Mass 1. Stage: +1 Range for this launch. Discard after launch.",
       cost=1, tags="Cheap;Disposable;Stageable" },
-    { id="T04", name="Expandable Tank",        type="Tank",    tier="",       card_index=11,
-      description="Stage: +2 Range for this launch. Discard after launch.",
+    { id="T04", name="Expandable Tank",        type="Tank",    tier="",       card_index=41,
+      description="Range 5. Mass 2. Stage: +2 Range for this launch. Discard after launch.",
       cost=3, tags="Expandable;Stageable" },
-    { id="T05", name="Pressurized Tank",       type="Tank",    tier="",       card_index=12,
-      description="Safer for crewed payloads.",
-      cost=3, tags="Pressurized" },
-    { id="T06", name="Long-Range Tank",        type="Tank",    tier="",       card_index=13,
-      description="Heavy. Needed for deep-space range.",
+    { id="T05", name="Pressurized Tank",       type="Tank",    tier="",       card_index=45,
+      description="Range 5. Mass 2. Safer for crewed payloads.",
+      cost=2, tags="Pressurized" },
+    { id="T06", name="Long-Range Tank",        type="Tank",    tier="",       card_index=48,
+      description="Range 12. Heavy. Mass 4.",
       cost=5, tags="DeepSpace;Extended" },
 
-    -- Payload cards (PNGs 14–20)
-    { id="P01", name="Comm Satellite",         type="Payload", tier="",       card_index=14,
-      description="Remains on the board as an on-orbit asset.",
+    -- Payload cards (slots 50–71; PNG indices: 50,53,56,59,62,66,69)
+    { id="P01", name="Comm Satellite",         type="Payload", tier="",       card_index=50,
+      description="Mass 2. Spend 1 Energy to activate. Remains on board as on-orbit asset.",
       cost=2, tags="Uncrewed;Electronics;Satellite" },
-    { id="P02", name="Imaging Probe",          type="Payload", tier="",       card_index=15,
-      description="Good for Earth/Moon recon missions.",
+    { id="P02", name="Imaging Probe",          type="Payload", tier="",       card_index=53,
+      description="Mass 1. Spend 1 Energy to activate imaging systems.",
       cost=2, tags="Uncrewed;Scientific" },
-    { id="P03", name="Science Module",         type="Payload", tier="",       card_index=16,
-      description="High reward for deep-space research missions.",
+    { id="P03", name="Science Module",         type="Payload", tier="",       card_index=56,
+      description="Mass 3. Spend 2 Energy to activate instruments. High reward for deep-space research.",
       cost=3, tags="Scientific;Heavy" },
-    { id="P04", name="Crew Capsule",           type="Payload", tier="",       card_index=17,
-      description="Enables crewed missions. If this craft returns to Earth, return this card to hand.",
+    { id="P04", name="Crew Capsule",           type="Payload", tier="",       card_index=59,
+      description="Mass 2. Spend 1 Energy on launch. Enables crewed missions. If returned to Earth, return card to hand.",
       cost=4, tags="Crewed;LifeSupport;Reusable" },
-    { id="P05", name="CubeSat Cluster",        type="Payload", tier="",       card_index=18,
-      description="Cheap, small experiments. Remains on the board as an on-orbit asset.",
+    { id="P05", name="CubeSat Cluster",        type="Payload", tier="",       card_index=62,
+      description="Mass 1. Cheap small experiments. Remains on board as on-orbit asset.",
       cost=1, tags="Uncrewed;Small;Satellite" },
-    { id="P06", name="Landing Lander",         type="Payload", tier="",       card_index=19,
-      description="Required for surface missions (Moon, Mars).",
+    { id="P06", name="Landing Lander",         type="Payload", tier="",       card_index=66,
+      description="Mass 2. Enables surface landing.",
       cost=3, tags="Surface;Heavy" },
-    { id="P07", name="Cargo Return Capsule",   type="Payload", tier="",       card_index=20,
-      description="If this craft returns to Earth, return this card to hand.",
+    { id="P07", name="Cargo Return Capsule",   type="Payload", tier="",       card_index=69,
+      description="Mass 1. Recovery and sample-return missions. If returned to Earth, return card to hand.",
       cost=3, tags="Uncrewed;Recovery;Reusable" },
 
-    -- Support cards (PNGs 21–24)
-    { id="S01", name="Heat Shield",            type="Support", tier="",       card_index=21,
-      description="Use from Sub-Orbital to land safely. Discard after use.",
-      cost=1, tags="HeatShield;Stageable" },
-    { id="S02", name="Recovery Chutes",        type="Support", tier="",       card_index=22,
-      description="Use from Sub-Orbital to land safely. Discard after use.",
+    -- Support cards — Reentry (slots 72–87; PNG indices: 72,78,82,85)
+    { id="S01", name="Heat Shield",            type="Support", tier="",       card_index=72,
+      description="Landing support. Use from Sub-Orbital to land safely. Discard after use.",
+      cost=1, tags="HeatShield;Stageable;Basic" },
+    { id="S02", name="Recovery Chutes",        type="Support", tier="",       card_index=78,
+      description="Landing support. Use from Sub-Orbital to land safely. Discard after use.",
       cost=1, tags="Parachute;Stageable" },
-    { id="S03", name="Ceramic Tile Shield",    type="Support", tier="",       card_index=23,
-      description="Use from Sub-Orbital to land safely. Return this card to hand if reused.",
+    { id="S03", name="Ceramic Tile Shield",    type="Support", tier="",       card_index=82,
+      description="Landing support. Use from Sub-Orbital to land safely. Return to hand if craft returns to Earth.",
       cost=2, tags="HeatShield;Reusable" },
-    { id="S04", name="Guided Parafoil",        type="Support", tier="",       card_index=24,
-      description="Use from Sub-Orbital to land safely. Return this card to hand if reused.",
+    { id="S04", name="Guided Parafoil",        type="Support", tier="",       card_index=85,
+      description="Landing support. Use from Sub-Orbital to land safely. Return to hand if craft returns to Earth.",
       cost=2, tags="Parachute;Reusable" },
 
-    -- Mission cards (PNGs 25–36)
-    { id="M01", name="LEO Deployment",         type="Mission", tier="Tier 1", card_index=25,
-      description="Requires: Payload with tag Uncrewed. Range 5.", vp=3, reward=2 },
-    { id="M07", name="Emergency Resupply",     type="Mission", tier="Tier 1", card_index=31,
-      description="Requires: Size M. Range 6.", vp=4, reward=3 },
-    { id="M10", name="Capsule Recovery",       type="Mission", tier="Tier 1", card_index=34,
-      description="Sub-Orbital → Earth. Requires: Light payload + Heat Shield or Parachute.", vp=5, reward=1 },
-    { id="M11", name="Reusable Flight Test",   type="Mission", tier="Tier 1", card_index=35,
-      description="Sub-Orbital → Earth. Requires: Reusable Payload + Reusable Landing support.", vp=4, reward=2 },
-    { id="M02", name="Lunar Flyby",            type="Mission", tier="Tier 2", card_index=26,
-      description="Requires: Range 8+.", vp=5, reward=2 },
-    { id="M03", name="Lunar Landing",          type="Mission", tier="Tier 2", card_index=27,
-      description="Requires: Landing Lander + Range 10.", vp=8, reward=3 },
-    { id="M08", name="Science Relay",          type="Mission", tier="Tier 2", card_index=32,
-      description="Requires: Scientific or Comm payload.", vp=6, reward=2 },
-    { id="M09", name="Orbital Service Check",  type="Mission", tier="Tier 2", card_index=33,
-      description="LEO → High Orbit → LEO. Requires: On-Orbit Satellite (no Engine needed).", vp=4, reward=2 },
-    { id="M04", name="Mars Orbit Insertion",   type="Mission", tier="Tier 3", card_index=28,
-      description="Requires: Range 14+, Size M or larger.", vp=12, reward=5 },
-    { id="M05", name="Deep Space Probe",       type="Mission", tier="Tier 3", card_index=29,
-      description="Requires: Range 16+.", vp=15, reward=6 },
-    { id="M06", name="Crewed Station Visit",   type="Mission", tier="Tier 3", card_index=30,
-      description="Requires: Crewed Capsule + Range 12.", vp=10, reward=4 },
-    { id="M12", name="Lunar Sample Return",    type="Mission", tier="Tier 3", card_index=36,
-      description="Requires: Cargo Return Capsule + Range 12 + Reusable Landing support.", vp=10, reward=5 },
+    -- Mission cards (slots 88–99; one copy each, PNG indices = slot numbers)
+    { id="M01", name="LEO Deployment",         type="Mission", tier="Tier 1", card_index=88,
+      description="Reach LEO. Carry an Uncrewed payload. Range 2.", vp=3, reward=4 },
+    { id="M07", name="Emergency Resupply",     type="Mission", tier="Tier 1", card_index=94,
+      description="Reach LEO and return to Earth. Carry payload Mass 2+. Range 4.", vp=4, reward=5 },
+    { id="M10", name="Capsule Recovery",       type="Mission", tier="Tier 1", card_index=97,
+      description="From Sub-Orbital Earth, land at Earth. Carry payload Mass 1 + Heat Shield or Parachute. Range 1.", vp=5, reward=1 },
+    { id="M11", name="Reusable Flight Test",   type="Mission", tier="Tier 1", card_index=98,
+      description="Fly Earth → Sub-Orbital Earth → Earth. Use Reusable Payload + Reusable reentry support. Range 2.", vp=4, reward=2 },
+    { id="M02", name="Lunar Flyby",            type="Mission", tier="Tier 2", card_index=89,
+      description="Reach Moon Orbit and return to Earth. Total route Range: 10.", vp=6, reward=3 },
+    { id="M03", name="Lunar Landing",          type="Mission", tier="Tier 2", card_index=90,
+      description="Reach the Moon surface. Have Landing Lander or Rocket-as-Lander. Range 7.", vp=8, reward=4 },
+    { id="M06", name="Crewed Station Visit",   type="Mission", tier="Tier 2", card_index=93,
+      description="Reach Earth ZOI and return to Earth. Have Crewed Capsule + Docking card + Engine. Range 8.", vp=7, reward=3 },
+    { id="M08", name="Science Relay",          type="Mission", tier="Tier 2", card_index=95,
+      description="Reach High Orbit and return to Earth. Have Scientific or Comm payload. Spend 1 Energy. Range 6.", vp=6, reward=2 },
+    { id="M09", name="Orbital Service Check",  type="Mission", tier="Tier 2", card_index=96,
+      description="From LEO, reach High Orbit, then return to LEO. Have On-Orbit Satellite + Engine. Range 2.", vp=4, reward=5 },
+    { id="M04", name="Mars Orbit Insertion",   type="Mission", tier="Tier 3", card_index=91,
+      description="Reach Mars High Orbit. Add Transfer Window cost. Carry payload Mass 2+. Base Range 7.", vp=12, reward=5 },
+    { id="M05", name="Deep Space Probe",       type="Mission", tier="Tier 3", card_index=92,
+      description="Reach Sub-Orbital Mars. Add Transfer Window cost. Have Scientific payload + Sensor Array. Spend 2 Energy. Base Range 9.", vp=15, reward=6 },
+    { id="M12", name="Lunar Sample Return",    type="Mission", tier="Tier 3", card_index=99,
+      description="Reach Moon surface, return to Earth. Have Lander + Cargo Return Capsule + Earth reentry support. Range 14.", vp=12, reward=5 },
 
-    -- Tech cards (PNGs 37–40)
-    { id="C01", name="Reusable Refurb",        type="Tech",    tier="",       card_index=37,
-      description="Reusable engines gain +1 reliability.",
+    -- Tech cards (slots 100–109; PNG indices: 100,102,104,107)
+    { id="C01", name="Reusable Refurb",        type="Tech",    tier="",       card_index=100,
+      description="Your Reusable engines gain +1 Reliability. Recover a Reusable card during Maintenance: gain 1 Credit.",
       cost=2, tags="Upgrade;Permanent" },
-    { id="C02", name="Cryo Handling",          type="Tech",    tier="",       card_index=38,
-      description="Allows Cryo Tank without penalty; +1 reliability for cryo setups.",
+    { id="C02", name="Cryo Handling",          type="Tech",    tier="",       card_index=102,
+      description="Your rockets with a Cryo Tank gain +1 Reliability on launch checks.",
       cost=3, tags="Upgrade;Compatible" },
-    { id="C03", name="Precision Guidance",     type="Tech",    tier="",       card_index=39,
-      description="+1 effective reliability on launch checks.",
+    { id="C03", name="Precision Guidance",     type="Tech",    tier="",       card_index=104,
+      description="+1 effective Reliability on launch checks.",
       cost=2, tags="Upgrade;Support" },
-    { id="C04", name="Modular Payloads",       type="Tech",    tier="",       card_index=40,
-      description="Treat your payload as one size lighter for mission requirements.",
+    { id="C04", name="Modular Payloads",       type="Tech",    tier="",       card_index=107,
+      description="Reduce your payload's Mass by 1 (minimum 1) for Thrust checks.",
       cost=2, tags="Upgrade;Flexible" },
 
-    -- Event cards (PNGs 41–44)
-    { id="EV01", name="Solar Storm",           type="Event",   tier="",       card_index=41,
-      description="Global: All launches this round suffer -2 reliability." },
-    { id="EV02", name="Funding Boost",         type="Event",   tier="",       card_index=42,
-      description="All players gain +3 Credits immediately." },
-    { id="EV03", name="Supply Delay",          type="Event",   tier="",       card_index=43,
+    -- Event cards (slots 110–113; PNG indices: 110–113)
+    { id="EV01", name="Solar Storm",           type="Event",   tier="",       card_index=110,
+      description="Global: All launches this round suffer -2 Reliability." },
+    { id="EV02", name="Funding Boost",         type="Event",   tier="",       card_index=111,
+      description="Occasional bonus: All players gain +3 Credits immediately." },
+    { id="EV03", name="Supply Delay",          type="Event",   tier="",       card_index=112,
       description="Players must spend +1 Credit to prepare launches this round." },
-    { id="EV04", name="Tech Breakthrough",     type="Event",   tier="",       card_index=44,
-      description="First player to launch this round draws a Tech card." },
+    { id="EV04", name="Tech Breakthrough",     type="Event",   tier="",       card_index=113,
+      description="First player to launch this round searches the Component Deck for 1 Technology card (add to hand, reshuffle)." },
+
+    -- Support cards — Docking (slots 114–118; PNG indices: 114,117)
+    { id="S05", name="Docking Adapter",        type="Support", tier="",       card_index=114,
+      description="Enables docking. Required for Docking missions. Spend 1 Energy to dock. Return to hand if craft returns to Earth.",
+      cost=2, tags="Docking;Reusable" },
+    { id="S06", name="Orbital Tug",            type="Support", tier="",       card_index=117,
+      description="Enables docking. Spend 1 Energy in orbit to gain +1 Range. Return to hand if craft returns to Earth.",
+      cost=3, tags="Docking;Maneuver" },
+
+    -- Event cards continued (slots 119–122; PNG indices: 119–122)
+    { id="EV05", name="Docking Opportunity",   type="Event",   tier="",       card_index=119,
+      description="This round, any craft with Docking tag that reaches an On-Orbit Station gains +2 VP." },
+    { id="EV06", name="Transfer Window Storm", type="Event",   tier="",       card_index=120,
+      description="This round, Transfer Window cost is increased by +2 (max TW 5)." },
+    { id="EV07", name="Launch Window",         type="Event",   tier="",       card_index=121,
+      description="This round, Transfer Window cost is reduced by 2 (min TW 0)." },
+    { id="EV08", name="Expanded Operations",   type="Event",   tier="",       card_index=122,
+      description="This round, each player's hand limit is increased to 7." },
+
+    -- Support cards — Power (slots 123–136; PNG indices: 123,126,128,131,134)
+    { id="S07", name="Solar Panel",            type="Support", tier="",       card_index=123,
+      description="Generates 2 Energy at start of each Action Phase while in space. Discard if craft enters atmosphere.",
+      cost=1, tags="Power;Solar;Fragile" },
+    { id="S08", name="RTG",                    type="Support", tier="",       card_index=126,
+      description="Generates 3 Energy at start of each Action Phase. Works anywhere. Mass 1 counts toward Thrust checks.",
+      cost=3, tags="Power;DeepSpace;Heavy" },
+    { id="S09", name="Battery Pack",           type="Support", tier="",       card_index=128,
+      description="Enters play with 4 stored Energy. Store up to 1 surplus generated Energy per round (max 4).",
+      cost=2, tags="Power;Storage" },
+    { id="S10", name="Flight Computer",        type="Support", tier="",       card_index=131,
+      description="Spend 1 Energy when launching, docking, or relaunching from surface: +1 Reliability for that check.",
+      cost=2, tags="Electronics;Guidance" },
+    { id="S11", name="Sensor Array",           type="Support", tier="",       card_index=134,
+      description="Spend 1 Energy to activate. Required for Tier 3 Scientific missions and any mission requiring Sensors.",
+      cost=2, tags="Scientific;Electronics" },
 }
 
 -- ── CARD COLOURS (match card design) ─────────────────────────
@@ -215,7 +251,7 @@ local MISSION_DISPLAY_POSITIONS = {
 }
 
 -- Starting hand — one card of each type dealt to each player seat
-local STARTING_CARDS = { "E02", "T01", "C03" }  -- Sterling Booster, Standard Tank, Precision Guidance
+local STARTING_CARDS = { "E02", "T01", "S01" }  -- Sterling Booster, Standard Tank, Heat Shield
 
 -- Ship token bag position (near the board, accessible to all players)
 local SHIP_BAG_POS = {-14, 1.5, -6}
@@ -279,7 +315,7 @@ local PLAYER_TINTS = {
 -- ── HELPERS ──────────────────────────────────────────────────
 
 local function cardFaceURL(card_index)
-    return BASE_IMAGE_URL .. string.format("template_tts_%02d.png", card_index)
+    return BASE_IMAGE_URL .. string.format("template_tts_%03d.png", card_index)
 end
 
 -- Build the TTS JSON state table for a custom deck or single card.
@@ -614,7 +650,7 @@ function dealStartingHands()
 
     Wait.time(function()
         broadcastToAll(
-            "Starting hands dealt! Each player receives: Sterling Booster + Standard Tank + Precision Guidance.",
+            "Starting hands dealt! Each player receives: Sterling Booster + Standard Tank + Heat Shield.",
             "Yellow")
     end, delay + 0.5)
 end
