@@ -1,36 +1,23 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300" viewBox="0 0 400 300">
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
   <defs>
-    <linearGradient id="barrelGrad" x1="0" x2="0" y1="0" y2="1">
-      <stop offset="0%" stop-color="#b86f12" />
-      <stop offset="50%" stop-color="#8c4a0a" />
-      <stop offset="100%" stop-color="#6b3a07" />
+    <linearGradient id="tankBody" x1="0" x2="0" y1="0" y2="1">
+      <stop offset="0%" stop-color="#d7eef7" />
+      <stop offset="100%" stop-color="#8fb1c3" />
     </linearGradient>
-    <linearGradient id="shine" x1="0" x2="1" y1="0" y2="0">
-      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.25" />
-      <stop offset="100%" stop-color="#ffffff" stop-opacity="0" />
+    <linearGradient id="tankBand" x1="0" x2="1" y1="0" y2="0">
+      <stop offset="0%" stop-color="#5ecf8e" />
+      <stop offset="100%" stop-color="#2d9f60" />
     </linearGradient>
   </defs>
 
-  <rect width="100%" height="100%" fill="#083b2d" />
-
-  <!-- centered container -->
-  <g transform="translate(200,120)">
-    <!-- background plate -->
-    <rect x="-170" y="-80" width="340" height="200" rx="14" fill="#0b6b57" />
-
-    <!-- stylized barrel (centered) -->
-    <!-- body -->
-    <rect x="-60" y="-40" width="120" height="100" rx="20" fill="url(#barrelGrad)" />
-    <!-- top and bottom ellipses to give 3D barrel look -->
-    <ellipse cx="0" cy="-40" rx="60" ry="18" fill="#5a2f03" />
-    <ellipse cx="0" cy="60" rx="60" ry="18" fill="#4a2602" />
-    <!-- metal bands -->
-    <rect x="-66" y="-6" width="132" height="8" rx="4" fill="#3a2a1a" />
-    <rect x="-66" y="18" width="132" height="8" rx="4" fill="#3a2a1a" />
-    <!-- highlight -->
-    <rect x="-50" y="-30" width="30" height="80" rx="10" fill="url(#shine)" />
+  <g stroke="#213547" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="37" y="24" width="54" height="78" rx="20" fill="url(#tankBody)" />
+    <ellipse cx="64" cy="24" rx="27" ry="10" fill="#eff8fc" />
+    <ellipse cx="64" cy="102" rx="27" ry="10" fill="#7f9bad" />
+    <rect x="33" y="40" width="62" height="10" rx="5" fill="url(#tankBand)" />
+    <rect x="33" y="76" width="62" height="10" rx="5" fill="url(#tankBand)" />
+    <circle cx="64" cy="63" r="15" fill="#17344d" />
+    <path d="M64 53 C58 61 57 66 64 74 C71 66 70 61 64 53 Z" fill="#ffb347" stroke="#d97a00" />
+    <path d="M48 30 H80" fill="none" opacity="0.55" />
   </g>
-
-  <!-- label centered below container -->
-  <text x="200" y="260" font-size="18" font-family="Arial" fill="#ffffff" text-anchor="middle">Tank</text>
 </svg>

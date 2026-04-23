@@ -26,7 +26,7 @@ HTMLTEXT="1-136","<div style='background:[COLOR];border-radius:10px 10px 0 0;hei
 ; Type label
 HTMLTEXT="1-136","<div style='font-family:Arial,sans-serif;font-size:7pt;letter-spacing:1px;color:#556070;padding:5px 46px 0 1px;text-transform:uppercase'><b>[TYPE]</b></div>",0.2,0.36,5.9,0.42,#ffffff,0,,100
 
-; Type icon — proportional, PNG transparency preserved
+; Type icon — PNG stays transparent with no badge behind it
 IMAGE="1-136","[ICONFILE]",0.35,0.78,0.50,0.50,0,"PN",100
 
 ; Card name — aligned with type label (y=0.36), T flag keeps canvas transparent so icon shows through
