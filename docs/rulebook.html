@@ -904,7 +904,7 @@
         <img src="../cards/art/icons/energy.png" style="width:18px;height:18px;object-fit:contain" alt="">
         Energy
       </div>
-      <p>Electricity used by active systems. Generators add Energy at the start of the Action Phase; batteries store Energy between rounds.</p>
+      <p>Electricity used by active systems. Each craft refills Energy to its power sources' total each round (no carry-over). A single-use Battery can be discarded for a one-time burst.</p>
     </div>
     <div class="stat-card">
       <div class="stat-name" style="display:flex;align-items:center;gap:6px">
@@ -950,7 +950,7 @@
     <li><strong>Agency Level Markers</strong> (1 per player) — Start at Level 1</li>
     <li><strong>Craft Markers</strong> (6 per player) — Represent rockets and in-orbit assets on the board</li>
     <li><strong>Range Tokens / Small Dice</strong> — Track remaining Range per craft on the board</li>
-    <li><strong>Energy Tokens</strong> — Track generated Energy on in-flight craft and stored Energy on Battery cards</li>
+    <li><strong>Energy Tokens</strong> — Track each in-flight craft's current Energy (refills each round; not stored between rounds)</li>
     <li><strong>Transfer Window Marker</strong> — Tracks the current TW cost (0–5) on the board track</li>
     <li><strong>1 First Player Token</strong></li>
   </ul>
@@ -1012,7 +1012,7 @@
     <div class="phase-card">
       <div class="phase-num">Phase 02</div>
       <div class="phase-name">Action</div>
-      <div class="phase-desc">Players alternate Command Turns equal to their Agency Level. In-flight craft first generate Energy, then launch, build, buy, and fly. Missions resolve immediately on arrival.</div>
+      <div class="phase-desc">Players alternate Command Turns equal to their Agency Level. In-flight craft first refill Energy, then launch, build, buy, and fly. Missions resolve immediately on arrival.</div>
     </div>
     <div class="phase-card">
       <div class="phase-num">Phase 03</div>
@@ -1033,8 +1033,7 @@
   <ul>
     <li>Reusable parts from craft that returned to Earth go back to hand (if not staged).</li>
     <li>Ongoing technology effects trigger.</li>
-    <li>Each Battery card may store up to 1 unused generated Energy from its craft, up to its capacity.</li>
-    <li>Discard all other unused generated Energy tokens from in-flight craft.</li>
+    <li><strong>Asset Operations:</strong> each persistent Satellite or Station may trigger each of its "spend Energy" income abilities once, spending the asset's remaining Energy this round. Collect the Credits or VP — free, no Command Turn.</li>
     <li>Discard the current round's Event card.</li>
     <li>Refill the Mission display to 3 cards if needed.</li>
     <li>Refill the <strong>Card Market</strong> to 5 cards from the Component Deck.</li>
@@ -1042,10 +1041,10 @@
 
   <h3>Energy Timing</h3>
   <ul>
-    <li><strong>Start of Action Phase:</strong> Each in-flight craft gains generated Energy equal to the total generation of its attached cards.</li>
-    <li><strong>Spend Energy:</strong> When a card tells you to spend Energy, remove that many Energy tokens from the craft or from its Battery cards.</li>
-    <li><strong>Stored Energy:</strong> Battery cards keep stored Energy between rounds and enter play full when their craft launches.</li>
-    <li><strong>Unused Energy:</strong> Generated Energy is lost during Maintenance unless a Battery stores it.</li>
+    <li><strong>Refill each round:</strong> At the start of each Action Phase a craft's Energy resets to its <strong>Power</strong> — the total output of its Solar Panels and RTGs. Unused Energy does not carry over.</li>
+    <li><strong>Spend Energy:</strong> When a card tells you to spend Energy, remove that many tokens from the craft's current Energy.</li>
+    <li><strong>Batteries are bursts, not storage:</strong> discard a Battery on a craft at any time to add its printed Energy immediately — works anywhere, even in atmosphere or at launch.</li>
+    <li><strong>Asset income:</strong> Persistent Satellite/Station income abilities spend the asset's Energy in Maintenance (Asset Operations) — no Command Turn or movement; just keep a Power card on the asset and it pays out every round.</li>
   </ul>
 
 
@@ -1088,7 +1087,7 @@
     </div>
     <div class="action-item">
       <div class="action-name">&#9670; Activate Craft</div>
-      <p>Spend remaining Range to move one of your in-flight craft along the orbital map. Spend Energy too if an attached card requires it for that activation. Each craft may be activated only once per Action Phase. May resolve a mission on arrival.</p>
+      <p>Choose one of your in-flight craft and <strong>move</strong> it (spend 1 Range per node), <strong>operate</strong> it (spend Energy to trigger an attached card's ability), or both. A craft with <strong>0 remaining Range</strong> can still be activated to operate in place — it just can't move. Each craft may be activated only once per Action Phase. May resolve a mission on arrival. <em>Routine satellite/station income is collected for free in Maintenance — see Asset Operations — so you needn't spend a turn to bank it.</em></p>
     </div>
     <div class="action-item">
       <div class="action-name">&#9670; Expand Agency</div>
@@ -1178,13 +1177,12 @@
 
   <h2>Energy Systems</h2>
 
-  <p>Some Support and Payload cards use <strong>Energy</strong>. Energy is tracked with tokens on each craft.</p>
+  <p>Some Support and Payload cards use <strong>Energy</strong>. Each craft's Energy refills to its <strong>Power</strong> (its generators' total) every round; it is tracked with tokens on the craft and does not carry over.</p>
 
   <ul>
-    <li><strong>Generation:</strong> Solar Panels and RTGs add Energy at the start of the Action Phase.</li>
+    <li><strong>Generation (continuous):</strong> Solar Panels (in space) and RTGs (anywhere) set the craft's Power, refilled at the start of each Action Phase.</li>
     <li><strong>Use:</strong> Cards such as Docking Adapters, Orbital Tugs, Sensors, and Flight Computers spend Energy when activated.</li>
-    <li><strong>Storage:</strong> Battery cards keep stored Energy between rounds and can hold unused generated Energy.</li>
-    <li><strong>Battery recharge:</strong> During Maintenance, each Battery may store up to 1 unused generated Energy from its craft.</li>
+    <li><strong>Battery (one-shot):</strong> A single-use Battery is not a generator — discard it at any time for an immediate Energy burst that works anywhere, even in atmosphere or at launch. Ideal for a one-time need or a craft with no generator.</li>
   </ul>
 
   <h2>Staging</h2>
@@ -1361,7 +1359,12 @@
 
   <h2>Persistent Assets</h2>
 
-  <p>Payloads with the <span class="tag">Satellite</span> or <span class="tag">Station</span> tag remain on the orbital board after delivery. They use Craft markers and may be activated in future rounds like any other craft.</p>
+  <p>Payloads with the <span class="tag">Satellite</span> or <span class="tag">Station</span> tag become persistent assets when <strong>deployed</strong> in space (see Launch Resolution). They use Craft markers and may be activated in future rounds like any other craft. To <strong>move</strong> one it must gain Range (e.g., an Orbital Tug); to <strong>operate</strong> one in place, use Activate Craft or — for routine income — the Maintenance Asset Operations step.</p>
+
+  <div class="box cyan">
+    <div class="box-title">&#x1F4E1; Asset Income Loop</div>
+    <p style="margin-bottom:0">A deployed asset keeps the Support cards that power it. Many assets carry an income ability (<em>spend 1 Energy to gain 1 Credit or VP</em>): pair the asset with a <span class="tag">Power</span> card such as a Solar Panel or RTG, deploy it in orbit, and collect that income <strong>free every Maintenance</strong> during Asset Operations — no Command Turn required.</p>
+  </div>
 
   <h2>On-Orbit Stations</h2>
 
@@ -1388,6 +1391,7 @@
     <li><strong>Optional Pre-Flight Staging.</strong> Stage one <span class="tag" style="font-size:.7rem">Stageable</span> card. Gain its printed bonus Range. The staged card is discarded.</li>
     <li><strong>Choose Path &amp; Move.</strong> The craft moves along the orbital map, spending 1 Range per node crossed (Transfer Window crossing costs the current TW value). The player may <strong>stop at any node</strong>, preserving unspent Range for future activations.</li>
     <li><strong>Mid-Flight Staging.</strong> At any point between nodes, stage a <span class="tag" style="font-size:.7rem">Stageable</span> card (typically an empty tank) to gain bonus Range and reduce Mass for relaunch checks. The staged card is discarded.</li>
+    <li><strong>Deploy Persistent Asset (optional).</strong> While in space (not on a surface or at Earth), you may detach one <span class="tag" style="font-size:.7rem">Satellite</span> or <span class="tag" style="font-size:.7rem">Station</span> payload at the current node. It becomes its own craft on a fresh marker, keeping any Support cards that power it, while the rest of the rocket keeps its remaining Range and flies on. Deploying is free.</li>
     <li><strong>Track Remaining Range.</strong> Place a token or die beside the craft marker on the board showing unspent Range.</li>
     <li><strong>Check Mission Requirements.</strong> If the craft reaches the mission destination, verify payload, tags, and special conditions.</li>
     <li><strong>Apply Special Effects.</strong> Trigger any card or event bonuses.</li>
@@ -1407,7 +1411,7 @@
   <div class="example-scene">
     <h4>Full Launch Example</h4>
     <p>You assemble a <strong>Hydrogen Core</strong> (Thrust 8, Reliability 7) + <strong>Cryo Tank</strong> (Range 8, Mass 3) + <strong>Standard Tank</strong> (Range 5, Mass 2) + <strong>Imaging Probe</strong> (Mass 1) for a <em>Lunar Flyby</em> mission (Route: Earth → Moon Orbit → Earth, Range 10).</p>
-    <p><strong>Launch Capability Check:</strong> Total Mass = 3 + 2 + 1 = 6 ≤ Thrust 8 ✓. <strong>Reliability Check:</strong> Roll d10 → 4 ≤ 7 ✓ Success! Total Range = 8 + 5 = 13. Fly: Earth → Sub-Orbital Earth → LEO → High Orbit (GEO) → Earth ZOI → Moon Orbit (5 Range spent). Fly back: Moon Orbit → Earth ZOI → High Orbit (GEO) → LEO → Sub-Orbital Earth → Earth (5 more = 10 total, 3 Range left over). Mission route completed! Score <strong>7 VP + 2 Credits</strong>. During Maintenance, the Hydrogen Core (non-Reusable) is discarded. The Cryo Tank and Standard Tank are discarded. The Imaging Probe, now operating as a small science satellite at Moon Orbit, stays on the board.</p>
+    <p><strong>Launch Capability Check:</strong> Total Mass = 3 + 2 + 1 = 6 ≤ Thrust 8 ✓. <strong>Reliability Check:</strong> Roll d10 → 4 ≤ 7 ✓ Success! Total Range = 8 + 5 = 13. Fly: Earth → Sub-Orbital Earth → LEO → High Orbit (GEO) → Earth ZOI → Moon Orbit (5 Range spent). Fly back: Moon Orbit → Earth ZOI → High Orbit (GEO) → LEO → Sub-Orbital Earth → Earth (5 more = 10 total, 3 Range left over). Mission route completed! Score <strong>7 VP + 2 Credits</strong>. On the outbound leg the player <strong>deployed</strong> the Imaging Probe at Moon Orbit, so it stays on the board as a persistent science satellite while the rest of the craft flew home. During Maintenance, the Hydrogen Core (non-Reusable) is discarded and the two tanks are discarded. (Pair the probe with a Power card and it earns 1 VP each Maintenance during Asset Operations.)</p>
   </div>
 
 
@@ -1560,9 +1564,9 @@
 
     <p><strong>Action Phase — Command Turn 1:</strong> Starbound pays 5 Credits to <strong>Acquire</strong> a Hydrogen Core engine (Thrust 8, Reliability 7) from the Card Market. The empty slot is immediately refilled. But now hand size is 6 — over the limit of 5! Starbound must discard one card immediately.</p>
 
-    <p><strong>Action Phase — Command Turn 2:</strong> Starbound combines Assemble and Launch in one Command Turn (legal when all components are in hand). They play <strong>Hydrogen Core + Cryo Tank (Range 8, Mass 3) + Standard Tank (Range 5, Mass 2) + Imaging Probe (Mass 1)</strong> to the Launch Area and immediately launch. <strong>Launch Capability Check:</strong> Total Mass = 3 + 2 + 1 = 6 ≤ Thrust 8 ✓. <strong>Reliability Check:</strong> roll d10 → 3 ≤ 7 ✓ Success! Total Range = 13. The craft flies outbound: Earth → Sub-Orbital Earth → LEO → High Orbit (GEO) → Earth ZOI → Moon Orbit (5 Range). The Imaging Probe detaches at Moon Orbit and stays as a persistent science satellite. The craft returns along the same route (5 more Range = 10 total). Starbound completes <em>Lunar Flyby</em> for <strong>7 VP + 2 Credits</strong>, with 3 Range still unspent on the returning craft.</p>
+    <p><strong>Action Phase — Command Turn 2:</strong> Starbound combines Assemble and Launch in one Command Turn (legal when all components are in hand). They play <strong>Hydrogen Core + Cryo Tank (Range 8, Mass 3) + Standard Tank (Range 5, Mass 2) + Imaging Probe (Mass 1)</strong> to the Launch Area and immediately launch. <strong>Launch Capability Check:</strong> Total Mass = 3 + 2 + 1 = 6 ≤ Thrust 8 ✓. <strong>Reliability Check:</strong> roll d10 → 3 ≤ 7 ✓ Success! Total Range = 13. The craft flies outbound: Earth → Sub-Orbital Earth → LEO → High Orbit (GEO) → Earth ZOI → Moon Orbit (5 Range). The player <strong>deploys</strong> the Imaging Probe at Moon Orbit, where it stays as a persistent science satellite. The rest of the craft returns along the same route (5 more Range = 10 total). Starbound completes <em>Lunar Flyby</em> for <strong>7 VP + 2 Credits</strong>, with 3 Range still unspent on the returning craft.</p>
 
-    <p><strong>Maintenance Phase:</strong> The Event card is discarded. The Mission display is refilled to 3. The Card Market is refilled to 5.</p>
+    <p><strong>Maintenance Phase:</strong> During <strong>Asset Operations</strong>, any powered persistent asset may spend Energy for its income — Starbound's new probe has no Power card yet, so it earns nothing this round (a Solar Panel next launch would fix that). The Event card is discarded. The Mission display is refilled to 3. The Card Market is refilled to 5.</p>
   </div>
 
 

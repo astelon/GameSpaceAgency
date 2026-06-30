@@ -136,7 +136,7 @@ The Transfer Window represents planetary alignment for interplanetary transfers.
 | **Thrust**           | Launch capability; must be ≥ total Mass  |
 | **Range**            | Abstract delta-v budget for orbital travel |
 | **Mass**             | Numeric weight of tanks (1–4) and payloads (1–3). Combined with Thrust, it determines whether a craft can launch from a surface. |
-| **Energy**           | Electricity used by active systems. Generators add Energy each Action Phase; batteries store it between rounds. |
+| **Energy**           | Electricity used by active systems. Each craft refills its Energy to the total of its power sources (Solar, RTG) each round; unused Energy does not carry over. A single-use Battery can be discarded for a one-time burst. |
 | **Reliability**      | Engine hardware failure risk             |
 
 > Design choice: Resources are **mostly embedded in cards**, not tracked as loose tokens, reducing bookkeeping.
@@ -147,7 +147,7 @@ Tracking note:
 
 * **Credits** are tracked openly on a personal player track.
 * **VP** are tracked openly on the shared board and updated immediately when earned.
-* **Energy** is tracked with tokens on each in-flight craft and on Battery cards.
+* **Energy** is tracked with tokens on each in-flight craft. It refills to the craft's power output each round and is not stored between rounds.
 * **Completing missions is the main source of Credits**. Other sources should stay smaller or situational.
 
 ---
@@ -222,7 +222,7 @@ Starting with the first player, players alternate taking **one Command Turn at a
 
 Each individual craft may be activated at most **once per Action Phase**.
 
-At the **start of the Action Phase**, each in-flight craft gains Energy equal to the total Energy generation of its attached cards. Place that many Energy tokens beside the craft. Stored Energy on Battery cards remains where it is.
+At the **start of the Action Phase**, refill each in-flight craft's Energy to its **Power** — the total Energy output of its attached power sources (Solar Panel, RTG). Remove any Energy left from last round first, then place tokens equal to Power. Unused Energy does **not** accumulate between rounds.
 
 #### Available Actions
 
@@ -233,7 +233,7 @@ At the **start of the Action Phase**, each in-flight craft gains Energy equal to
 * **Upgrade Rocket** – Replace components
 * **Accept Mission** – Commit to a Public mission in the display. In this prototype, all missions stay public and can be raced by multiple players.
 * **Launch New Craft** – Place an assembled rocket at `Earth`, perform the launch capability check, optionally Stage, then fly it along the orbital map spending Range. Resolve the mission immediately if the craft reaches its destination. (See §7.3 Launch Resolution.)
-* **Activate Craft** – Spend remaining Range to move one of your in-flight craft along the orbital map. Spend Energy if any attached card requires it for this activation. May resolve a mission if it reaches the destination.
+* **Activate Craft** – Choose one of your in-flight craft and **move** it (spend 1 Range per node crossed), **operate** it (spend Energy to trigger an ability printed on an attached card), or both. A craft with **0 remaining Range** can still be activated to operate in place — it simply cannot move. May resolve a mission if it reaches the destination. *(Routine persistent-asset income is collected for free during Maintenance instead — see §7.4 Asset Operations — so you rarely need to spend a Command Turn just to bank it.)*
 * **Expand Agency** – Increase your Agency Level by paying Credits
 
 > Action economy is intentionally tight: you get only a few command turns, and larger agencies can coordinate more craft each round.
@@ -286,19 +286,29 @@ When a craft is launched or activated, resolve the flight immediately:
 4. The player chooses a path on the orbital map. The craft moves along this path, spending **1 Range per node** crossed. The player may **stop at any node**, preserving unspent Range for future activations.
 5. **Mid-Flight Staging:** At any point during movement (between nodes), a player may stage a `Stageable` card (typically an empty Fuel Tank) to gain its stage bonus Range. The staged card is discarded. This also reduces the craft's Mass for future relaunch capability checks.
 6. Track the craft's **remaining Range** with a token or small die beside its marker on the board.
-7. If a card on the craft says to **Spend Energy**, remove that many Energy tokens from the craft or from its attached Battery cards when the effect is used.
+7. If a card on the craft says to **Spend Energy**, remove that many Energy tokens from the craft's current Energy when the effect is used. If the craft is short, you may **discard a Battery** attached to it to add its printed burst of Energy (a Battery works anywhere, even in atmosphere or at launch).
 8. If the craft reaches the mission route's required destination, check **Mission Requirements** (Mass, tags, special conditions).
 9. Apply special effects.
 10. Score VP and rewards.
 
+#### Deploying Persistent Assets
+
+At any point while a craft is **in space** (at any orbital node — not on a surface and not at the `Earth` node), the controlling player may **deploy** one `Satellite` or `Station` payload carried by that craft:
+
+* The payload separates and becomes its **own craft** at the current node, taking one of your craft markers.
+* Any Support cards you assign to it (typically a `Power` card such as a Solar Panel or RTG to run it, plus its own equipment) stay attached and remain with the deployed asset.
+* The **rest of the rocket keeps its remaining Range** and may continue its flight in the same action — this is how a craft can drop a satellite and still fly home.
+* A deployed asset normally has **0 Range** of its own (no Fuel Tank), so it stays parked where it was deployed. It still counts as one of your craft and may be activated at most once per Action Phase.
+* Deploying is **free** and is part of the launch or activation already underway; it does not cost an extra Command Turn.
+
+A payload that is never deployed simply returns or is discarded with its craft as normal. A Comm Satellite, Imaging Probe, Station Hub, or Microgravity Lab must be **deployed** before it can produce its ongoing income (see §7.4 *Asset Operations*).
+
 #### Energy Timing
 
-* **Generated Energy** is placed on a craft at the **start of the Action Phase**.
-* **Stored Energy** remains on Battery cards between rounds.
-* When a card says to **Spend X Energy**, remove that many tokens from the craft. You may spend generated Energy or stored Battery Energy.
-* **Generated Energy that is still unused during Maintenance is lost**, unless a Battery card stores it.
-* Each **Battery Pack** may store **up to 1 unused generated Energy per round**, up to its printed capacity.
-* A Battery card enters play **full** when its craft is launched.
+* **Energy refills, it does not accumulate.** At the start of each Action Phase a craft's Energy resets to its **Power** (the total output of its Solar Panels and RTGs). Whatever you don't spend this round is gone next round — there is no stored-vs-generated distinction and no end-of-round Energy cleanup.
+* When a card says to **Spend X Energy**, remove that many tokens from the craft's current Energy.
+* **Batteries are single-use bursts, not storage.** At any time you may discard a Battery attached to a craft to immediately add its printed Energy. A Battery works **anywhere**, including in atmosphere and during launch or relaunch — handy when Solar Panels are unavailable or the craft carries no generator.
+* **Persistent-asset income** abilities (a Comm Satellite, Imaging Probe, Station Hub, or Microgravity Lab) spend the asset's Energy during the **Maintenance Phase** *Asset Operations* step — no Command Turn and no movement, only that the asset still has Energy this round. Because Energy refills every round, just keep a `Power` card on the asset and the income pays out each round.
 
 #### Failure
 
@@ -324,8 +334,7 @@ If requirements are not met:
 
 * Reusable parts from craft that returned to `Earth` return to hand if they were not staged
 * Ongoing technology effects trigger
-* On each Battery card, you may store up to **1 unused generated Energy** from that craft, up to the card's capacity
-* Discard any other unused generated Energy tokens from in-flight craft
+* **Asset Operations:** Each persistent `Satellite` or `Station` you control may trigger each of its "spend Energy" income abilities **once**, spending the asset's remaining Energy this round. Collect the printed Credits or VP. This is free and costs no Command Turn. (Energy simply refills at the start of the next Action Phase — there is no separate Energy cleanup.)
 * Discard the current round's Event card
 * Refill the Mission display to 3 cards if needed
 * Refill the **Card Market** to 5 cards from the Component Deck
@@ -410,7 +419,7 @@ An Engine-free craft is only legal if it is already **in flight** or **in orbit*
 * If your craft has **no Engine** but is already in flight or in orbit, its Total Rocket Mass must be **≤ 3**.
 * Engines have no Mass for lift purposes. Support cards count only if they print a Mass value.
 * **Range** measures remaining travel potential. A rocket's total Range = sum of all Fuel Tank Range values.
-* **Energy** powers activated systems such as docking hardware, advanced sensors, and computer assists. A craft gains generated Energy at the start of each Action Phase and may spend it or stored Battery Energy during that round.
+* **Energy** powers activated systems such as docking hardware, advanced sensors, and computer assists. A craft refills Energy to its power output at the start of each Action Phase and spends it during that round; a Battery may be discarded for a one-time burst.
 * To **maneuver**, a craft must have an Engine to turn that Range into orbital changes.
 * Missions with the `Docking` tag require a `Docking`-tagged support card on the rocket (e.g., Docking Adapter or Orbital Tug).
 * Missions with the `Docking` or `Maneuver` tags require a rocket with an Engine.
@@ -452,10 +461,11 @@ then it may land on the surface directly. To **relaunch from a surface**, the cr
 
 ### Persistent Assets
 
-* Payloads with the `Satellite` or `Station` tags remain on the orbital board after a successful delivery mission.
-* If a delivered payload remains in space, its attached Support cards remain attached to that persistent craft unless they were staged or discarded.
-* These assets use your craft markers and may be activated on future turns like any other craft.
-* Satellites and stations count against your available commands during the Action Phase.
+* Payloads with the `Satellite` or `Station` tags become persistent assets when **deployed** in space (see §7.3 *Deploying Persistent Assets*). A payload may also be left behind automatically if its whole craft strands at a node with 0 Range.
+* A persistent asset keeps any Support cards assigned to it (for example a Solar Panel or RTG that powers it) unless they were staged or discarded.
+* These assets use your craft markers and may be activated like any other craft. To **move** one it must first gain Range (e.g., from an Orbital Tug); to **operate** one in place, use the Activate Craft action or the Maintenance *Asset Operations* step.
+* Many assets carry an **ongoing income** ability ("spend 1 Energy to gain 1 Credit/VP"). Pair the asset with a `Power` card so it has Energy each round, then collect that income for **free every Maintenance** during Asset Operations — you do not spend a Command Turn to bank it.
+* Satellites and stations each count as one of your craft and may be activated at most once per Action Phase.
 
 ### On-Orbit Stations
 
@@ -610,7 +620,7 @@ Technologies should:
 * Mission-driven scoring and economy
 * Commercial / Prestige / Infrastructure mission taxonomy (tag-based)
 * Mission reward split: Commercial skews Credits, Prestige skews VP, Infrastructure balanced
-* Persistent asset economy loops: Comm Satellite and Station Hub generate Credits; Imaging Probe and Microgravity Lab generate VP
+* Persistent asset economy loops: Comm Satellite and Station Hub generate Credits; Imaging Probe and Microgravity Lab generate VP. Assets must be **deployed** in space and paired with a `Power` card; income is harvested for free during the Maintenance *Asset Operations* step (no Command Turn required)
 * Card Market for component acquisition
 * Event cards integrated into Planning Phase
 * Technology tableau (permanent until removed)
