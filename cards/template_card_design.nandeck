@@ -5,7 +5,7 @@
 UNIT=CM
 CARDSIZE=6.3,8.8
 
-CARDS=136
+CARDS=142
 
 ; CSV data — all 23 columns mapped explicitly; LINKMULTI duplicates each row per its Copies value
 LINKMULTI="COPIES"
@@ -21,30 +21,30 @@ REPLACE="TEXT","Energy","<span style='display:inline-block;background:#d69e2e;co
 BORDER=ROUNDED,#d9e2ef,0.12
 
 ; Colored mission-type stripe at the top
-HTMLTEXT="1-136","<div style='background:[COLOR];border-radius:10px 10px 0 0;height:100%'></div>",0.2,0.2,5.9,0.28,#ffffff,0,,100
+HTMLTEXT="1-142","<div style='background:[COLOR];border-radius:10px 10px 0 0;height:100%'></div>",0.2,0.2,5.9,0.28,#ffffff,0,,100
 
 ; Type label
-HTMLTEXT="1-136","<div style='font-family:Arial,sans-serif;font-size:7pt;letter-spacing:1px;color:#556070;padding:5px 46px 0 1px;text-transform:uppercase'><b>[TYPE]</b></div>",0.2,0.36,5.9,0.42,#ffffff,0,,100
+HTMLTEXT="1-142","<div style='font-family:Arial,sans-serif;font-size:7pt;letter-spacing:1px;color:#556070;padding:5px 46px 0 1px;text-transform:uppercase'><b>[TYPE]</b></div>",0.2,0.36,5.9,0.42,#ffffff,0,,100
 
 ; Type icon — PNG stays transparent with no badge behind it
-IMAGE="1-136","[ICONFILE]",0.35,0.78,0.50,0.50,0,"PN",100
+IMAGE="1-142","[ICONFILE]",0.35,0.78,0.50,0.50,0,"PN",100
 
 ; Card name — aligned with type label (y=0.36), T flag keeps canvas transparent so icon shows through
-HTMLTEXT="1-136","<div style='font-family:Arial,sans-serif;font-size:10pt;color:#152033;padding:2px 47px 0 54px'><b>[NAME]</b></div>",0.2,0.36,5.9,0.92,#ffffff,0,"B",100
+HTMLTEXT="1-142","<div style='font-family:Arial,sans-serif;font-size:10pt;color:#152033;padding:2px 47px 0 54px'><b>[NAME]</b></div>",0.2,0.36,5.9,0.92,#ffffff,0,"B",100
 
 ; Program ID sub-label
-HTMLTEXT="1-136","<div style='font-family:Arial,sans-serif;font-size:7pt;color:#6a7486;padding:0 12px'>Program: [CARDID]</div>",0.2,1.3,5.9,0.28,#ffffff,0,,100
+HTMLTEXT="1-142","<div style='font-family:Arial,sans-serif;font-size:7pt;color:#6a7486;padding:0 12px'>Program: [CARDID]</div>",0.2,1.3,5.9,0.28,#ffffff,0,,100
 
 ; Cost badge (circular, color-keyed) — T flag makes canvas transparent; box is 1.05×1.05 cm so the circle is never clipped
-HTMLTEXT="1-136","<div style='width:100%;height:100%;background:[COLOR];border-radius:999px;border:3px solid rgba(0,0,0,0.35);color:#ffffff;font-family:Arial,sans-serif;text-align:center;padding-top:6px'><b style='font-size:20pt'>[COST]</b></div>",4.88,0.25,1.05,1.05,#ffffff,0,"T",100
+HTMLTEXT="1-142","<div style='width:100%;height:100%;background:[COLOR];border-radius:999px;border:3px solid rgba(0,0,0,0.35);color:#ffffff;font-family:Arial,sans-serif;text-align:center;padding-top:6px'><b style='font-size:20pt'>[COST]</b></div>",4.88,0.25,1.05,1.05,#ffffff,0,"T",100
 
 ; Art window — RECTANGLE stays in the IMAGE pass so artwork renders on top of it
-RECTANGLE="1-136",0.35,1.7,5.6,3.35,#eef2f8,#dbe3ee,0.05
+RECTANGLE="1-142",0.35,1.7,5.6,3.35,#eef2f8,#dbe3ee,0.05
 ; C = crop-fill the frame, A = antialiasing
-IMAGE="1-136","[ARTFILE]",0.5,1.85,5.3,3.05,0,"CA",100
+IMAGE="1-142","[ARTFILE]",0.5,1.85,5.3,3.05,0,"CA",100
 
 ; Type / tags line under art
-HTMLTEXT="1-136","<div style='font-family:Arial,sans-serif;font-size:7pt;color:#344155;padding:3px 8px'><b>[TYPE]</b> <span style='color:#8a96aa'>//</span> [MISSIONTYPE] [TIER] [TAGS]</div>",0.35,5.15,5.6,0.35,#f5f7fb,0,,100
+HTMLTEXT="1-142","<div style='font-family:Arial,sans-serif;font-size:7pt;color:#344155;padding:3px 8px'><b>[TYPE]</b> <span style='color:#8a96aa'>//</span> [MISSIONTYPE] [TIER] [TAGS]</div>",0.35,5.15,5.6,0.35,#f5f7fb,0,,100
 
 ; Conditional stat layout by cluster
 ; Left cluster (consumes): Mass, Energy Use
@@ -53,15 +53,15 @@ HTMLTEXT="1-136","<div style='font-family:Arial,sans-serif;font-size:7pt;color:#
 
 ; Left slot 1: Mass (cards with printed mass)
 ; Tanks(25-49) + Payloads(50-71) + S08 RTG(126-127)
-HTMLTEXT="25-71,126-127","<div style='width:100%;height:100%'></div>",0.35,5.6,0.70,0.62,#dd6b20,0,,100
-IMAGE="25-71,126-127","art/icons/mass.png",0.56,5.63,0.28,0.28,0,"PN",100
-HTMLTEXT="25-71,126-127","<div style='background:#dd6b20;font-family:Arial,sans-serif;font-size:8pt;font-weight:bold;color:#ffffff;text-align:center;line-height:1'>[MASS]</div>",0.35,5.91,0.70,0.31,#dd6b20,0,,100
+HTMLTEXT="25-71,126-127,137-142","<div style='width:100%;height:100%'></div>",0.35,5.6,0.70,0.62,#dd6b20,0,,100
+IMAGE="25-71,126-127,137-142","art/icons/mass.png",0.56,5.63,0.28,0.28,0,"PN",100
+HTMLTEXT="25-71,126-127,137-142","<div style='background:#dd6b20;font-family:Arial,sans-serif;font-size:8pt;font-weight:bold;color:#ffffff;text-align:center;line-height:1'>[MASS]</div>",0.35,5.91,0.70,0.31,#dd6b20,0,,100
 
 ; Left slot 2: Energy Use (cards that also have Mass)
 ; P01-P04(50-61)
-HTMLTEXT="50-61","<div style='width:100%;height:100%'></div>",1.145,5.6,0.70,0.62,#d69e2e,0,,100
-IMAGE="50-61","art/icons/energy.png",1.355,5.63,0.28,0.28,0,"PN",100
-HTMLTEXT="50-61","<div style='background:#d69e2e;font-family:Arial,sans-serif;font-size:8pt;font-weight:bold;color:#ffffff;text-align:center;line-height:1'>1</div>",1.145,5.91,0.70,0.31,#d69e2e,0,,100
+HTMLTEXT="50-61,137-138,141-142","<div style='width:100%;height:100%'></div>",1.145,5.6,0.70,0.62,#d69e2e,0,,100
+IMAGE="50-61,137-138,141-142","art/icons/energy.png",1.355,5.63,0.28,0.28,0,"PN",100
+HTMLTEXT="50-61,137-138,141-142","<div style='background:#d69e2e;font-family:Arial,sans-serif;font-size:8pt;font-weight:bold;color:#ffffff;text-align:center;line-height:1'>1</div>",1.145,5.91,0.70,0.31,#d69e2e,0,,100
 
 ; Left slot 1: Energy Use (cards without Mass)
 ; S05-S06(114-118) + S10-S11(131-136)
@@ -104,7 +104,7 @@ IMAGE="88-99","art/icons/credits.png",5.33,5.63,0.28,0.28,0,"PN",100
 HTMLTEXT="88-99","<div style='background:#4a5568;font-family:Arial,sans-serif;font-size:8pt;font-weight:bold;color:#ffffff;text-align:center;line-height:1'>[REWARDCREDITS]</div>",5.12,5.91,0.70,0.31,#4a5568,0,,100
 
 ; Rules text panel (non-mission cards) — Engines(1-24)+Tanks(25-49)+Payloads(50-71)+Support(72-87)+Tech(100-109)+Events(110-136)
-HTMLTEXT="1-87,100-136","<div style='background:#fbfcfe;border:1px solid #dde5f0;border-radius:10px;padding:7px;color:#17212f;font-family:Arial,sans-serif;font-size:7pt;line-height:1.14'>[TEXT]</div>",0.35,6.35,5.6,1.58,#ffffff,0,,100
+HTMLTEXT="1-87,100-142","<div style='background:#fbfcfe;border:1px solid #dde5f0;border-radius:10px;padding:7px;color:#17212f;font-family:Arial,sans-serif;font-size:7pt;line-height:1.14'>[TEXT]</div>",0.35,6.35,5.6,1.58,#ffffff,0,,100
 
 ; Mission cards: explicit conditions block — Missions(88-99)
 HTMLTEXT="88-99","<div style='background:#fbfcfe;border:1px solid #dde5f0;border-radius:10px;padding:6px 7px;color:#17212f;font-family:Arial,sans-serif;font-size:7pt;line-height:1.12'><b style='font-size:7pt;color:#334155;text-transform:uppercase;letter-spacing:0.4px'>Conditions</b><br>[TEXT]</div>",0.35,6.35,5.6,1.58,#ffffff,0,,100
@@ -113,11 +113,11 @@ HTMLTEXT="88-99","<div style='background:#fbfcfe;border:1px solid #dde5f0;border
 HTMLTEXT="128-130","<div style='font-family:Arial,sans-serif;font-size:6pt;color:#6a7486;text-align:right;padding:64px 10px 0 0'>Stored EN: <span style='display:inline-block;width:8px;height:8px;border:1px solid #7a8699;border-radius:999px;margin-left:3px;vertical-align:middle'></span><span style='display:inline-block;width:8px;height:8px;border:1px solid #7a8699;border-radius:999px;margin-left:3px;vertical-align:middle'></span><span style='display:inline-block;width:8px;height:8px;border:1px solid #7a8699;border-radius:999px;margin-left:3px;vertical-align:middle'></span><span style='display:inline-block;width:8px;height:8px;border:1px solid #7a8699;border-radius:999px;margin-left:3px;vertical-align:middle'></span></div>",0.35,6.35,5.6,1.58,#ffffff,0,"B",100
 
 ; Separator line before flavor text
-HTMLTEXT="1-136","<div style='border-top:1px solid #cfd7e3'></div>",0.55,8.00,5.2,0.05,#ffffff,0,,100
+HTMLTEXT="1-142","<div style='border-top:1px solid #cfd7e3'></div>",0.55,8.00,5.2,0.05,#ffffff,0,,100
 
 ; Flavor text
-HTMLTEXT="1-136","<div style='font-family:Arial,sans-serif;font-size:7pt;color:#6d7787;padding:2px 8px;font-style:italic'>[FLAVOR]</div>",0.35,8.08,5.6,0.42,#ffffff,0,,100
+HTMLTEXT="1-142","<div style='font-family:Arial,sans-serif;font-size:7pt;color:#6d7787;padding:2px 8px;font-style:italic'>[FLAVOR]</div>",0.35,8.08,5.6,0.42,#ffffff,0,,100
 
 ; Footer
-HTMLTEXT="1-136","<div style='font-family:Arial,sans-serif;font-size:6pt;color:#98a3b6;padding:0 8px'>Space Agency prototype deck</div>",0.35,8.50,3.0,0.28,#ffffff,0,,100
-HTMLTEXT="1-136","<div style='font-family:Arial,sans-serif;font-size:6pt;color:#98a3b6;text-align:right;padding:0 8px'>[CARDID]</div>",3.45,8.50,2.5,0.28,#ffffff,0,,100
+HTMLTEXT="1-142","<div style='font-family:Arial,sans-serif;font-size:6pt;color:#98a3b6;padding:0 8px'>Space Agency prototype deck</div>",0.35,8.50,3.0,0.28,#ffffff,0,,100
+HTMLTEXT="1-142","<div style='font-family:Arial,sans-serif;font-size:6pt;color:#98a3b6;text-align:right;padding:0 8px'>[CARDID]</div>",3.45,8.50,2.5,0.28,#ffffff,0,,100

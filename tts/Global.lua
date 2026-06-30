@@ -1,743 +1,1939 @@
 -- ============================================================
 -- SPACE AGENCY RACE — Tabletop Simulator Global Script
 -- ============================================================
---
--- INITIAL SETUP (required before first use):
---   1. Host the card PNGs from cards/output/cards/ at an
---      accessible URL (options below) and set BASE_IMAGE_URL.
---   2. Optionally provide a CARD_BACK_URL for a custom card back.
---   3. Paste this script into TTS: Scripting → Global Script.
---   4. Press "Save & Play" — the game will set up automatically.
---
--- IMAGE URL OPTIONS:
---   a) GitHub Raw  — push cards/output/cards/ to your repo, then:
---        https://raw.githubusercontent.com/USER/GameSpaceAgency/main/cards/output/cards/
---   b) GitHub Pages — enable Pages on your repo, then:
---        https://USER.github.io/GameSpaceAgency/cards/output/cards/
---   c) Local server — run: python -m http.server 8080 in the project root, then:
---        http://localhost:8080/cards/output/cards/
---      (works only when TTS and the server run on the same machine)
---
--- CARD IMAGE FILENAMES expected at BASE_IMAGE_URL:
---   template_tts_001.png  through  template_tts_136.png
---   (55 unique designs × copies = 136 total; nanDECK writes to cards/output/cards/)
---   Only the first copy of each unique design is referenced by TTS (see card_index values).
---
--- ============================================================
-
--- ── CONFIGURATION ────────────────────────────────────────────
 
 local BASE_IMAGE_URL = "https://raw.githubusercontent.com/astelon/GameSpaceAgency/main/cards/output/cards/"
--- Replace YOUR_USERNAME above with your GitHub username.
+local CARD_BACK_URL = BASE_IMAGE_URL .. "card_back.png"
+local REPO_ROOT_URL = BASE_IMAGE_URL:match("^(.*/)cards/output/cards/$") or BASE_IMAGE_URL
+local BOARD_IMAGE_URL = REPO_ROOT_URL .. "tts/board_v2.png"
+local SHIP_MODEL_URL = REPO_ROOT_URL .. "models/spaceship.obj"
+local RULEBOOK_URL = REPO_ROOT_URL .. "docs/rulebook.html"
 
-local CARD_BACK_URL  = BASE_IMAGE_URL .. "card_back.png"
--- Replace if you have a dedicated card-back image at a different URL.
--- A plain dark colour works too; you can use any publicly-hosted image.
+local MANAGED_NOTE = "GSA"
+local STARTING_CARDS = { "E02", "T01", "S01" }
+local LEVEL_COSTS = { [2] = 6, [3] = 14 }
+local PLAYER_ORDER = { "White", "Red", "Blue", "Green" }
 
--- Derived from BASE_IMAGE_URL by stripping the cards/output/cards/ suffix.
--- Update BASE_IMAGE_URL and this follows automatically.
-local REPO_ROOT_URL    = BASE_IMAGE_URL:match("^(.*/)cards/output/cards/$") or BASE_IMAGE_URL
-local RULEBOOK_PDF_URL = REPO_ROOT_URL .. "docs/rulebook.pdf"
-local BOARD_IMAGE_URL  = REPO_ROOT_URL .. "tts/board_v2.png"
-local SHIP_MODEL_URL   = REPO_ROOT_URL .. "models/spaceship.obj"
-
--- ── CARD DATA ────────────────────────────────────────────────
--- card_index: first physical slot in the 136-card LINKMULTI layout → determines PNG filename
--- (template_tts_{card_index:03d}.png — first copy of each unique design)
-
-local CARDS = {
-    -- Engine cards (slots 1–24 in 136-card layout; PNG indices: 1,4,12,14,17,20,22)
-    { id="E01", name="Merlin-1a",              type="Engine",  tier="",       card_index=1,
-      description="If this craft returns to Earth, return this card to hand.",
-      cost=4, tags="Reusable;Experimental" },
-    { id="E02", name="Sterling Booster",       type="Engine",  tier="",       card_index=4,
-      description="High reliability, single-use.",
-      cost=3, tags="Disposable;Reliable;Basic" },
-    { id="E03", name="Hydrogen Core",          type="Engine",  tier="",       card_index=12,
-      description="Requires Cryo Tank. High thrust.",
-      cost=5, tags="HighThrust;Cryogenic" },
-    { id="E04", name="Ion Sustainer",          type="Engine",  tier="",       card_index=14,
-      description="Low thrust but very reliable and efficient.",
-      cost=2, tags="LowThrust;Efficient" },
-    { id="E05", name="Hybrid Cycle",           type="Engine",  tier="",       card_index=17,
-      description="If this craft returns to Earth, return this card to hand.",
-      cost=4, tags="Reusable;Balanced" },
-    { id="E06", name="Raptor-X",               type="Engine",  tier="",       card_index=20,
-      description="High risk, high reward. May cause major failure on roll.",
-      cost=6, tags="Experimental;HighThrust" },
-    { id="E07", name="Kick Stage",             type="Engine",  tier="",       card_index=22,
-      description="Stage: +2 Range for this launch. Discard after launch.",
-      cost=4, tags="Disposable;Stageable" },
-
-    -- Tank cards (slots 25–49; PNG indices: 25,33,36,41,45,48)
-    { id="T01", name="Standard Tank",          type="Tank",    tier="",       card_index=25,
-      description="Range 5. Mass 2. Compatible with most engines.",
-      cost=2, tags="Stable;Basic" },
-    { id="T02", name="Cryo Tank",              type="Tank",    tier="",       card_index=33,
-      description="Range 8. Mass 3. Required for Hydrogen Core engine.",
-      cost=4, tags="Cryogenic;Extended" },
-    { id="T03", name="Fuel Pod",               type="Tank",    tier="",       card_index=36,
-      description="Range 3. Mass 1. Stage: +1 Range for this launch. Discard after launch.",
-      cost=1, tags="Cheap;Disposable;Stageable" },
-    { id="T04", name="Expandable Tank",        type="Tank",    tier="",       card_index=41,
-      description="Range 5. Mass 2. Stage: +2 Range for this launch. Discard after launch.",
-      cost=3, tags="Expandable;Stageable" },
-    { id="T05", name="Pressurized Tank",       type="Tank",    tier="",       card_index=45,
-      description="Range 5. Mass 2. Safer for crewed payloads.",
-      cost=2, tags="Pressurized" },
-    { id="T06", name="Long-Range Tank",        type="Tank",    tier="",       card_index=48,
-      description="Range 12. Heavy. Mass 4.",
-      cost=5, tags="DeepSpace;Extended" },
-
-    -- Payload cards (slots 50–71; PNG indices: 50,53,56,59,62,66,69)
-    { id="P01", name="Comm Satellite",         type="Payload", tier="",       card_index=50,
-      description="Mass 2. Spend 1 Energy to activate. Remains on board as on-orbit asset.",
-      cost=2, tags="Uncrewed;Electronics;Satellite" },
-    { id="P02", name="Imaging Probe",          type="Payload", tier="",       card_index=53,
-      description="Mass 1. Spend 1 Energy to activate imaging systems.",
-      cost=2, tags="Uncrewed;Scientific" },
-    { id="P03", name="Science Module",         type="Payload", tier="",       card_index=56,
-      description="Mass 3. Spend 2 Energy to activate instruments. High reward for deep-space research.",
-      cost=3, tags="Scientific;Heavy" },
-    { id="P04", name="Crew Capsule",           type="Payload", tier="",       card_index=59,
-      description="Mass 2. Spend 1 Energy on launch. Enables crewed missions. If returned to Earth, return card to hand.",
-      cost=4, tags="Crewed;LifeSupport;Reusable" },
-    { id="P05", name="CubeSat Cluster",        type="Payload", tier="",       card_index=62,
-      description="Mass 1. Cheap small experiments. Remains on board as on-orbit asset.",
-      cost=1, tags="Uncrewed;Small;Satellite" },
-    { id="P06", name="Landing Lander",         type="Payload", tier="",       card_index=66,
-      description="Mass 2. Enables surface landing.",
-      cost=3, tags="Surface;Heavy" },
-    { id="P07", name="Cargo Return Capsule",   type="Payload", tier="",       card_index=69,
-      description="Mass 1. Recovery and sample-return missions. If returned to Earth, return card to hand.",
-      cost=3, tags="Uncrewed;Recovery;Reusable" },
-
-    -- Support cards — Reentry (slots 72–87; PNG indices: 72,78,82,85)
-    { id="S01", name="Heat Shield",            type="Support", tier="",       card_index=72,
-      description="Landing support. Use from Sub-Orbital to land safely. Discard after use.",
-      cost=1, tags="HeatShield;Stageable;Basic" },
-    { id="S02", name="Recovery Chutes",        type="Support", tier="",       card_index=78,
-      description="Landing support. Use from Sub-Orbital to land safely. Discard after use.",
-      cost=1, tags="Parachute;Stageable" },
-    { id="S03", name="Ceramic Tile Shield",    type="Support", tier="",       card_index=82,
-      description="Landing support. Use from Sub-Orbital to land safely. Return to hand if craft returns to Earth.",
-      cost=2, tags="HeatShield;Reusable" },
-    { id="S04", name="Guided Parafoil",        type="Support", tier="",       card_index=85,
-      description="Landing support. Use from Sub-Orbital to land safely. Return to hand if craft returns to Earth.",
-      cost=2, tags="Parachute;Reusable" },
-
-    -- Mission cards (slots 88–99; one copy each, PNG indices = slot numbers)
-    { id="M01", name="LEO Deployment",         type="Mission", tier="Tier 1", card_index=88,
-      description="Reach LEO. Carry an Uncrewed payload. Range 2.", vp=3, reward=4 },
-    { id="M07", name="Emergency Resupply",     type="Mission", tier="Tier 1", card_index=94,
-      description="Reach LEO and return to Earth. Carry payload Mass 2+. Range 4.", vp=4, reward=5 },
-    { id="M10", name="Capsule Recovery",       type="Mission", tier="Tier 1", card_index=97,
-      description="From Sub-Orbital Earth, land at Earth. Carry payload Mass 1 + Heat Shield or Parachute. Range 1.", vp=5, reward=1 },
-    { id="M11", name="Reusable Flight Test",   type="Mission", tier="Tier 1", card_index=98,
-      description="Fly Earth → Sub-Orbital Earth → Earth. Use Reusable Payload + Reusable reentry support. Range 2.", vp=4, reward=2 },
-    { id="M02", name="Lunar Flyby",            type="Mission", tier="Tier 2", card_index=89,
-      description="Reach Moon Orbit and return to Earth. Total route Range: 10.", vp=6, reward=3 },
-    { id="M03", name="Lunar Landing",          type="Mission", tier="Tier 2", card_index=90,
-      description="Reach the Moon surface. Have Landing Lander or Rocket-as-Lander. Range 7.", vp=8, reward=4 },
-    { id="M06", name="Crewed Station Visit",   type="Mission", tier="Tier 2", card_index=93,
-      description="Reach Earth ZOI and return to Earth. Have Crewed Capsule + Docking card + Engine. Range 8.", vp=7, reward=3 },
-    { id="M08", name="Science Relay",          type="Mission", tier="Tier 2", card_index=95,
-      description="Reach High Orbit and return to Earth. Have Scientific or Comm payload. Spend 1 Energy. Range 6.", vp=6, reward=2 },
-    { id="M09", name="Orbital Service Check",  type="Mission", tier="Tier 2", card_index=96,
-      description="From LEO, reach High Orbit, then return to LEO. Have On-Orbit Satellite + Engine. Range 2.", vp=4, reward=5 },
-    { id="M04", name="Mars Orbit Insertion",   type="Mission", tier="Tier 3", card_index=91,
-      description="Reach Mars High Orbit. Add Transfer Window cost. Carry payload Mass 2+. Base Range 7.", vp=12, reward=5 },
-    { id="M05", name="Deep Space Probe",       type="Mission", tier="Tier 3", card_index=92,
-      description="Reach Sub-Orbital Mars. Add Transfer Window cost. Have Scientific payload + Sensor Array. Spend 2 Energy. Base Range 9.", vp=15, reward=6 },
-    { id="M12", name="Lunar Sample Return",    type="Mission", tier="Tier 3", card_index=99,
-      description="Reach Moon surface, return to Earth. Have Lander + Cargo Return Capsule + Earth reentry support. Range 14.", vp=12, reward=5 },
-
-    -- Tech cards (slots 100–109; PNG indices: 100,102,104,107)
-    { id="C01", name="Reusable Refurb",        type="Tech",    tier="",       card_index=100,
-      description="Your Reusable engines gain +1 Reliability. Recover a Reusable card during Maintenance: gain 1 Credit.",
-      cost=2, tags="Upgrade;Permanent" },
-    { id="C02", name="Cryo Handling",          type="Tech",    tier="",       card_index=102,
-      description="Your rockets with a Cryo Tank gain +1 Reliability on launch checks.",
-      cost=3, tags="Upgrade;Compatible" },
-    { id="C03", name="Precision Guidance",     type="Tech",    tier="",       card_index=104,
-      description="+1 effective Reliability on launch checks.",
-      cost=2, tags="Upgrade;Support" },
-    { id="C04", name="Modular Payloads",       type="Tech",    tier="",       card_index=107,
-      description="Reduce your payload's Mass by 1 (minimum 1) for Thrust checks.",
-      cost=2, tags="Upgrade;Flexible" },
-
-    -- Event cards (slots 110–113; PNG indices: 110–113)
-    { id="EV01", name="Solar Storm",           type="Event",   tier="",       card_index=110,
-      description="Global: All launches this round suffer -2 Reliability." },
-    { id="EV02", name="Funding Boost",         type="Event",   tier="",       card_index=111,
-      description="Occasional bonus: All players gain +3 Credits immediately." },
-    { id="EV03", name="Supply Delay",          type="Event",   tier="",       card_index=112,
-      description="Players must spend +1 Credit to prepare launches this round." },
-    { id="EV04", name="Tech Breakthrough",     type="Event",   tier="",       card_index=113,
-      description="First player to launch this round searches the Component Deck for 1 Technology card (add to hand, reshuffle)." },
-
-    -- Support cards — Docking (slots 114–118; PNG indices: 114,117)
-    { id="S05", name="Docking Adapter",        type="Support", tier="",       card_index=114,
-      description="Enables docking. Required for Docking missions. Spend 1 Energy to dock. Return to hand if craft returns to Earth.",
-      cost=2, tags="Docking;Reusable" },
-    { id="S06", name="Orbital Tug",            type="Support", tier="",       card_index=117,
-      description="Enables docking. Spend 1 Energy in orbit to gain +1 Range. Return to hand if craft returns to Earth.",
-      cost=3, tags="Docking;Maneuver" },
-
-    -- Event cards continued (slots 119–122; PNG indices: 119–122)
-    { id="EV05", name="Docking Opportunity",   type="Event",   tier="",       card_index=119,
-      description="This round, any craft with Docking tag that reaches an On-Orbit Station gains +2 VP." },
-    { id="EV06", name="Transfer Window Storm", type="Event",   tier="",       card_index=120,
-      description="This round, Transfer Window cost is increased by +2 (max TW 5)." },
-    { id="EV07", name="Launch Window",         type="Event",   tier="",       card_index=121,
-      description="This round, Transfer Window cost is reduced by 2 (min TW 0)." },
-    { id="EV08", name="Expanded Operations",   type="Event",   tier="",       card_index=122,
-      description="This round, each player's hand limit is increased to 7." },
-
-    -- Support cards — Power (slots 123–136; PNG indices: 123,126,128,131,134)
-    { id="S07", name="Solar Panel",            type="Support", tier="",       card_index=123,
-      description="Generates 2 Energy at start of each Action Phase while in space. Discard if craft enters atmosphere.",
-      cost=1, tags="Power;Solar;Fragile" },
-    { id="S08", name="RTG",                    type="Support", tier="",       card_index=126,
-      description="Generates 3 Energy at start of each Action Phase. Works anywhere. Mass 1 counts toward Thrust checks.",
-      cost=3, tags="Power;DeepSpace;Heavy" },
-    { id="S09", name="Battery Pack",           type="Support", tier="",       card_index=128,
-      description="Enters play with 4 stored Energy. Store up to 1 surplus generated Energy per round (max 4).",
-      cost=2, tags="Power;Storage" },
-    { id="S10", name="Flight Computer",        type="Support", tier="",       card_index=131,
-      description="Spend 1 Energy when launching, docking, or relaunching from surface: +1 Reliability for that check.",
-      cost=2, tags="Electronics;Guidance" },
-    { id="S11", name="Sensor Array",           type="Support", tier="",       card_index=134,
-      description="Spend 1 Energy to activate. Required for Tier 3 Scientific missions and any mission requiring Sensors.",
-      cost=2, tags="Scientific;Electronics" },
+local PLAYER_TINTS = {
+    White = { r = 0.92, g = 0.92, b = 0.92 },
+    Red = { r = 0.92, g = 0.14, b = 0.14 },
+    Blue = { r = 0.17, g = 0.38, b = 1.00 },
+    Green = { r = 0.12, g = 0.78, b = 0.22 },
 }
-
--- ── CARD COLOURS (match card design) ─────────────────────────
 
 local TYPE_COLOR = {
-    Engine  = {0.27, 0.51, 0.71},   -- blue
-    Tank    = {0.17, 0.63, 0.17},   -- green
-    Payload = {1.00, 0.50, 0.05},   -- orange
-    Support = {0.65, 0.55, 0.99},   -- purple-ish
-    Mission = {0.84, 0.15, 0.15},   -- red
-    Tech    = {0.77, 0.71, 0.99},   -- light purple
-    Event   = {0.55, 0.34, 0.29},   -- brown
+    Engine = { 0.27, 0.51, 0.71 },
+    Tank = { 0.17, 0.63, 0.17 },
+    Payload = { 1.00, 0.50, 0.05 },
+    Support = { 0.57, 0.38, 0.87 },
+    Mission = { 0.84, 0.15, 0.15 },
+    Tech = { 0.72, 0.64, 0.97 },
+    Event = { 0.55, 0.34, 0.29 },
 }
 
--- ── TABLE LAYOUT ─────────────────────────────────────────────
--- TTS axes: X = right (+) / left (−), Z = far (+) / near (−)
--- Deck component rail sits at the far end of the table (z ≈ +9).
--- Mission display runs across the centre (z ≈ +2 … +4).
+local BOARD_POS = { x = 0, y = 1.5, z = -1 }
+local BOARD_TARGET_SIZE = { x = 24, y = 1, z = 15 }
 
-local SPAWN_POSITIONS = {
-    -- Component build decks along the far edge, outside the board (Z = -10)
-    Engine       = { pos={-10,  1.5, -10},  rotY=0,  faceDown=false },
-    Tank         = { pos={-5.5, 1.5, -10},  rotY=0,  faceDown=false },
-    Payload      = { pos={-1,   1.5, -10},  rotY=0,  faceDown=false },
-    Support      = { pos={ 3.5, 1.5, -10},  rotY=0,  faceDown=false },
-    Tech         = { pos={ 8,   1.5, -10},  rotY=0,  faceDown=false },
-    Event        = { pos={ 11,  1.5, -10},  rotY=0,  faceDown=true  },
-    -- Mission decks by tier — right side of board (X = 14)
-    ["Mission T1"] = { pos={14, 1.5, -3},   rotY=90, faceDown=true  },
-    ["Mission T2"] = { pos={14, 1.5,  0},   rotY=90, faceDown=true  },
-    ["Mission T3"] = { pos={14, 1.5,  3},   rotY=90, faceDown=true  },
+local DECK_Y = 2.08
+local BOARD_CARD_Y = 1.96
+local BOARD_LABEL_Y = 1.84
+local BOARD_MARKER_Y = 1.82
+local TABLE_LABEL_Y = 1.03
+local INFO_PANEL_Y = 1.06
+local CONTROL_Y = 1.55
+
+local DECK_LAYOUT = {
+    component = { pos = { -14.8, DECK_Y, -6.8 }, rotY = 180, faceDown = true, name = "Component Deck" },
+    event = { pos = { 14.8, DECK_Y, -6.8 }, rotY = 180, faceDown = true, name = "Event Deck" },
+    mission = { pos = { 10.8, DECK_Y, -3.2 }, rotY = 90, faceDown = true, name = "Mission Deck" },
+    tier2 = { pos = { 10.8, DECK_Y, 0.0 }, rotY = 90, faceDown = true, name = "Tier 2 Reserve" },
+    tier3 = { pos = { 10.8, DECK_Y, 3.2 }, rotY = 90, faceDown = true, name = "Tier 3 Reserve" },
 }
 
--- Revealed Tier-1 mission display — on the board, between orbital map and VP track
+local MARKET_POSITIONS = {
+    { -7.6, BOARD_CARD_Y, -7.1 },
+    { -3.8, BOARD_CARD_Y, -7.1 },
+    { 0.0, BOARD_CARD_Y, -7.1 },
+    { 3.8, BOARD_CARD_Y, -7.1 },
+    { 7.6, BOARD_CARD_Y, -7.1 },
+}
+
 local MISSION_DISPLAY_POSITIONS = {
-    {-4.5, 1.5, 2},
-    { 0,   1.5, 2},
-    { 4.5, 1.5, 2},
+    { -4.6, BOARD_CARD_Y, 2.25 },
+    { 0.0, BOARD_CARD_Y, 2.25 },
+    { 4.6, BOARD_CARD_Y, 2.25 },
 }
 
--- Starting hand — one card of each type dealt to each player seat
-local STARTING_CARDS = { "E02", "T01", "S01" }  -- Sterling Booster, Standard Tank, Heat Shield
+local EVENT_DISPLAY_POS = { 0.0, BOARD_CARD_Y, -5.65 }
 
--- Ship token bag position (near the board, accessible to all players)
-local SHIP_BAG_POS = {-14, 1.5, -6}
-
--- Player seat positions (Z near-side, facing -Z = toward camera)
-local PLAYER_SEATS = {
-    { color="White", pos={ 0,  1.5, -12}, rotY=0   },
-    { color="Red",   pos={ 12, 1.5,  0},  rotY=270 },
-    { color="Blue",  pos={ 0,  1.5,  15}, rotY=180 },
-    { color="Green", pos={-12, 1.5,  0},  rotY=90  },
+local TRANSFER_WINDOW_POSITIONS = {
+    { 0.0, BOARD_MARKER_Y, -3.90 },
+    { 0.0, BOARD_MARKER_Y, -2.80 },
+    { 0.0, BOARD_MARKER_Y, -1.70 },
+    { 0.0, BOARD_MARKER_Y, -0.60 },
+    { 0.0, BOARD_MARKER_Y, 0.50 },
+    { 0.0, BOARD_MARKER_Y, 1.60 },
 }
 
--- ── BOARD / TRACKER DATA ─────────────────────────────────────
--- Board v2: Custom_Board scale {24,1,15}, centre world {0,1.5,-1}
--- Pixel → world:  X = px_x * 0.0078125 − 12
---                 Z = px_y * 0.0078125 − 8.5  (includes board Z offset -1)
+local TRACKER_Y_BASE = 1.63
+local TRACKER_Y_STEP = 0.04
 
-local BOARD_POS   = { x=0,  y=1.5, z=-1 }
-local BOARD_SCALE = { x=24, y=1,   z=15 }
-
--- World-space centre of each orbital node (for craft token placement)
--- Moon Transfer is visually absorbed into Earth's influence zone on board v2.
-local ORBITAL_NODES = {
-  Earth           = { x=-10.438, z=-0.297, name="Earth"              },
-  SubOrbitalEarth = { x= -9.500, z=-0.297, name="Sub-Orbital Earth"  },
-  LEO             = { x= -8.523, z=-0.297, name="LEO"                },
-  HighOrbit       = { x= -7.297, z=-0.297, name="High Orbit"         },
-  MoonTransfer    = { x= -4.344, z=-1.000, name="Moon Transfer"      },
-  MoonOrbit       = { x= -9.500, z=-5.500, name="Moon Orbit"         },
-  SubOrbitalMoon  = { x= -9.500, z=-5.891, name="Sub-Orbital Moon"   },
-  Moon            = { x= -9.500, z=-6.625, name="Moon"               },
-  SolarOrbit      = { x= -2.430, z=-0.297, name="Solar Orbit"        },
-  MarsTransfer    = { x= -0.008, z=-0.297, name="Mars Transfer"      },
-  MarsOrbit       = { x=  6.125, z=-0.297, name="Mars Orbit"         },
-  LMO             = { x=  7.414, z=-0.297, name="LMO"                },
-  SubOrbitalMars  = { x=  8.703, z=-0.297, name="Sub-Orbital Mars"   },
-  Mars            = { x= 10.422, z=-0.297, name="Mars"               },
+local VP_TRACK = {
+    x0 = -10.945,
+    z = 4.273,
+    step = 0.730,
+    max = 30,
+    prefix = "VP - ",
 }
 
--- VP track: 31 positions (0–30).  SVG y=1635 → board.png row.
--- world_Z = 4.273,  world_X_i = -10.945 + i * 0.730
-local VP_TRACK_Z    =  4.273
-local VP_TRACK_X0   = -10.945
-local VP_TRACK_STEP =  0.730
-
--- Credit track: 21 positions (0–20).  SVG y=1820 → board.png row.
--- world_Z = 5.719,  world_X_i = -10.828 + i * 0.938
-local CREDIT_TRACK_Z    =  5.719
-local CREDIT_TRACK_X0   = -10.828
-local CREDIT_TRACK_STEP =  0.938
-local CREDIT_START      =  5   -- each player begins with 5 Credits
-
--- Per-player tracker token colours (flat cylinders on the board tracks)
-local PLAYER_TINTS = {
-    { name="White", r=0.90, g=0.90, b=0.90 },
-    { name="Red",   r=0.90, g=0.10, b=0.10 },
-    { name="Blue",  r=0.15, g=0.35, b=1.00 },
-    { name="Green", r=0.10, g=0.80, b=0.20 },
+local CREDIT_TRACK = {
+    x0 = -10.828,
+    z = 5.719,
+    step = 0.938,
+    max = 20,
+    prefix = "Credits - ",
+    start = 5,
 }
 
--- ── HELPERS ──────────────────────────────────────────────────
+local CONTROL_LAYOUT = {
+    origin = { -5.6, CONTROL_Y, 11.4 },
+    columns = 5,
+    columnStep = 2.85,
+    rowStep = 0.95,
+    tileScale = { 1.55, 0.18, 0.52 },
+    buttonWidth = 920,
+    buttonHeight = 240,
+    fontSize = 108,
+}
 
-local function cardFaceURL(card_index)
-    return BASE_IMAGE_URL .. string.format("template_tts_%03d.png", card_index)
-end
+local PANEL_STYLES = {
+    default = {
+        scale = { 0.10, 0.08, 0.10 },
+        width = 1050,
+        height = 180,
+        fontSize = 84,
+        tileColor = { 0.02, 0.02, 0.03 },
+        fontColor = { 0.93, 0.93, 0.96 },
+        buttonColor = { 0, 0, 0, 0 },
+        hoverColor = { 0, 0, 0, 0 },
+        pressColor = { 0, 0, 0, 0 },
+    },
+    display = {
+        scale = { 0.10, 0.08, 0.10 },
+        width = 1220,
+        height = 220,
+        fontSize = 90,
+        tileColor = { 0.02, 0.02, 0.03 },
+        fontColor = { 0.95, 0.91, 0.76 },
+        buttonColor = { 0, 0, 0, 0 },
+        hoverColor = { 0, 0, 0, 0 },
+        pressColor = { 0, 0, 0, 0 },
+    },
+    agency = {
+        scale = { 0.10, 0.08, 0.10 },
+        width = 980,
+        height = 210,
+        fontSize = 80,
+        tileColor = { 0.02, 0.02, 0.03 },
+        fontColor = { 0.93, 0.93, 0.96 },
+        buttonColor = { 0, 0, 0, 0 },
+        hoverColor = { 0, 0, 0, 0 },
+        pressColor = { 0, 0, 0, 0 },
+    },
+    info = {
+        scale = { 0.10, 0.08, 0.10 },
+        width = 1700,
+        height = 320,
+        fontSize = 88,
+        tileColor = { 0.02, 0.02, 0.03 },
+        fontColor = { 0.93, 0.93, 0.96 },
+        buttonColor = { 0, 0, 0, 0 },
+        hoverColor = { 0, 0, 0, 0 },
+        pressColor = { 0, 0, 0, 0 },
+    },
+    status = {
+        scale = { 0.10, 0.08, 0.10 },
+        width = 2200,
+        height = 980,
+        fontSize = 84,
+        tileColor = { 0.02, 0.02, 0.03 },
+        fontColor = { 0.93, 0.93, 0.96 },
+        buttonColor = { 0, 0, 0, 0 },
+        hoverColor = { 0, 0, 0, 0 },
+        pressColor = { 0, 0, 0, 0 },
+    },
+}
 
--- Build the TTS JSON state table for a custom deck or single card.
--- cards      : list of CARD entries belonging to this deck
--- group_name : human-readable name (used for Nickname)
--- pos        : {x, y, z}
--- rotY       : Y rotation of the stack
--- face_down  : if true, deck spawns face-down (rotZ = 180)
-local function buildDeckState(cards, group_name, pos, rotY, face_down)
-    local rotZ       = face_down and 180 or 0
-    local custom_deck = {}
-    local deck_ids   = {}
-    local contained  = {}
-    local type_color = TYPE_COLOR[cards[1].type] or {0.71, 0.71, 0.71}
+local CONTROL_BUTTONS = {
+    { name = "Reset Table", label = "Reset\nTable", callback = "onResetClicked" },
+    { name = "Deal Starting Hands", label = "Deal\nStart", callback = "onDealHandsClicked" },
+    { name = "Planning Phase", label = "Planning", callback = "onPlanningPhaseClicked" },
+    { name = "Maintenance", label = "Mainte-\nnance", callback = "onMaintenanceClicked" },
+    { name = "Increase Agency Level", label = "Level\nUp", callback = "onLevelUpClicked" },
+    { name = "Refill Market", label = "Refill\nMarket", callback = "onRefillMarketClicked" },
+    { name = "Refill Missions", label = "Refill\nMissions", callback = "onRefillMissionsClicked" },
+    { name = "Buy Sterling Booster", label = "Buy\nSterling", callback = "onBuySterlingClicked" },
+    { name = "Buy Standard Tank", label = "Buy\nTank", callback = "onBuyTankClicked" },
+    { name = "Buy Heat Shield", label = "Buy\nShield", callback = "onBuyShieldClicked" },
+}
 
-    for _, card in ipairs(cards) do
-        local idx = card.card_index
-        custom_deck[tostring(idx)] = {
-            FaceURL      = cardFaceURL(idx),
-            BackURL      = CARD_BACK_URL,
-            NumWidth     = 1,
-            NumHeight    = 1,
-            BackIsHidden = true,
-            UniqueBack   = false,
-        }
-        local card_id = idx * 100
-        table.insert(deck_ids, card_id)
+local ROUND_STATUS_POS = { 12.6, INFO_PANEL_Y, 10.1 }
+local RULEBOOK_NOTE_POS = { -12.6, INFO_PANEL_Y, 10.1 }
+local CRAFT_BAG_POS = { -14.8, 1.5, -3.6 }
+local FIRST_PLAYER_POS = { -14.8, 1.5, -1.0 }
 
-        -- Build description text
-        local desc = card.description or ""
-        if card.tags  and card.tags  ~= "" then desc = "[" .. card.tags .. "]\n" .. desc end
-        if card.cost  and card.cost  ~= "" then desc = "Cost: " .. card.cost .. "\n"    .. desc end
-        if card.tier  and card.tier  ~= "" then desc = card.tier .. "\n"               .. desc end
-        if card.vp    and card.vp    ~= "" then desc = desc .. "\nVP: "    .. tostring(card.vp)    end
-        if card.reward and card.reward ~= "" then desc = desc .. "  Credits: " .. tostring(card.reward) end
+local RELIABILITY_DICE = {
+    { color = "White", pos = { -6.0, 1.5, 7.5 } },
+    { color = "Red", pos = { -2.0, 1.5, 7.5 } },
+    { color = "Blue", pos = { 2.0, 1.5, 7.5 } },
+    { color = "Green", pos = { 6.0, 1.5, 7.5 } },
+}
 
-        table.insert(contained, {
-            Name        = "Card",
-            CardID      = card_id,
-            Nickname    = card.name,
-            Description = desc,
-            GMNotes     = card.id,
-            ColorDiffuse = { r=type_color[1], g=type_color[2], b=type_color[3] },
-            CustomDeck  = { [tostring(idx)] = custom_deck[tostring(idx)] },
-            Transform   = {
-                posX=0, posY=0, posZ=0,
-                rotX=0, rotY=180, rotZ=0,
-                scaleX=1, scaleY=1, scaleZ=1,
-            },
-            Locked=false, Grid=true, Snap=true,
-            Autoraise=true, Sticky=true, Tooltip=true,
-        })
-    end
+local AGENCY_LEVEL_TRACKS = {
+    White = {
+        { -1.6, 1.14, -10.2 },
+        { 0.0, 1.14, -10.2 },
+        { 1.6, 1.14, -10.2 },
+    },
+    Red = {
+        { 13.9, 1.14, -1.6 },
+        { 13.9, 1.14, 0.0 },
+        { 13.9, 1.14, 1.6 },
+    },
+    Blue = {
+        { 1.6, 1.14, 9.4 },
+        { 0.0, 1.14, 9.4 },
+        { -1.6, 1.14, 9.4 },
+    },
+    Green = {
+        { -13.9, 1.14, 1.6 },
+        { -13.9, 1.14, 0.0 },
+        { -13.9, 1.14, -1.6 },
+    },
+}
 
-    if #cards == 1 then
-        -- TTS: a single card, not a deck wrapper
-        local c = contained[1]
-        c.Transform.posX  = pos[1]
-        c.Transform.posY  = pos[2]
-        c.Transform.posZ  = pos[3]
-        c.Transform.rotY  = rotY or 0
-        c.Transform.rotZ  = rotZ
-        c.Nickname = group_name ~= cards[1].type and group_name or c.Nickname
-        return c
-    end
+local AGENCY_LABEL_POSITIONS = {
+    White = { 0.0, TABLE_LABEL_Y, -11.45 },
+    Red = { 14.65, TABLE_LABEL_Y, 0.0 },
+    Blue = { 0.0, TABLE_LABEL_Y, 10.65 },
+    Green = { -14.65, TABLE_LABEL_Y, 0.0 },
+}
 
-    return {
-        Name     = "DeckCustom",
-        Nickname = group_name,
-        GMNotes  = "",
-        ColorDiffuse = { r=type_color[1], g=type_color[2], b=type_color[3] },
-        Transform = {
-            posX  = pos[1], posY = pos[2], posZ = pos[3],
-            rotX  = 0, rotY = rotY or 0, rotZ = rotZ,
-            scaleX=1, scaleY=1, scaleZ=1,
+local CARD_LABELS = {
+    { name = "Card Market Label", text = "Card Market\n5 face-up", pos = { 0.0, BOARD_LABEL_Y, -8.55 }, style = "display" },
+    { name = "Event Display Label", text = "Active Event", pos = { 0.0, BOARD_LABEL_Y, -6.95 }, style = "display" },
+    { name = "Mission Display Label", text = "Mission Display\n3 face-up", pos = { 0.0, BOARD_LABEL_Y, 0.95 }, style = "display" },
+}
+
+local OBSOLETE_LABEL_NAMES = {
+    "Component Deck Label",
+    "Event Deck Label",
+    "Mission Deck Label",
+    "Tier 2 Reserve Label",
+    "Tier 3 Reserve Label",
+    "Craft Bag Label",
+    "First Player Label",
+    "Agency Track - White",
+    "Agency Track - Red",
+    "Agency Track - Blue",
+    "Agency Track - Green",
+}
+
+local SUPPLY_RECOVERY_LAYOUTS = {
+    component = {
+        target = DECK_LAYOUT.component.pos,
+        rotation = { 0, DECK_LAYOUT.component.rotY, 180 },
+        anchors = {
+            { -12.8, 1.6, -9.7 },
+            { -16.0, DECK_Y, -8.8 },
+            DECK_LAYOUT.component.pos,
         },
-        Locked=false, Grid=true, Snap=true,
-        Autoraise=true, Sticky=true, Tooltip=true,
-        CustomDeck       = custom_deck,
-        DeckIDs          = deck_ids,
-        ContainedObjects = contained,
-    }
+    },
+    event = {
+        target = DECK_LAYOUT.event.pos,
+        rotation = { 0, DECK_LAYOUT.event.rotY, 180 },
+        anchors = {
+            { 12.8, 1.6, -9.7 },
+            { 16.0, DECK_Y, -8.8 },
+            DECK_LAYOUT.event.pos,
+        },
+    },
+    mission = {
+        target = DECK_LAYOUT.mission.pos,
+        rotation = { 0, DECK_LAYOUT.mission.rotY, 180 },
+        anchors = {
+            { 13.2, 1.6, -3.2 },
+            { 14.8, DECK_Y, -3.6 },
+            { 16.1, DECK_Y, -3.4 },
+            DECK_LAYOUT.mission.pos,
+        },
+    },
+    tier2 = {
+        target = DECK_LAYOUT.tier2.pos,
+        rotation = { 0, DECK_LAYOUT.tier2.rotY, 180 },
+        anchors = {
+            { 13.2, 1.6, 0.0 },
+            { 14.8, DECK_Y, -0.6 },
+            { 16.1, DECK_Y, -0.2 },
+            DECK_LAYOUT.tier2.pos,
+        },
+    },
+    tier3 = {
+        target = DECK_LAYOUT.tier3.pos,
+        rotation = { 0, DECK_LAYOUT.tier3.rotY, 180 },
+        anchors = {
+            { 13.2, 1.6, 3.2 },
+            { 14.8, DECK_Y, 2.4 },
+            { 16.1, DECK_Y, 3.0 },
+            DECK_LAYOUT.tier3.pos,
+        },
+    },
+}
+
+local LEGACY_EXACT_NAMES = {
+    ["Orbital Map"] = true,
+    ["Rulebook"] = true,
+    ["Ship Tokens"] = true,
+}
+
+local CARDS = {
+    { id = "E01", name = "Merlin-1a", type = "Engine", missionType = nil, tier = nil, card_index = 1, copies = 3, cost = 4, thrust = 7, range = nil, mass = nil, energy = nil, energyMode = nil, reliability = 7, vp = 0, reward = nil, tags = "Reusable;Experimental", text = "If this craft returns to Earth, return this card to hand.", isBasic = false },
+    { id = "E02", name = "Sterling Booster", type = "Engine", missionType = nil, tier = nil, card_index = 4, copies = 8, cost = 3, thrust = 5, range = nil, mass = nil, energy = nil, energyMode = nil, reliability = 9, vp = 0, reward = nil, tags = "Disposable;Reliable;Basic", text = "High reliability, single-use. Always available for purchase.", isBasic = true },
+    { id = "E03", name = "Hydrogen Core", type = "Engine", missionType = nil, tier = nil, card_index = 12, copies = 2, cost = 5, thrust = 8, range = nil, mass = nil, energy = nil, energyMode = nil, reliability = 7, vp = 0, reward = nil, tags = "HighThrust;Cryogenic", text = "Requires at least one Cryo Tank. Cryo propellant delivers high thrust and long Range per unit mass.", isBasic = false },
+    { id = "E04", name = "Ion Sustainer", type = "Engine", missionType = nil, tier = nil, card_index = 14, copies = 3, cost = 2, thrust = 3, range = nil, mass = nil, energy = nil, energyMode = nil, reliability = 9, vp = 0, reward = nil, tags = "LowThrust;Efficient", text = "Low thrust but very reliable and efficient.", isBasic = false },
+    { id = "E05", name = "Hybrid Cycle", type = "Engine", missionType = nil, tier = nil, card_index = 17, copies = 3, cost = 4, thrust = 6, range = nil, mass = nil, energy = nil, energyMode = nil, reliability = 8, vp = 0, reward = nil, tags = "Reusable;Balanced", text = "If this craft returns to Earth, return this card to hand.", isBasic = false },
+    { id = "E06", name = "Raptor-X", type = "Engine", missionType = nil, tier = nil, card_index = 20, copies = 2, cost = 6, thrust = 9, range = nil, mass = nil, energy = nil, energyMode = nil, reliability = 6, vp = 0, reward = nil, tags = "Experimental;HighThrust", text = "Non-Reusable. Highest thrust available. Best for mass-heavy payloads where no other engine qualifies — but lower Reliability means a higher chance of losing it on a failed roll.", isBasic = false },
+    { id = "E07", name = "Kick Stage", type = "Engine", missionType = nil, tier = nil, card_index = 22, copies = 3, cost = 4, thrust = 7, range = nil, mass = nil, energy = nil, energyMode = nil, reliability = 7, vp = 0, reward = nil, tags = "Disposable;Stageable", text = "Stage: +2 Range for this launch. Still counts as your Engine for this mission. Discard after launch.", isBasic = false },
+    { id = "T01", name = "Standard Tank", type = "Tank", missionType = nil, tier = nil, card_index = 25, copies = 8, cost = 2, thrust = nil, range = 5, mass = 2, energy = nil, energyMode = nil, reliability = nil, vp = 0, reward = nil, tags = "Stable;Basic", text = "Compatible with most engines. Always available for purchase.", isBasic = true },
+    { id = "T02", name = "Cryo Tank", type = "Tank", missionType = nil, tier = nil, card_index = 33, copies = 3, cost = 4, thrust = nil, range = 8, mass = 3, energy = nil, energyMode = nil, reliability = nil, vp = 0, reward = nil, tags = "Cryogenic;Extended", text = "Required for Hydrogen Core engine.", isBasic = false },
+    { id = "T03", name = "Fuel Pod", type = "Tank", missionType = nil, tier = nil, card_index = 36, copies = 5, cost = 1, thrust = nil, range = 3, mass = 1, energy = nil, energyMode = nil, reliability = nil, vp = 0, reward = nil, tags = "Cheap;Disposable;Stageable", text = "Stage: +1 Range for this launch. Discard after launch.", isBasic = false },
+    { id = "T04", name = "Expandable Tank", type = "Tank", missionType = nil, tier = nil, card_index = 41, copies = 4, cost = 3, thrust = nil, range = 5, mass = 2, energy = nil, energyMode = nil, reliability = nil, vp = 0, reward = nil, tags = "Expandable;Stageable", text = "Stage: +2 Range for this launch. Discard after launch.", isBasic = false },
+    { id = "T05", name = "Pressurized Tank", type = "Tank", missionType = nil, tier = nil, card_index = 45, copies = 3, cost = 2, thrust = nil, range = 5, mass = 2, energy = nil, energyMode = nil, reliability = nil, vp = 0, reward = nil, tags = "Pressurized", text = "Safer for crewed payloads.", isBasic = false },
+    { id = "T06", name = "Long-Range Tank", type = "Tank", missionType = nil, tier = nil, card_index = 48, copies = 2, cost = 5, thrust = nil, range = 12, mass = 4, energy = nil, energyMode = nil, reliability = nil, vp = 0, reward = nil, tags = "DeepSpace;Extended", text = "Range 12. Heavy. Mass 4.", isBasic = false },
+    { id = "P01", name = "Comm Satellite", type = "Payload", missionType = nil, tier = nil, card_index = 50, copies = 3, cost = 2, thrust = nil, range = nil, mass = 2, energy = -1, energyMode = "Use", reliability = nil, vp = 0, reward = nil, tags = "Uncrewed;Electronics;Satellite", text = "After delivery to LEO or High Orbit (GEO), this payload remains on the board as a communications satellite. Once per round, spend 1 Energy to gain 1 Credit from relay contracts.", isBasic = false },
+    { id = "P02", name = "Imaging Probe", type = "Payload", missionType = nil, tier = nil, card_index = 53, copies = 3, cost = 2, thrust = nil, range = nil, mass = 1, energy = -1, energyMode = "Use", reliability = nil, vp = 0, reward = nil, tags = "Uncrewed;Scientific;Electronics;Satellite", text = "After delivery, this payload remains on the board as a small science satellite. Once per round, spend 1 Energy to gain 1 VP from imagery or research data.", isBasic = false },
+    { id = "P03", name = "Science Module", type = "Payload", missionType = nil, tier = nil, card_index = 56, copies = 3, cost = 3, thrust = nil, range = nil, mass = 3, energy = -2, energyMode = "Use", reliability = nil, vp = 0, reward = nil, tags = "Scientific;Heavy", text = "Spend 2 Energy to activate this module's instruments. High reward for deep-space research missions.", isBasic = false },
+    { id = "P04", name = "Crew Capsule", type = "Payload", missionType = nil, tier = nil, card_index = 59, copies = 3, cost = 4, thrust = nil, range = nil, mass = 2, energy = -1, energyMode = "Use", reliability = nil, vp = 0, reward = nil, tags = "Crewed;LifeSupport;Reusable", text = "Spend 1 Energy when this capsule launches or relaunches from a surface. Enables crewed missions. If this craft returns to Earth, return this card to hand.", isBasic = false },
+    { id = "P05", name = "CubeSat Cluster", type = "Payload", missionType = nil, tier = nil, card_index = 62, copies = 4, cost = 1, thrust = nil, range = nil, mass = 1, energy = nil, energyMode = nil, reliability = nil, vp = 0, reward = nil, tags = "Uncrewed;Small;Satellite", text = "Cheap, small experiments. Remains on the board as an on-orbit asset.", isBasic = false },
+    { id = "P06", name = "Landing Lander", type = "Payload", missionType = nil, tier = nil, card_index = 66, copies = 3, cost = 3, thrust = nil, range = nil, mass = 2, energy = nil, energyMode = nil, reliability = nil, vp = 0, reward = nil, tags = "Surface;Heavy", text = "Enables surface landing. Alternative: use Rocket-as-Lander (Engine + sufficient Range).", isBasic = false },
+    { id = "P07", name = "Cargo Return Capsule", type = "Payload", missionType = nil, tier = nil, card_index = 69, copies = 3, cost = 3, thrust = nil, range = nil, mass = 1, energy = nil, energyMode = nil, reliability = nil, vp = 0, reward = nil, tags = "Uncrewed;Recovery;Reusable", text = "Useful for recovery or sample-return missions. If this craft returns to Earth, return this card to hand.", isBasic = false },
+    { id = "P08", name = "Station Hub", type = "Payload", missionType = nil, tier = nil, card_index = 137, copies = 2, cost = 4, thrust = nil, range = nil, mass = 2, energy = -1, energyMode = "Use", reliability = nil, vp = 0, reward = nil, tags = "Station;Docking;Electronics", text = "Core bus for a permanent orbital station. If this craft ends movement at High Orbit (GEO) with a Power card, a LifeSupport card, and one additional Scientific or Electronics card attached, designate it as an On-Orbit Station. Once per round, spend 1 Energy to gain 1 Credit from station operations.", isBasic = false },
+    { id = "S01", name = "Heat Shield", type = "Support", missionType = nil, tier = nil, card_index = 72, copies = 6, cost = 1, thrust = nil, range = nil, mass = nil, energy = nil, energyMode = nil, reliability = nil, vp = 0, reward = nil, tags = "Heat Shield;Stageable;Basic", text = "Landing support. Use from a Sub-Orbital node to land safely. Discard after use. Always available for purchase.", isBasic = true },
+    { id = "S02", name = "Recovery Chutes", type = "Support", missionType = nil, tier = nil, card_index = 78, copies = 4, cost = 1, thrust = nil, range = nil, mass = nil, energy = nil, energyMode = nil, reliability = nil, vp = 0, reward = nil, tags = "Parachute;Stageable", text = "Landing support. Use from a Sub-Orbital node to land safely. Discard after use.", isBasic = false },
+    { id = "S03", name = "Ceramic Tile Shield", type = "Support", missionType = nil, tier = nil, card_index = 82, copies = 3, cost = 2, thrust = nil, range = nil, mass = nil, energy = nil, energyMode = nil, reliability = nil, vp = 0, reward = nil, tags = "Heat Shield;Reusable", text = "Landing support. Use from a Sub-Orbital node to land safely. If this craft returns to Earth, return this card to hand.", isBasic = false },
+    { id = "S04", name = "Guided Parafoil", type = "Support", missionType = nil, tier = nil, card_index = 85, copies = 3, cost = 2, thrust = nil, range = nil, mass = nil, energy = nil, energyMode = nil, reliability = nil, vp = 0, reward = nil, tags = "Parachute;Reusable", text = "Landing support. Use from a Sub-Orbital node to land safely. If this craft returns to Earth, return this card to hand.", isBasic = false },
+    { id = "M01", name = "LEO Deployment", type = "Mission", missionType = "Public", tier = "Tier 1", card_index = 88, copies = 1, cost = 0, thrust = nil, range = 2, mass = nil, energy = nil, energyMode = nil, reliability = nil, vp = 2, reward = 5, tags = "LEO;Commercial;Public", text = "Reach LEO.<br>Carry an Uncrewed payload.", isBasic = false },
+    { id = "M02", name = "Lunar Flyby", type = "Mission", missionType = "Public", tier = "Tier 2", card_index = 89, copies = 1, cost = 0, thrust = nil, range = 10, mass = nil, energy = nil, energyMode = nil, reliability = nil, vp = 7, reward = 2, tags = "Lunar;Scientific;Prestige;Public", text = "Reach Moon Orbit and return to Earth.<br>Total route range needed: 10.", isBasic = false },
+    { id = "M03", name = "Lunar Landing", type = "Mission", missionType = "Public", tier = "Tier 2", card_index = 90, copies = 1, cost = 0, thrust = nil, range = 7, mass = nil, energy = nil, energyMode = nil, reliability = nil, vp = 9, reward = 3, tags = "Lunar;Surface;Prestige;Public", text = "Reach the Moon surface (one-way).<br>Have Landing Lander or Rocket-as-Lander.", isBasic = false },
+    { id = "M04", name = "Mars Orbit Insertion", type = "Mission", missionType = "Public", tier = "Tier 3", card_index = 91, copies = 1, cost = 0, thrust = nil, range = 7, mass = nil, energy = nil, energyMode = nil, reliability = nil, vp = 13, reward = 3, tags = "Mars;DeepSpace;Prestige;Public", text = "Reach Mars High Orbit.<br>Add Transfer Window cost to route plan.<br>Carry payload Mass 2+.", isBasic = false },
+    { id = "M05", name = "Deep Space Probe", type = "Mission", missionType = "Public", tier = "Tier 3", card_index = 92, copies = 1, cost = 0, thrust = nil, range = 9, mass = nil, energy = nil, energyMode = nil, reliability = nil, vp = 15, reward = 2, tags = "DeepSpace;Scientific;Prestige;Public", text = "Reach Sub-Orbital Mars.<br>Add Transfer Window cost to route plan.<br>Have Scientific payload + Sensor Array.<br>Spend 2 Energy for mission ops.", isBasic = false },
+    { id = "M06", name = "Crewed Station Visit", type = "Mission", missionType = "Public", tier = "Tier 2", card_index = 93, copies = 1, cost = 0, thrust = nil, range = 6, mass = nil, energy = nil, energyMode = nil, reliability = nil, vp = 5, reward = 4, tags = "Crewed;Docking;On-Orbit;Infrastructure;Public", text = "Reach High Orbit (GEO), dock with any On-Orbit Station, and return to Earth.<br>Have Crewed Capsule + Docking card + Engine.", isBasic = false },
+    { id = "M07", name = "Emergency Resupply", type = "Mission", missionType = "Public", tier = "Tier 1", card_index = 94, copies = 1, cost = 0, thrust = nil, range = 4, mass = nil, energy = nil, energyMode = nil, reliability = nil, vp = 3, reward = 6, tags = "LEO;Commercial;Public", text = "Reach LEO and return to Earth.<br>Carry payload Mass 2+.", isBasic = false },
+    { id = "M08", name = "Science Relay", type = "Mission", missionType = "Public", tier = "Tier 2", card_index = 95, copies = 1, cost = 0, thrust = nil, range = 6, mass = nil, energy = nil, energyMode = nil, reliability = nil, vp = 6, reward = 3, tags = "Scientific;Relay;Infrastructure;Public", text = "Reach High Orbit and return to Earth.<br>Have Scientific or Comm payload.<br>Spend 1 Energy to run relay instruments.", isBasic = false },
+    { id = "M09", name = "Orbital Service Check", type = "Mission", missionType = "Public", tier = "Tier 2", card_index = 96, copies = 1, cost = 0, thrust = nil, range = 2, mass = nil, energy = nil, energyMode = nil, reliability = nil, vp = 2, reward = 6, tags = "On-Orbit;Commercial;Public", text = "From a craft at LEO, fly to High Orbit (GEO) and return to LEO.<br>Requires: one of your Satellites already in High Orbit (GEO) to inspect. Engine with sufficient Range.", isBasic = false },
+    { id = "M10", name = "Capsule Recovery", type = "Mission", missionType = "Public", tier = "Tier 1", card_index = 97, copies = 1, cost = 0, thrust = nil, range = 1, mass = nil, energy = nil, energyMode = nil, reliability = nil, vp = 3, reward = 2, tags = "In-Flight;Infrastructure;Public", text = "From Sub-Orbital Earth, land at Earth.<br>Carry payload Mass 1 + Heat Shield or Parachute.", isBasic = false },
+    { id = "M11", name = "Reusable Flight Test", type = "Mission", missionType = "Public", tier = "Tier 1", card_index = 98, copies = 1, cost = 0, thrust = nil, range = 2, mass = nil, energy = nil, energyMode = nil, reliability = nil, vp = 4, reward = 3, tags = "Recovery;Infrastructure;Public", text = "Fly Earth -> Sub-Orbital Earth -> Earth.<br>Use Reusable Payload + Reusable reentry support.", isBasic = false },
+    { id = "M12", name = "Lunar Sample Return", type = "Mission", missionType = "Public", tier = "Tier 3", card_index = 99, copies = 1, cost = 0, thrust = nil, range = 14, mass = nil, energy = nil, energyMode = nil, reliability = nil, vp = 13, reward = 3, tags = "Lunar;Recovery;Prestige;Public", text = "Reach Moon surface, collect samples, and return to Earth.<br>Have Lander (or Rocket-as-Lander) + Cargo Return Capsule + Earth reentry support.", isBasic = false },
+    { id = "C01", name = "Reusable Refurb", type = "Tech", missionType = nil, tier = nil, card_index = 100, copies = 2, cost = 2, thrust = nil, range = nil, mass = nil, energy = nil, energyMode = nil, reliability = nil, vp = 0, reward = nil, tags = "Upgrade;Permanent", text = "Your Reusable engines gain +1 Reliability. When you recover a Reusable card during Maintenance, gain 1 Credit.", isBasic = false },
+    { id = "C02", name = "Cryo Handling", type = "Tech", missionType = nil, tier = nil, card_index = 102, copies = 2, cost = 3, thrust = nil, range = nil, mass = nil, energy = nil, energyMode = nil, reliability = nil, vp = 0, reward = nil, tags = "Upgrade;Compatible", text = "Your rockets that include a Cryo Tank gain +1 Reliability on launch checks.", isBasic = false },
+    { id = "C03", name = "Precision Guidance", type = "Tech", missionType = nil, tier = nil, card_index = 104, copies = 3, cost = 2, thrust = nil, range = nil, mass = nil, energy = nil, energyMode = nil, reliability = nil, vp = 0, reward = nil, tags = "Upgrade;Support", text = "Increase mission success chance: +1 effective reliability on launch checks.", isBasic = false },
+    { id = "C04", name = "Modular Payloads", type = "Tech", missionType = nil, tier = nil, card_index = 107, copies = 3, cost = 2, thrust = nil, range = nil, mass = nil, energy = nil, energyMode = nil, reliability = nil, vp = 0, reward = nil, tags = "Upgrade;Flexible", text = "Reduce your payload's Mass by 1 (minimum 1) for Thrust checks.", isBasic = false },
+    { id = "EV01", name = "Solar Storm", type = "Event", missionType = nil, tier = nil, card_index = 110, copies = 1, cost = 0, thrust = nil, range = nil, mass = nil, energy = nil, energyMode = nil, reliability = nil, vp = 0, reward = nil, tags = "Event", text = "Global: All launches this round suffer -2 reliability.", isBasic = false },
+    { id = "EV02", name = "Funding Boost", type = "Event", missionType = nil, tier = nil, card_index = 111, copies = 1, cost = 0, thrust = nil, range = nil, mass = nil, energy = nil, energyMode = nil, reliability = nil, vp = 0, reward = nil, tags = "Event", text = "Occasional bonus: All players gain +3 Credits immediately.", isBasic = false },
+    { id = "EV03", name = "Supply Delay", type = "Event", missionType = nil, tier = nil, card_index = 112, copies = 1, cost = 0, thrust = nil, range = nil, mass = nil, energy = nil, energyMode = nil, reliability = nil, vp = 0, reward = nil, tags = "Event", text = "Players must spend +1 Credit to prepare launches this round.", isBasic = false },
+    { id = "EV04", name = "Tech Breakthrough", type = "Event", missionType = nil, tier = nil, card_index = 113, copies = 1, cost = 0, thrust = nil, range = nil, mass = nil, energy = nil, energyMode = nil, reliability = nil, vp = 0, reward = nil, tags = "Event", text = "First player to launch this round searches the Component Deck for 1 Technology card (add to hand, reshuffle).", isBasic = false },
+    { id = "S05", name = "Docking Adapter", type = "Support", missionType = nil, tier = nil, card_index = 114, copies = 3, cost = 2, thrust = nil, range = nil, mass = nil, energy = -1, energyMode = "Use", reliability = nil, vp = 0, reward = nil, tags = "Docking;Reusable", text = "Enables docking with stations and other craft. Required for Docking missions. Spend 1 Energy to dock. If this craft returns to Earth, return this card to hand.", isBasic = false },
+    { id = "S06", name = "Orbital Tug", type = "Support", missionType = nil, tier = nil, card_index = 117, copies = 2, cost = 3, thrust = nil, range = nil, mass = nil, energy = -1, energyMode = "Use", reliability = nil, vp = 0, reward = nil, tags = "Docking;Maneuver", text = "Enables docking and orbital maneuvering (satisfies Docking and Maneuver tag requirements). Spend 1 Energy when activating this craft in orbit to gain +1 Range. If this craft returns to Earth, return this card to hand.", isBasic = false },
+    { id = "EV05", name = "Docking Opportunity", type = "Event", missionType = nil, tier = nil, card_index = 119, copies = 1, cost = 0, thrust = nil, range = nil, mass = nil, energy = nil, energyMode = nil, reliability = nil, vp = 0, reward = nil, tags = "Event", text = "This round, any craft with a Docking tag that docks with an On-Orbit Station in High Orbit (GEO) gains +2 VP.", isBasic = false },
+    { id = "EV06", name = "Transfer Window Storm", type = "Event", missionType = nil, tier = nil, card_index = 120, copies = 1, cost = 0, thrust = nil, range = nil, mass = nil, energy = nil, energyMode = nil, reliability = nil, vp = 0, reward = nil, tags = "Event", text = "This round, Transfer Window cost is increased by +2 (max TW 5).", isBasic = false },
+    { id = "EV07", name = "Launch Window", type = "Event", missionType = nil, tier = nil, card_index = 121, copies = 1, cost = 0, thrust = nil, range = nil, mass = nil, energy = nil, energyMode = nil, reliability = nil, vp = 0, reward = nil, tags = "Event", text = "This round, Transfer Window cost is reduced by 2 (min TW 0).", isBasic = false },
+    { id = "EV08", name = "Expanded Operations", type = "Event", missionType = nil, tier = nil, card_index = 122, copies = 1, cost = 0, thrust = nil, range = nil, mass = nil, energy = nil, energyMode = nil, reliability = nil, vp = 0, reward = nil, tags = "Event", text = "This round, each player's hand limit is increased to 7.", isBasic = false },
+    { id = "S07", name = "Solar Panel", type = "Support", missionType = nil, tier = nil, card_index = 123, copies = 3, cost = 1, thrust = nil, range = nil, mass = nil, energy = 2, energyMode = "Gen", reliability = nil, vp = 0, reward = nil, tags = "Power;Solar;Fragile", text = "Generates 2 Energy at the start of each Action Phase while this craft is in space. If this craft enters atmosphere, discard this card.", isBasic = false },
+    { id = "S08", name = "RTG", type = "Support", missionType = nil, tier = nil, card_index = 126, copies = 2, cost = 3, thrust = nil, range = nil, mass = 1, energy = 3, energyMode = "Gen", reliability = nil, vp = 0, reward = nil, tags = "Power;DeepSpace;Heavy", text = "Generates 3 Energy at the start of each Action Phase. Works in any location. This card's Mass counts toward launch Thrust checks.", isBasic = false },
+    { id = "S09", name = "Battery Pack", type = "Support", missionType = nil, tier = nil, card_index = 128, copies = 3, cost = 2, thrust = nil, range = nil, mass = nil, energy = 4, energyMode = "Storage", reliability = nil, vp = 0, reward = nil, tags = "Power;Storage", text = "Enters play with 4 stored Energy. Does not generate Energy. At the end of the round, you may store 1 surplus generated Energy on this card, up to 4.", isBasic = false },
+    { id = "S10", name = "Flight Computer", type = "Support", missionType = nil, tier = nil, card_index = 131, copies = 3, cost = 2, thrust = nil, range = nil, mass = nil, energy = -1, energyMode = "Use", reliability = nil, vp = 0, reward = nil, tags = "Electronics;Guidance", text = "Spend 1 Energy when this craft launches, docks, or relaunches from a surface: this craft gets +1 Reliability for that check.", isBasic = false },
+    { id = "S11", name = "Sensor Array", type = "Support", missionType = nil, tier = nil, card_index = 134, copies = 3, cost = 2, thrust = nil, range = nil, mass = nil, energy = -1, energyMode = "Use", reliability = nil, vp = 0, reward = nil, tags = "Scientific;Electronics", text = "Spend 1 Energy to activate this card. Required for Tier 3 Scientific missions and any mission text that requires Sensors.", isBasic = false },
+    { id = "S12", name = "Habitation Ring", type = "Support", missionType = nil, tier = nil, card_index = 139, copies = 2, cost = 3, thrust = nil, range = nil, mass = 1, energy = nil, energyMode = nil, reliability = nil, vp = 0, reward = nil, tags = "LifeSupport;Station", text = "Provides living quarters for long-duration crews. If attached to a Station Hub in High Orbit (GEO), it helps that craft qualify as an On-Orbit Station.", isBasic = false },
+    { id = "S13", name = "Microgravity Lab", type = "Support", missionType = nil, tier = nil, card_index = 141, copies = 2, cost = 3, thrust = nil, range = nil, mass = 1, energy = -1, energyMode = "Use", reliability = nil, vp = 0, reward = nil, tags = "Scientific;Station", text = "Orbital laboratory module. Spend 1 Energy to activate experiments; if attached to a Station Hub in High Orbit (GEO), gain 1 VP the first time you do this each round. It also helps that craft qualify as an On-Orbit Station.", isBasic = false },
+}
+
+local CARD_BY_ID = {}
+for _, card in ipairs(CARDS) do
+    CARD_BY_ID[card.id] = card
 end
 
--- ── SETUP LOGIC ──────────────────────────────────────────────
+local gameState = {}
 
--- Collects cards by predicate into a list
-local function filterCards(predicate)
+local function cloneTable(source)
     local result = {}
-    for _, card in ipairs(CARDS) do
-        if predicate(card) then table.insert(result, card) end
+    for key, value in pairs(source) do
+        result[key] = value
     end
     return result
 end
 
--- Finds a single card by id
-local function findCard(card_id)
-    for _, card in ipairs(CARDS) do
-        if card.id == card_id then return card end
+local function startsWith(value, prefix)
+    return type(value) == "string" and value:sub(1, #prefix) == prefix
+end
+
+local function clamp(value, minValue, maxValue)
+    if value < minValue then
+        return minValue
+    end
+    if value > maxValue then
+        return maxValue
+    end
+    return value
+end
+
+local function isPlayableColor(color)
+    return PLAYER_TINTS[color] ~= nil
+end
+
+local function defaultAgencyLevels()
+    local levels = {}
+    for _, color in ipairs(PLAYER_ORDER) do
+        levels[color] = 1
+    end
+    return levels
+end
+
+local function normalizeState(state)
+    state = state or {}
+    state.currentRound = tonumber(state.currentRound) or 0
+    state.transferWindowBase = clamp(tonumber(state.transferWindowBase) or 0, 0, 5)
+    state.activeEventId = state.activeEventId
+    state.activeEventName = state.activeEventName
+    state.unlockedTier2 = state.unlockedTier2 == true
+    state.unlockedTier3 = state.unlockedTier3 == true
+    state.agencyLevels = state.agencyLevels or defaultAgencyLevels()
+
+    for _, color in ipairs(PLAYER_ORDER) do
+        state.agencyLevels[color] = clamp(tonumber(state.agencyLevels[color]) or 1, 1, 3)
+    end
+
+    return state
+end
+
+local function resetState()
+    gameState = normalizeState({
+        currentRound = 0,
+        transferWindowBase = 0,
+        activeEventId = nil,
+        activeEventName = nil,
+        unlockedTier2 = false,
+        unlockedTier3 = false,
+        agencyLevels = defaultAgencyLevels(),
+    })
+end
+
+local function getTag(obj)
+    return (obj and (obj.tag or obj.type)) or ""
+end
+
+local function isCard(obj)
+    return getTag(obj) == "Card"
+end
+
+local function isDeck(obj)
+    local tag = getTag(obj)
+    return tag == "Deck" or tag == "DeckCustom"
+end
+
+local function isCardStack(obj)
+    return isCard(obj) or isDeck(obj)
+end
+
+local function distanceSquared(pos, target)
+    local dx = pos.x - target[1]
+    local dy = pos.y - target[2]
+    local dz = pos.z - target[3]
+    return dx * dx + dy * dy + dz * dz
+end
+
+local function getManagedNote(obj)
+    if obj and obj.getGMNotes then
+        return obj.getGMNotes() or ""
+    end
+    return ""
+end
+
+local function isLegacyManagedName(name)
+    if LEGACY_EXACT_NAMES[name] then
+        return true
+    end
+    return startsWith(name, "ZoneLabel:")
+end
+
+local function markManaged(obj)
+    if obj and obj.setGMNotes then
+        obj.setGMNotes(MANAGED_NOTE)
+    end
+    return obj
+end
+
+local function findObjectByName(name)
+    for _, obj in ipairs(getAllObjects()) do
+        if obj.getName() == name then
+            return obj
+        end
     end
     return nil
 end
 
--- Spawns a TTS object from a state table; returns the object.
-local function spawnFromState(state)
-    return spawnObjectJSON({ json=JSON.encode(state), sound=false, snap_to_grid=true })
-end
+local function findCardStackNear(position, radius)
+    local best = nil
+    local bestDistance = nil
+    local radiusSq = radius * radius
 
--- Central game setup function.
-local function setupGame()
-    -- 1. Destroy all unlocked objects, plus any locked zone labels from a previous setup
     for _, obj in ipairs(getAllObjects()) do
-        local name = obj.getName()
-        if not obj.getLock() or name:sub(1, 10) == "ZoneLabel:" or name == "Orbital Map" then
-            obj.destruct()
-        end
-    end
-
-    Wait.time(function()
-        -- 2. Component decks (Engine, Tank, Payload, Support, Tech)
-        for _, deck_type in ipairs({"Engine","Tank","Payload","Support","Tech"}) do
-            local cards = filterCards(function(c) return c.type == deck_type end)
-            local sp    = SPAWN_POSITIONS[deck_type]
-            spawnFromState(buildDeckState(cards, deck_type .. " Deck", sp.pos, sp.rotY, sp.faceDown))
-        end
-
-        -- 3. Event deck (face-down, shuffled)
-        local event_cards = filterCards(function(c) return c.type == "Event" end)
-        local ev_sp = SPAWN_POSITIONS["Event"]
-        local event_obj = spawnFromState(buildDeckState(event_cards, "Event Deck", ev_sp.pos, ev_sp.rotY, ev_sp.faceDown))
-        Wait.time(function() if event_obj then event_obj.shuffle() end end, 0.8)
-
-        -- 4. Mission decks split by tier (each face-down & shuffled)
-        for tier_key, tier_label in pairs({["Mission T1"]="Tier 1", ["Mission T2"]="Tier 2", ["Mission T3"]="Tier 3"}) do
-            local tier_cards = filterCards(function(c) return c.type=="Mission" and c.tier==tier_label end)
-            local sp = SPAWN_POSITIONS[tier_key]
-            local deck_name = "Mission " .. tier_label
-            local deck_obj = spawnFromState(buildDeckState(tier_cards, deck_name, sp.pos, sp.rotY, sp.faceDown))
-            -- Shuffle only Tier 1 now; Tier 2 and 3 unlock later
-            if tier_key == "Mission T1" then
-                Wait.time(function()
-                    if deck_obj then
-                        deck_obj.shuffle()
-                        -- 5. Reveal 3 Tier-1 mission cards face-up into the display row
-                        Wait.time(function()
-                            for i = 1, 3 do
-                                if deck_obj then
-                                    local dpos = MISSION_DISPLAY_POSITIONS[i]
-                                    deck_obj.takeObject({
-                                        position = {dpos[1], dpos[2] + 0.5, dpos[3]},
-                                        flip     = true,  -- face-up
-                                        smooth   = true,
-                                    })
-                                end
-                            end
-                        end, 0.8)
-                    end
-                end, 0.8)
+        if isCardStack(obj) then
+            local pos = obj.getPosition()
+            local dist = distanceSquared(pos, position)
+            if dist <= radiusSq and (bestDistance == nil or dist < bestDistance) then
+                best = obj
+                bestDistance = dist
             end
         end
+    end
 
-        -- 6. Zone labels using Notecards
-        local function placeLabel(text, pos)
-            local nc = spawnObject({ type="Notecard", position=pos })
-            nc.setName("ZoneLabel:" .. text)
-            nc.setLock(true)
-            nc.setValue(text)
-        end
-        placeLabel("ENGINES",          {-10,  0.8, -10})
-        placeLabel("TANKS",            {-5.5, 0.8, -10})
-        placeLabel("PAYLOADS",         {-1,   0.8, -10})
-        placeLabel("SUPPORT",          { 3.5, 0.8, -10})
-        placeLabel("TECH",             { 8,   0.8, -10})
-        placeLabel("EVENTS",           { 11,  0.8, -10})
-        placeLabel("TIER 1\nMISSIONS", {14,   0.8,  -3})
-        placeLabel("TIER 2\nMISSIONS", {14,   0.8,   0})
-        placeLabel("TIER 3\nMISSIONS", {14,   0.8,   3})
-        placeLabel("MISSION DISPLAY",  { 0,   0.8,   2})
-
-        -- 7. Reliability dice — one d10 per player seat, placed in the centre
-        local die_positions = { {-6, 1.5, 7.5}, {-2, 1.5, 7.5}, {2, 1.5, 7.5}, {6, 1.5, 7.5} }
-        local die_colors    = { {1,1,1}, {1,0.2,0.2}, {0.2,0.4,1}, {0.2,0.8,0.2} }
-        for i = 1, 4 do
-            local dp = die_positions[i]
-            local dc = die_colors[i]
-            local die = spawnObject({ type="Die_10", position={dp[1], dp[2], dp[3]} })
-            die.setColorTint({ r=dc[1], g=dc[2], b=dc[3] })
-            die.setName("Reliability Die")
-        end
-
-        -- 8. Game board
-        local board = spawnObjectJSON({
-            json = JSON.encode({
-                Name     = "Custom_Board",
-                Nickname = "Orbital Map",
-                Transform = {
-                    posX=BOARD_POS.x, posY=BOARD_POS.y, posZ=BOARD_POS.z,
-                    rotX=0, rotY=0, rotZ=0,
-                    scaleX=BOARD_SCALE.x, scaleY=BOARD_SCALE.y, scaleZ=BOARD_SCALE.z,
-                },
-                CustomBoard = {
-                    FaceURL = BOARD_IMAGE_URL,
-                    BackURL = BOARD_IMAGE_URL,
-                },
-                Locked=true, Grid=true, Snap=true,
-                Autoraise=true, Sticky=true, Tooltip=true,
-            }),
-            sound = false,
-            snap_to_grid = false,
-        })
-
-        -- 9. Player tracker tokens — flat cylinders stacked slightly on VP and Credit tracks
-        for i, pc in ipairs(PLAYER_TINTS) do
-            local y_off = 1.63 + (i - 1) * 0.04
-            local vp_token = spawnObject({
-                type     = "Chip_10",
-                position = { VP_TRACK_X0, y_off, VP_TRACK_Z },
-                scale    = { 0.6, 0.6, 0.6 },
-            })
-            vp_token.setColorTint({ r=pc.r, g=pc.g, b=pc.b })
-            vp_token.setName("VP - " .. pc.name)
-
-            local cr_token = spawnObject({
-                type     = "Chip_10",
-                position = { CREDIT_TRACK_X0 + CREDIT_START * CREDIT_TRACK_STEP, y_off, CREDIT_TRACK_Z },
-                scale    = { 0.6, 0.6, 0.6 },
-            })
-            cr_token.setColorTint({ r=pc.r, g=pc.g, b=pc.b })
-            cr_token.setName("Credits - " .. pc.name)
-        end
-
-        -- 10. Ship token bag — one custom-model spaceship per player colour
-        local ship_contained = {}
-        for i, pc in ipairs(PLAYER_TINTS) do
-            table.insert(ship_contained, {
-                Name     = "Custom_Model",
-                Nickname = "Ship - " .. pc.name,
-                GMNotes  = "",
-                ColorDiffuse = { r=pc.r, g=pc.g, b=pc.b },
-                Transform = {
-                    posX=0, posY=0, posZ=0,
-                    rotX=0, rotY=0, rotZ=0,
-                    scaleX=0.04, scaleY=0.04, scaleZ=0.04,
-                },
-                CustomMesh = {
-                    MeshURL       = SHIP_MODEL_URL,
-                    DiffuseURL    = "",
-                    NormalURL     = "",
-                    ColliderURL   = "",
-                    Convex        = true,
-                    MaterialIndex = 0,   -- Plastic
-                    TypeIndex     = 0,   -- Generic
-                    CastShadows   = true,
-                },
-                Locked=false, Grid=true, Snap=true,
-                Autoraise=true, Sticky=true, Tooltip=true,
-            })
-        end
-
-        spawnObjectJSON({
-            json = JSON.encode({
-                Name     = "Bag",
-                Nickname = "Ship Tokens",
-                GMNotes  = "",
-                ColorDiffuse = { r=0.2, g=0.2, b=0.4 },
-                Transform = {
-                    posX=SHIP_BAG_POS[1], posY=SHIP_BAG_POS[2], posZ=SHIP_BAG_POS[3],
-                    rotX=0, rotY=0, rotZ=0,
-                    scaleX=1, scaleY=1, scaleZ=1,
-                },
-                Locked=false, Grid=true, Snap=true,
-                Autoraise=true, Sticky=true, Tooltip=true,
-                ContainedObjects = ship_contained,
-            }),
-            sound = false,
-            snap_to_grid = true,
-        })
-        placeLabel("SHIPS", {SHIP_BAG_POS[1], 0.8, SHIP_BAG_POS[3]})
-
-        broadcastToAll("Space Agency Race is set up! Deal starting hands when all players are seated.", "Yellow")
-    end, 0.3)
+    return best
 end
 
--- Deals 1 starting Engine, 1 Tank, and 1 Tech card to each seated player.
--- Starting cards are identified by their GMNotes field (stores the card id, e.g. "E02").
-function dealStartingHands()
-    local seated = {}
-    for _, player in ipairs(Player.getPlayers()) do
-        if player.seated then table.insert(seated, player) end
+local function findLooseCardByIdNearPositions(cardId, positions, radius)
+    local radiusSq = radius * radius
+    for _, obj in ipairs(getAllObjects()) do
+        if isCard(obj) and obj.getGMNotes() == cardId then
+            local pos = obj.getPosition()
+            for _, target in ipairs(positions) do
+                if distanceSquared(pos, target) <= radiusSq then
+                    return obj
+                end
+            end
+        end
     end
-    if #seated == 0 then
-        broadcastToAll("No seated players found. Sit at a colour seat first.", "Red")
-        return
+    return nil
+end
+
+local function findCardInDeckById(cardId, deckPos)
+    local stack = findCardStackNear(deckPos, 2.2)
+    if not stack then
+        return nil, nil
     end
 
-    -- Build a lookup: card_id → containing deck/card object
-    local function findObjectByCardId(card_id)
-        for _, obj in ipairs(getAllObjects()) do
-            if obj.type == "Card" and obj.getGMNotes() == card_id then
-                return obj, nil          -- stand-alone card
-            elseif obj.type == "Deck" then
-                for _, entry in ipairs(obj.getObjects()) do
-                    if entry.gm_notes == card_id then
-                        return obj, entry.guid  -- deck + guid of card within it
-                    end
-                end
+    if isDeck(stack) then
+        for _, entry in ipairs(stack.getObjects()) do
+            if entry.gm_notes == cardId then
+                return stack, entry.guid
             end
         end
         return nil, nil
     end
 
-    local delay = 0
-    for _, seat_player in ipairs(seated) do
-        for _, card_id in ipairs(STARTING_CARDS) do
-            Wait.time(function()
-                local container, guid = findObjectByCardId(card_id)
-                if not container then
-                    broadcastToAll("Starting card " .. card_id .. " not found on table.", "Red")
-                    return
-                end
-                local taken
-                if guid then
-                    taken = container.takeObject({ guid=guid, smooth=true })
-                else
-                    taken = container  -- it is already a loose card
-                end
-                if taken then taken.deal(1, seat_player.color) end
-            end, delay)
-            delay = delay + 0.3
+    if isCard(stack) and stack.getGMNotes() == cardId then
+        return stack, nil
+    end
+
+    return nil, nil
+end
+
+local function formatTags(tags)
+    if not tags or tags == "" then
+        return nil
+    end
+    return tags:gsub(";", ", ")
+end
+
+local function sanitizeText(text)
+    if not text or text == "" then
+        return nil
+    end
+    return text:gsub("<br%s*/?>", "\n")
+end
+
+local function buildCardDescription(card)
+    local lines = {}
+    local stats = {}
+
+    if card.type == "Mission" and card.tier then
+        table.insert(lines, card.tier .. " Mission")
+    elseif card.type == "Tech" then
+        table.insert(lines, "Technology")
+    elseif card.type == "Event" then
+        table.insert(lines, "Round Event")
+    end
+
+    if card.cost and card.type ~= "Mission" and card.type ~= "Event" then
+        table.insert(stats, "Cost " .. tostring(card.cost))
+    end
+    if card.thrust then
+        table.insert(stats, "Thrust " .. tostring(card.thrust))
+    end
+    if card.range then
+        table.insert(stats, "Range " .. tostring(card.range))
+    end
+    if card.mass then
+        table.insert(stats, "Mass " .. tostring(card.mass))
+    end
+    if card.reliability then
+        table.insert(stats, "Reliability " .. tostring(card.reliability))
+    end
+    if card.energy then
+        if card.energyMode == "Gen" then
+            table.insert(stats, "Energy +" .. tostring(card.energy))
+        elseif card.energyMode == "Storage" then
+            table.insert(stats, "Storage " .. tostring(card.energy))
+        else
+            table.insert(stats, "Energy " .. tostring(card.energy))
+        end
+    end
+    if card.vp and card.vp > 0 then
+        table.insert(stats, "VP " .. tostring(card.vp))
+    end
+    if card.reward and card.reward > 0 then
+        table.insert(stats, "Reward " .. tostring(card.reward) .. " Credits")
+    end
+
+    if #stats > 0 then
+        table.insert(lines, table.concat(stats, " | "))
+    end
+
+    if card.isBasic then
+        table.insert(lines, "Basic card")
+    end
+
+    local tags = formatTags(card.tags)
+    if tags then
+        table.insert(lines, "Tags: " .. tags)
+    end
+
+    local text = sanitizeText(card.text)
+    if text then
+        table.insert(lines, text)
+    end
+
+    return table.concat(lines, "\n")
+end
+
+local function cardFaceURL(cardIndex)
+    return BASE_IMAGE_URL .. string.format("template_tts_%03d.png", cardIndex)
+end
+
+local function filterCards(predicate)
+    local result = {}
+    for _, card in ipairs(CARDS) do
+        if predicate(card) then
+            table.insert(result, card)
+        end
+    end
+    table.sort(result, function(left, right)
+        return left.card_index < right.card_index
+    end)
+    return result
+end
+
+local function expandCopies(cards)
+    local expanded = {}
+    for _, card in ipairs(cards) do
+        for offset = 0, (card.copies or 1) - 1 do
+            local copy = cloneTable(card)
+            copy.card_index = card.card_index + offset
+            copy.copyNumber = offset + 1
+            table.insert(expanded, copy)
         end
     end
 
-    Wait.time(function()
-        broadcastToAll(
-            "Starting hands dealt! Each player receives: Sterling Booster + Standard Tank + Heat Shield.",
-            "Yellow")
-    end, delay + 0.5)
+    table.sort(expanded, function(left, right)
+        return left.card_index < right.card_index
+    end)
+    return expanded
 end
 
--- ── BUTTONS ──────────────────────────────────────────────────
+local function buildDeckState(cards, deckName, layout)
+    local physicalCards = expandCopies(cards)
+    local customDeck = {}
+    local deckIds = {}
+    local contained = {}
+    local baseColor = TYPE_COLOR[physicalCards[1].type] or { 0.72, 0.72, 0.72 }
+    local rotZ = layout.faceDown and 180 or 0
 
--- Creates a persistent clickable tile with a labelled button on it.
--- Returns the spawned tile object.
-local function createButton(label, fn_name, position)
-    local tile = spawnObject({
-        type     = "BlockRectangle",
+    for _, card in ipairs(physicalCards) do
+        local idx = card.card_index
+        customDeck[tostring(idx)] = {
+            FaceURL = cardFaceURL(idx),
+            BackURL = CARD_BACK_URL,
+            NumWidth = 1,
+            NumHeight = 1,
+            BackIsHidden = true,
+            UniqueBack = false,
+        }
+
+        local cardId = idx * 100
+        table.insert(deckIds, cardId)
+
+        table.insert(contained, {
+            Name = "Card",
+            Nickname = card.name,
+            Description = buildCardDescription(card),
+            GMNotes = card.id,
+            CardID = cardId,
+            ColorDiffuse = { r = baseColor[1], g = baseColor[2], b = baseColor[3] },
+            CustomDeck = { [tostring(idx)] = customDeck[tostring(idx)] },
+            Transform = {
+                posX = 0, posY = 0, posZ = 0,
+                rotX = 0, rotY = 180, rotZ = 0,
+                scaleX = 1, scaleY = 1, scaleZ = 1,
+            },
+            Locked = false,
+            Grid = true,
+            Snap = true,
+            Autoraise = true,
+            Sticky = true,
+            Tooltip = true,
+        })
+    end
+
+    return {
+        Name = "DeckCustom",
+        Nickname = deckName,
+        Description = deckName,
+        GMNotes = MANAGED_NOTE,
+        ColorDiffuse = { r = baseColor[1], g = baseColor[2], b = baseColor[3] },
+        Transform = {
+            posX = layout.pos[1], posY = layout.pos[2], posZ = layout.pos[3],
+            rotX = 0, rotY = layout.rotY or 0, rotZ = rotZ,
+            scaleX = 1, scaleY = 1, scaleZ = 1,
+        },
+        Locked = false,
+        Grid = true,
+        Snap = true,
+        Autoraise = true,
+        Sticky = true,
+        Tooltip = true,
+        CustomDeck = customDeck,
+        DeckIDs = deckIds,
+        ContainedObjects = contained,
+    }
+end
+
+local function spawnFromState(state)
+    return spawnObjectJSON({ json = JSON.encode(state), sound = false, snap_to_grid = true })
+end
+
+local function applyBoardLayout(board, position, rotation)
+    local bounds = board.getVisualBoundsNormalized() or board.getBoundsNormalized()
+    if bounds and bounds.size and bounds.size.x > 0 and bounds.size.z > 0 then
+        local currentScale = board.getScale()
+        board.setScale({
+            x = currentScale.x * BOARD_TARGET_SIZE.x / bounds.size.x,
+            y = currentScale.y,
+            z = currentScale.z * BOARD_TARGET_SIZE.z / bounds.size.z,
+        })
+    end
+
+    board.setPosition(position)
+    board.setRotation(rotation)
+    board.setName("Orbital Map")
+    board.setDescription("Space Agency Race board")
+    board.setGMNotes(MANAGED_NOTE)
+    board.setLock(true)
+    board.use_grid = true
+    board.auto_raise = true
+    board.sticky = true
+    board.tooltip = true
+end
+
+local function configureBoardObject(board, position, rotation)
+    board.setCustomObject({ image = BOARD_IMAGE_URL })
+    board = board.reload()
+
+    Wait.condition(function()
+        applyBoardLayout(board, position, rotation)
+    end, function()
+        return board ~= nil and not board.spawning and not board.loading_custom
+    end)
+
+    return board
+end
+
+local function spawnBoard()
+    local position = { x = BOARD_POS.x, y = BOARD_POS.y, z = BOARD_POS.z }
+    local rotation = { x = 0, y = 0, z = 0 }
+    local board = spawnObject({
+        type = "Custom_Board",
         position = position,
-        scale    = {3.5, 0.2, 1.2},
+        rotation = rotation,
+        scale = { x = 1, y = 1, z = 1 },
+        sound = false,
+        snap_to_grid = false,
     })
-    tile.setLock(true)
-    tile.setName(label)
-    tile.setColorTint({0.1, 0.1, 0.3})
-    tile.createButton({
-        click_function = fn_name,
+
+    return configureBoardObject(board, position, rotation)
+end
+
+local function ensureBoardPresent()
+    local board = findObjectByName("Orbital Map")
+    if board then
+        return configureBoardObject(board, board.getPosition(), board.getRotation())
+    end
+
+    return spawnBoard()
+end
+
+local function trackerPosition(spec, value, playerColor)
+    local tintIndex = 0
+    for index, color in ipairs(PLAYER_ORDER) do
+        if color == playerColor then
+            tintIndex = index - 1
+            break
+        end
+    end
+    return { spec.x0 + spec.step * value, TRACKER_Y_BASE + tintIndex * TRACKER_Y_STEP, spec.z }
+end
+
+local function createTracker(kind, color, value)
+    local spec = kind == "vp" and VP_TRACK or CREDIT_TRACK
+    local tint = PLAYER_TINTS[color]
+    local tracker = spawnObject({
+        type = "Chip_10",
+        position = trackerPosition(spec, value, color),
+        scale = { 0.6, 0.6, 0.6 },
+    })
+    tracker.setName(spec.prefix .. color)
+    tracker.setDescription(kind == "vp" and "Victory points" or "Credits")
+    tracker.setColorTint(tint)
+    tracker.setLock(false)
+    markManaged(tracker)
+    return tracker
+end
+
+local function createAgencyMarker(color)
+    local tint = PLAYER_TINTS[color]
+    local marker = spawnObject({
+        type = "Chip_10",
+        position = AGENCY_LEVEL_TRACKS[color][1],
+        scale = { 0.55, 0.55, 0.55 },
+    })
+    marker.setName("Agency Marker - " .. color)
+    marker.setDescription(color .. " agency level")
+    marker.setColorTint(tint)
+    marker.setLock(false)
+    markManaged(marker)
+    return marker
+end
+
+local function createReliabilityDie(color, position)
+    local die = spawnObject({ type = "Die_10", position = position })
+    die.setName("Reliability Die - " .. color)
+    die.setColorTint(PLAYER_TINTS[color])
+    markManaged(die)
+    return die
+end
+
+local function createFirstPlayerToken()
+    local token = spawnObject({
+        type = "Chip_10",
+        position = FIRST_PLAYER_POS,
+        scale = { 0.7, 0.7, 0.7 },
+    })
+    token.setName("First Player")
+    token.setDescription("Pass to the first player each round")
+    token.setColorTint({ r = 0.97, g = 0.82, b = 0.19 })
+    markManaged(token)
+    return token
+end
+
+local function createCraftBag()
+    local craftMarkers = {}
+    for _, color in ipairs(PLAYER_ORDER) do
+        local tint = PLAYER_TINTS[color]
+        for copy = 1, 6 do
+            table.insert(craftMarkers, {
+                Name = "Custom_Model",
+                Nickname = "Craft Marker - " .. color,
+                Description = "Craft marker " .. tostring(copy) .. " for " .. color,
+                GMNotes = MANAGED_NOTE,
+                ColorDiffuse = { r = tint.r, g = tint.g, b = tint.b },
+                Transform = {
+                    posX = 0, posY = 0, posZ = 0,
+                    rotX = 0, rotY = 0, rotZ = 0,
+                    scaleX = 0.04, scaleY = 0.04, scaleZ = 0.04,
+                },
+                CustomMesh = {
+                    MeshURL = SHIP_MODEL_URL,
+                    DiffuseURL = "",
+                    NormalURL = "",
+                    ColliderURL = "",
+                    Convex = true,
+                    MaterialIndex = 0,
+                    TypeIndex = 0,
+                    CastShadows = true,
+                },
+                Locked = false,
+                Grid = true,
+                Snap = true,
+                Autoraise = true,
+                Sticky = true,
+                Tooltip = true,
+            })
+        end
+    end
+
+    local bag = spawnObjectJSON({
+        json = JSON.encode({
+            Name = "Bag",
+            Nickname = "Craft Markers",
+            Description = "Six craft markers per player",
+            GMNotes = MANAGED_NOTE,
+            ColorDiffuse = { r = 0.18, g = 0.18, b = 0.32 },
+            Transform = {
+                posX = CRAFT_BAG_POS[1], posY = CRAFT_BAG_POS[2], posZ = CRAFT_BAG_POS[3],
+                rotX = 0, rotY = 0, rotZ = 0,
+                scaleX = 1, scaleY = 1, scaleZ = 1,
+            },
+            Locked = false,
+            Grid = true,
+            Snap = true,
+            Autoraise = true,
+            Sticky = true,
+            Tooltip = true,
+            ContainedObjects = craftMarkers,
+        }),
+        sound = false,
+        snap_to_grid = true,
+    })
+    return markManaged(bag)
+end
+
+local function ensurePanelObject(name, position)
+    local panel = findObjectByName(name)
+    if panel and getTag(panel) ~= "BlockRectangle" then
+        panel.destruct()
+        panel = nil
+    end
+    if not panel then
+        panel = spawnObject({
+            type = "BlockRectangle",
+            position = position,
+            scale = { 1, 1, 1 },
+            sound = false,
+            snap_to_grid = false,
+        })
+    end
+    return panel
+end
+
+local function applyTextPanelStyle(panel, name, labelText, descriptionText, position, style)
+    panel.setName(name)
+    panel.setDescription(descriptionText or labelText)
+    panel.setPosition(position)
+    panel.setRotation({ 0, 0, 0 })
+    panel.setScale(style.scale)
+    panel.setColorTint(style.tileColor)
+    panel.setLock(true)
+    markManaged(panel)
+    panel.clearButtons()
+    panel.createButton({
+        click_function = "onLayoutPanelClicked",
         function_owner = Global,
-        label          = label,
-        position       = {0, 0.6, 0},
-        rotation       = {0, 0, 0},
-        width          = 1800,
-        height         = 500,
-        font_size      = 220,
-        color          = {0.9, 0.9, 0.9},
-        hover_color    = {1, 1, 1},
-        press_color    = {0.6, 0.8, 1},
+        label = labelText,
+        tooltip = descriptionText or labelText,
+        position = { 0, 0.28, 0 },
+        rotation = { 0, 0, 0 },
+        width = style.width,
+        height = style.height,
+        font_size = style.fontSize,
+        font_color = style.fontColor,
+        color = style.buttonColor or style.tileColor,
+        hover_color = style.hoverColor or style.buttonColor or style.tileColor,
+        press_color = style.pressColor or style.buttonColor or style.tileColor,
     })
+    return panel
+end
+
+local function ensureTextPanel(name, labelText, descriptionText, position, styleKey)
+    local panel = ensurePanelObject(name, position)
+    local style = PANEL_STYLES[styleKey or "default"] or PANEL_STYLES.default
+    return applyTextPanelStyle(panel, name, labelText, descriptionText, position, style)
+end
+
+local function createLabel(name, text, position, styleKey)
+    return ensureTextPanel(name, text, text, position, styleKey)
+end
+
+local function ensureAgencyTrackLabels()
+end
+
+local function removeObsoleteLabels()
+    for _, name in ipairs(OBSOLETE_LABEL_NAMES) do
+        local obj = findObjectByName(name)
+        if obj then
+            obj.destruct()
+        end
+    end
+end
+
+local function ensureCardLabels()
+    for _, label in ipairs(CARD_LABELS) do
+        createLabel(label.name, label.text, label.pos, label.style)
+    end
+end
+
+local function controlButtonPosition(index)
+    local zeroBasedIndex = index - 1
+    local column = zeroBasedIndex % CONTROL_LAYOUT.columns
+    local row = math.floor(zeroBasedIndex / CONTROL_LAYOUT.columns)
+    return {
+        CONTROL_LAYOUT.origin[1] + column * CONTROL_LAYOUT.columnStep,
+        CONTROL_LAYOUT.origin[2],
+        CONTROL_LAYOUT.origin[3] - row * CONTROL_LAYOUT.rowStep,
+    }
+end
+
+local function applyControlTileStyle(tile, name, label, callback, position)
+    tile.setName(name)
+    tile.setPosition(position)
+    tile.setScale(CONTROL_LAYOUT.tileScale)
+    tile.setColorTint({ 0.10, 0.10, 0.28 })
+    tile.setLock(true)
+    markManaged(tile)
+    tile.clearButtons()
+    tile.createButton({
+        click_function = callback,
+        function_owner = Global,
+        label = label,
+        tooltip = name,
+        position = { 0, 0.50, 0 },
+        rotation = { 0, 0, 0 },
+        width = CONTROL_LAYOUT.buttonWidth,
+        height = CONTROL_LAYOUT.buttonHeight,
+        font_size = CONTROL_LAYOUT.fontSize,
+        color = { 0.92, 0.92, 0.96 },
+        hover_color = { 1.00, 1.00, 1.00 },
+        press_color = { 0.58, 0.78, 1.00 },
+    })
+end
+
+local function createControlTile(name, label, callback, position)
+    local tile = spawnObject({
+        type = "BlockRectangle",
+        position = position,
+        scale = CONTROL_LAYOUT.tileScale,
+    })
+    applyControlTileStyle(tile, name, label, callback, position)
     return tile
 end
 
--- Global button callback: reset / setup table
-function onResetClicked(obj, player_color, alt_click)
-    if alt_click then return end
-    broadcastToAll(player_color .. " is resetting the table...", "Orange")
+local function ensureControlTiles()
+    for index, control in ipairs(CONTROL_BUTTONS) do
+        local position = controlButtonPosition(index)
+        local tile = findObjectByName(control.name)
+        if not tile then
+            createControlTile(control.name, control.label, control.callback, position)
+        else
+            applyControlTileStyle(tile, control.name, control.label, control.callback, position)
+        end
+    end
+end
+
+local function ensureRulebookNote()
+    return ensureTextPanel(
+        "Rulebook Reference",
+        "Rulebook\nHover for URL",
+        "Rulebook URL\n" .. RULEBOOK_URL,
+        RULEBOOK_NOTE_POS,
+        "info"
+    )
+end
+
+local function effectiveTransferWindow()
+    local modifier = 0
+    if gameState.activeEventId == "EV06" then
+        modifier = 2
+    elseif gameState.activeEventId == "EV07" then
+        modifier = -2
+    end
+    return clamp(gameState.transferWindowBase + modifier, 0, 5)
+end
+
+local function currentHandLimit()
+    if gameState.activeEventId == "EV08" then
+        return 7
+    end
+    return 5
+end
+
+local function getParticipatingColors(fallbackColor)
+    local colors = {}
+    for _, player in ipairs(Player.getPlayers()) do
+        if player.seated and isPlayableColor(player.color) then
+            table.insert(colors, player.color)
+        end
+    end
+    if #colors == 0 and fallbackColor and isPlayableColor(fallbackColor) then
+        table.insert(colors, fallbackColor)
+    end
+    return colors
+end
+
+local function findTrackerObject(kind, playerColor)
+    local prefix = kind == "vp" and VP_TRACK.prefix or CREDIT_TRACK.prefix
+    return findObjectByName(prefix .. playerColor)
+end
+
+local function trackerSpec(kind)
+    return kind == "vp" and VP_TRACK or CREDIT_TRACK
+end
+
+local function getTrackerValue(kind, playerColor)
+    local obj = findTrackerObject(kind, playerColor)
+    if not obj then
+        return nil
+    end
+    local spec = trackerSpec(kind)
+    local pos = obj.getPosition()
+    local raw = (pos.x - spec.x0) / spec.step
+    return clamp(math.floor(raw + 0.5), 0, spec.max)
+end
+
+local function setTrackerValue(kind, playerColor, value)
+    local obj = findTrackerObject(kind, playerColor)
+    if not obj then
+        return false
+    end
+    local spec = trackerSpec(kind)
+    local clamped = clamp(value, 0, spec.max)
+    obj.setPositionSmooth(trackerPosition(spec, clamped, playerColor), false, true)
+    return true
+end
+
+local function addTrackerValue(kind, playerColor, delta)
+    local current = getTrackerValue(kind, playerColor)
+    if current == nil then
+        return false
+    end
+    return setTrackerValue(kind, playerColor, current + delta)
+end
+
+local function findAgencyMarker(playerColor)
+    return findObjectByName("Agency Marker - " .. playerColor)
+end
+
+local function updateAgencyMarkers()
+    for _, color in ipairs(PLAYER_ORDER) do
+        local marker = findAgencyMarker(color)
+        local level = clamp(gameState.agencyLevels[color] or 1, 1, 3)
+        if marker then
+            marker.setPositionSmooth(AGENCY_LEVEL_TRACKS[color][level], false, true)
+            marker.setDescription("Agency level " .. tostring(level) .. "\nCommand turns: " .. tostring(level))
+        end
+    end
+end
+
+local function ensureRoundStatusNote()
+    local tier2Text = gameState.unlockedTier2 and "Unlocked" or "Locked"
+    local tier3Text = gameState.unlockedTier3 and "Unlocked" or "Locked"
+    local tw = effectiveTransferWindow()
+    local eventLine = gameState.activeEventName or "None"
+
+    local statusText = table.concat({
+        "Round " .. tostring(gameState.currentRound),
+        "TW " .. tostring(tw) .. " (base " .. tostring(gameState.transferWindowBase) .. ")",
+        "Event: " .. eventLine,
+        "Hand limit: " .. tostring(currentHandLimit()),
+        "Tier 2: " .. tier2Text,
+        "Tier 3: " .. tier3Text,
+        "Basics always available:",
+        "Sterling Booster, Standard Tank, Heat Shield",
+    }, "\n")
+
+    return ensureTextPanel("Round Status", statusText, statusText, ROUND_STATUS_POS, "status")
+end
+
+local function updateTransferWindowMarker()
+    local marker = findObjectByName("Transfer Window Marker")
+    if not marker then
+        return
+    end
+    local value = effectiveTransferWindow()
+    local pos = TRANSFER_WINDOW_POSITIONS[value + 1]
+    marker.setPositionSmooth(pos, false, true)
+    marker.setDescription("Current transfer window cost: " .. tostring(value))
+end
+
+local function updateVisualState()
+    updateTransferWindowMarker()
+    updateAgencyMarkers()
+    ensureRoundStatusNote()
+    ensureRulebookNote()
+end
+
+local function cleanupTable()
+    for _, obj in ipairs(getAllObjects()) do
+        local name = obj.getName() or ""
+        local gmNotes = getManagedNote(obj)
+        if (not obj.getLock()) or gmNotes == MANAGED_NOTE or isLegacyManagedName(name) then
+            obj.destruct()
+        end
+    end
+end
+
+local function slotOccupied(position, radius)
+    local radiusSq = radius * radius
+    for _, obj in ipairs(getAllObjects()) do
+        if isCardStack(obj) then
+            local pos = obj.getPosition()
+            if distanceSquared(pos, position) <= radiusSq then
+                return true
+            end
+        end
+    end
+    return false
+end
+
+local function findCardAt(position, radius)
+    local radiusSq = radius * radius
+    for _, obj in ipairs(getAllObjects()) do
+        if isCard(obj) then
+            local pos = obj.getPosition()
+            if distanceSquared(pos, position) <= radiusSq then
+                return obj
+            end
+        end
+    end
+    return nil
+end
+
+local function planarDistanceSquared(pos, target)
+    local dx = pos.x - target[1]
+    local dz = pos.z - target[3]
+    return dx * dx + dz * dz
+end
+
+local function isNearAnyAnchor(pos, anchors, radius)
+    local radiusSq = radius * radius
+    for _, anchor in ipairs(anchors) do
+        if planarDistanceSquared(pos, anchor) <= radiusSq then
+            return true
+        end
+    end
+    return false
+end
+
+local function isNearDisplaySlot(pos, slots, radius)
+    return isNearAnyAnchor(pos, slots, radius)
+end
+
+local function cardDefinitionForObject(obj)
+    if isCard(obj) then
+        return CARD_BY_ID[obj.getGMNotes()]
+    end
+    if isDeck(obj) then
+        local objects = obj.getObjects()
+        if objects and objects[1] then
+            return CARD_BY_ID[objects[1].gm_notes]
+        end
+    end
+    return nil
+end
+
+local function recoveryLayoutForCard(cardDef)
+    if not cardDef then
+        return nil
+    end
+    if cardDef.type == "Event" then
+        return SUPPLY_RECOVERY_LAYOUTS.event
+    end
+    if cardDef.type == "Mission" then
+        if cardDef.tier == "Tier 3" and not gameState.unlockedTier3 then
+            return SUPPLY_RECOVERY_LAYOUTS.tier3
+        end
+        if cardDef.tier == "Tier 2" and not gameState.unlockedTier2 then
+            return SUPPLY_RECOVERY_LAYOUTS.tier2
+        end
+        return SUPPLY_RECOVERY_LAYOUTS.mission
+    end
+    return SUPPLY_RECOVERY_LAYOUTS.component
+end
+
+local function recoverLegacySupplyCards()
+    for _, obj in ipairs(getAllObjects()) do
+        if isCardStack(obj) then
+            local cardDef = cardDefinitionForObject(obj)
+            local layout = recoveryLayoutForCard(cardDef)
+            local pos = obj.getPosition()
+            local shouldRecover = layout and isNearAnyAnchor(pos, layout.anchors, 2.6)
+            if not shouldRecover and cardDef and cardDef.type == "Mission" then
+                shouldRecover = not isNearDisplaySlot(pos, MISSION_DISPLAY_POSITIONS, 2.0) and pos.x > 11.4
+            end
+            if shouldRecover and layout then
+                obj.setPositionSmooth(layout.target, false, true)
+                obj.setRotationSmooth(layout.rotation, false, true)
+            end
+        end
+    end
+end
+
+local function repositionNamedObject(name, position, rotation)
+    local obj = findObjectByName(name)
+    if obj then
+        obj.setPositionSmooth(position, false, true)
+        if rotation then
+            obj.setRotationSmooth(rotation, false, true)
+        end
+    end
+end
+
+local function syncLooseCardsAtPositions(slots)
+    for _, slot in ipairs(slots) do
+        local card = findCardAt(slot, 1.5)
+        if card then
+            card.setPositionSmooth(slot, false, true)
+        end
+    end
+end
+
+local function syncManagedLayoutObjects()
+    removeObsoleteLabels()
+    repositionNamedObject(DECK_LAYOUT.component.name, DECK_LAYOUT.component.pos, { 0, DECK_LAYOUT.component.rotY, 180 })
+    repositionNamedObject(DECK_LAYOUT.event.name, DECK_LAYOUT.event.pos, { 0, DECK_LAYOUT.event.rotY, 180 })
+    repositionNamedObject(DECK_LAYOUT.mission.name, DECK_LAYOUT.mission.pos, { 0, DECK_LAYOUT.mission.rotY, 180 })
+    repositionNamedObject(DECK_LAYOUT.tier2.name, DECK_LAYOUT.tier2.pos, { 0, DECK_LAYOUT.tier2.rotY, 180 })
+    repositionNamedObject(DECK_LAYOUT.tier3.name, DECK_LAYOUT.tier3.pos, { 0, DECK_LAYOUT.tier3.rotY, 180 })
+    repositionNamedObject("Craft Markers", CRAFT_BAG_POS)
+    repositionNamedObject("First Player", FIRST_PLAYER_POS)
+    recoverLegacySupplyCards()
+    syncLooseCardsAtPositions(MARKET_POSITIONS)
+    syncLooseCardsAtPositions(MISSION_DISPLAY_POSITIONS)
+    syncLooseCardsAtPositions({ EVENT_DISPLAY_POS })
+end
+
+local function takeTopCardToPosition(sourcePos, targetPos, flip, rotation)
+    local source = findCardStackNear(sourcePos, 2.2)
+    if not source then
+        return nil
+    end
+
+    if isDeck(source) then
+        return source.takeObject({
+            position = targetPos,
+            rotation = rotation or { 0, 180, 0 },
+            flip = flip == true,
+            smooth = true,
+        })
+    end
+
+    if isCard(source) then
+        source.setPositionSmooth(targetPos, false, true)
+        if rotation then
+            source.setRotationSmooth(rotation, false, true)
+        end
+        if flip then
+            source.flip()
+        end
+        return source
+    end
+
+    return nil
+end
+
+local function refillFaceUpSlots(sourcePos, slots)
+    local delay = 0
+    for _, slot in ipairs(slots) do
+        if not slotOccupied(slot, 1.2) then
+            Wait.time(function()
+                takeTopCardToPosition(sourcePos, slot, true, { 0, 180, 0 })
+            end, delay)
+            delay = delay + 0.25
+        end
+    end
+end
+
+local function refillMarket()
+    refillFaceUpSlots(DECK_LAYOUT.component.pos, MARKET_POSITIONS)
+end
+
+local function refillMissionDisplay()
+    refillFaceUpSlots(DECK_LAYOUT.mission.pos, MISSION_DISPLAY_POSITIONS)
+end
+
+local function findSupplyCard(cardId)
+    local deck, guid = findCardInDeckById(cardId, DECK_LAYOUT.component.pos)
+    if deck then
+        return deck, guid
+    end
+    local loose = findLooseCardByIdNearPositions(cardId, MARKET_POSITIONS, 1.3)
+    if loose then
+        return loose, nil
+    end
+    return nil, nil
+end
+
+local function takeSupplyCardToHand(cardId, playerColor)
+    local container, guid = findSupplyCard(cardId)
+    if not container then
+        return false
+    end
+
+    local taken = nil
+    if guid then
+        taken = container.takeObject({ guid = guid, smooth = false })
+    else
+        taken = container
+    end
+
+    if taken and taken.deal then
+        taken.deal(1, playerColor)
+        return true
+    end
+
+    return false
+end
+
+local function drawCardsToSeatedPlayers(count)
+    local colors = getParticipatingColors(nil)
+    if #colors == 0 then
+        return
+    end
+
+    local delay = 0
+    for _, color in ipairs(colors) do
+        Wait.time(function()
+            local stack = findCardStackNear(DECK_LAYOUT.component.pos, 2.2)
+            if stack and stack.deal then
+                stack.deal(count, color)
+            end
+        end, delay)
+        delay = delay + 0.35
+    end
+end
+
+local function dealStartingHands()
+    local colors = getParticipatingColors(nil)
+    if #colors == 0 then
+        broadcastToAll("No seated players found. Sit at a player seat first.", "Red")
+        return
+    end
+
+    local delay = 0
+    for _, color in ipairs(colors) do
+        for _, cardId in ipairs(STARTING_CARDS) do
+            Wait.time(function()
+                if not takeSupplyCardToHand(cardId, color) then
+                    broadcastToAll("Could not find starting card " .. cardId .. " in the component supply.", "Red")
+                end
+            end, delay)
+            delay = delay + 0.20
+        end
+    end
+
+    Wait.time(function()
+        refillMarket()
+        broadcastToAll("Starting hands dealt: Sterling Booster, Standard Tank, and Heat Shield.", "Yellow")
+    end, delay + 0.6)
+end
+
+local function discoverActiveEventFromTable()
+    local card = findCardAt(EVENT_DISPLAY_POS, 1.5)
+    if not card then
+        gameState.activeEventId = nil
+        gameState.activeEventName = nil
+        return
+    end
+
+    local cardId = card.getGMNotes()
+    local eventDef = CARD_BY_ID[cardId]
+    gameState.activeEventId = cardId
+    gameState.activeEventName = eventDef and eventDef.name or cardId
+end
+
+local function applyCatchUpGrant(amount, triggerColor)
+    local colors = getParticipatingColors(triggerColor)
+    if #colors == 0 then
+        return
+    end
+
+    local lowestVp = nil
+    local vpTied = {}
+    for _, color in ipairs(colors) do
+        local vp = getTrackerValue("vp", color) or 0
+        if lowestVp == nil or vp < lowestVp then
+            lowestVp = vp
+            vpTied = { color }
+        elseif vp == lowestVp then
+            table.insert(vpTied, color)
+        end
+    end
+
+    if #vpTied == 1 then
+        addTrackerValue("credit", vpTied[1], amount)
+        broadcastToAll(vpTied[1] .. " gains the catch-up grant: +" .. tostring(amount) .. " Credits.", "Yellow")
+        return
+    end
+
+    local lowestCredit = nil
+    local creditTied = {}
+    for _, color in ipairs(vpTied) do
+        local credit = getTrackerValue("credit", color) or 0
+        if lowestCredit == nil or credit < lowestCredit then
+            lowestCredit = credit
+            creditTied = { color }
+        elseif credit == lowestCredit then
+            table.insert(creditTied, color)
+        end
+    end
+
+    if #creditTied == 1 then
+        addTrackerValue("credit", creditTied[1], amount)
+        broadcastToAll(creditTied[1] .. " wins the catch-up tiebreak and gains +" .. tostring(amount) .. " Credits.", "Yellow")
+        return
+    end
+
+    for _, color in ipairs(creditTied) do
+        addTrackerValue("credit", color, 2)
+    end
+    broadcastToAll("Catch-up grant tie: each tied player gains 2 Credits.", "Yellow")
+end
+
+local function mergeDeckStacks(targetPos, sourcePos, targetName, targetRotY)
+    local target = findCardStackNear(targetPos, 2.2)
+    local source = findCardStackNear(sourcePos, 2.2)
+    if not source then
+        return
+    end
+
+    if not target then
+        source.setPositionSmooth(targetPos, false, true)
+        source.setRotationSmooth({ 0, targetRotY, 180 }, false, true)
+        source.setName(targetName)
+        if source.setGMNotes then
+            source.setGMNotes(MANAGED_NOTE)
+        end
+        Wait.time(function()
+            local stack = findCardStackNear(targetPos, 2.2)
+            if stack and stack.shuffle then
+                stack.shuffle()
+            end
+        end, 0.8)
+        return
+    end
+
+    if isDeck(target) then
+        target.putObject(source)
+        Wait.time(function()
+            local stack = findCardStackNear(targetPos, 2.2)
+            if stack then
+                stack.setName(targetName)
+                if stack.setGMNotes then
+                    stack.setGMNotes(MANAGED_NOTE)
+                end
+                if stack.shuffle then
+                    stack.shuffle()
+                end
+            end
+        end, 0.8)
+        return
+    end
+
+    if isDeck(source) then
+        source.putObject(target)
+        source.setPositionSmooth(targetPos, false, true)
+        source.setRotationSmooth({ 0, targetRotY, 180 }, false, true)
+        source.setName(targetName)
+        if source.setGMNotes then
+            source.setGMNotes(MANAGED_NOTE)
+        end
+        Wait.time(function()
+            local stack = findCardStackNear(targetPos, 2.2)
+            if stack and stack.shuffle then
+                stack.shuffle()
+            end
+        end, 0.8)
+        return
+    end
+
+    source.setPositionSmooth(targetPos, false, true)
+    Wait.time(function()
+        local stack = findCardStackNear(targetPos, 2.2)
+        if stack then
+            stack.setName(targetName)
+            if stack.setGMNotes then
+                stack.setGMNotes(MANAGED_NOTE)
+            end
+            if stack.shuffle then
+                stack.shuffle()
+            end
+        end
+    end, 0.8)
+end
+
+local function unlockMissionTier(tier, triggerColor)
+    if tier == 2 then
+        if gameState.unlockedTier2 then
+            return
+        end
+        gameState.unlockedTier2 = true
+        mergeDeckStacks(DECK_LAYOUT.mission.pos, DECK_LAYOUT.tier2.pos, DECK_LAYOUT.mission.name, DECK_LAYOUT.mission.rotY)
+        applyCatchUpGrant(3, triggerColor)
+        broadcastToAll("Tier 2 missions are now shuffled into the mission deck.", "Yellow")
+    elseif tier == 3 then
+        if gameState.unlockedTier3 then
+            return
+        end
+        gameState.unlockedTier3 = true
+        mergeDeckStacks(DECK_LAYOUT.mission.pos, DECK_LAYOUT.tier3.pos, DECK_LAYOUT.mission.name, DECK_LAYOUT.mission.rotY)
+        applyCatchUpGrant(4, triggerColor)
+        broadcastToAll("Tier 3 missions are now shuffled into the mission deck.", "Yellow")
+    end
+
+    Wait.time(updateVisualState, 1.0)
+end
+
+local function currentLevelCost(level)
+    return LEVEL_COSTS[level] or 0
+end
+
+local function levelUpAgency(playerColor)
+    if not isPlayableColor(playerColor) then
+        broadcastToAll("Choose a player color before using Level Up.", "Red")
+        return
+    end
+
+    local currentLevel = gameState.agencyLevels[playerColor] or 1
+    if currentLevel >= 3 then
+        broadcastToAll(playerColor .. " is already at Agency Level 3.", "Yellow")
+        return
+    end
+
+    local nextLevel = currentLevel + 1
+    local cost = currentLevelCost(nextLevel)
+    local credits = getTrackerValue("credit", playerColor) or 0
+    if credits < cost then
+        broadcastToAll(playerColor .. " needs " .. tostring(cost) .. " Credits to reach Level " .. tostring(nextLevel) .. ".", "Red")
+        return
+    end
+
+    setTrackerValue("credit", playerColor, credits - cost)
+    gameState.agencyLevels[playerColor] = nextLevel
+
+    if nextLevel == 2 and not gameState.unlockedTier2 then
+        unlockMissionTier(2, playerColor)
+    elseif nextLevel == 3 and not gameState.unlockedTier3 then
+        addTrackerValue("vp", playerColor, 2)
+        unlockMissionTier(3, playerColor)
+    end
+
+    updateVisualState()
+    broadcastToAll(playerColor .. " reaches Agency Level " .. tostring(nextLevel) .. ".", "Yellow")
+end
+
+local function buyBasicCard(playerColor, cardId, cost)
+    if not isPlayableColor(playerColor) then
+        broadcastToAll("Choose a player color before buying a basic card.", "Red")
+        return
+    end
+
+    local credits = getTrackerValue("credit", playerColor) or 0
+    if credits < cost then
+        broadcastToAll(playerColor .. " needs " .. tostring(cost) .. " Credits to buy " .. cardId .. ".", "Red")
+        return
+    end
+
+    if not takeSupplyCardToHand(cardId, playerColor) then
+        broadcastToAll("No copy of " .. cardId .. " is currently available in the component supply.", "Red")
+        return
+    end
+
+    setTrackerValue("credit", playerColor, credits - cost)
+    Wait.time(refillMarket, 0.6)
+    updateVisualState()
+end
+
+local function applyEventImmediateEffects(eventId)
+    local colors = getParticipatingColors(nil)
+    if eventId == "EV02" then
+        for _, color in ipairs(colors) do
+            addTrackerValue("credit", color, 3)
+        end
+        broadcastToAll("Funding Boost: all seated players gain 3 Credits.", "Yellow")
+    elseif eventId == "EV01" then
+        broadcastToAll("Solar Storm: launches suffer -2 Reliability this round.", "Yellow")
+    elseif eventId == "EV03" then
+        broadcastToAll("Supply Delay: launches cost +1 Credit to prepare this round.", "Yellow")
+    elseif eventId == "EV04" then
+        broadcastToAll("Tech Breakthrough: the first player to launch this round may search the component deck for a Tech.", "Yellow")
+    elseif eventId == "EV05" then
+        broadcastToAll("Docking Opportunity: Docking craft that dock with an on-orbit station in High Orbit (GEO) gain +2 VP this round.", "Yellow")
+    elseif eventId == "EV06" then
+        broadcastToAll("Transfer Window Storm: TW cost is +2 this round (max 5).", "Yellow")
+    elseif eventId == "EV07" then
+        broadcastToAll("Launch Window: TW cost is -2 this round (min 0).", "Yellow")
+    elseif eventId == "EV08" then
+        broadcastToAll("Expanded Operations: hand limit is 7 this round.", "Yellow")
+    end
+end
+
+local function revealEventCard()
+    local existing = findCardAt(EVENT_DISPLAY_POS, 1.5)
+    if existing then
+        return false
+    end
+
+    local drawn = takeTopCardToPosition(DECK_LAYOUT.event.pos, EVENT_DISPLAY_POS, true, { 0, 180, 0 })
+    if not drawn then
+        gameState.activeEventId = nil
+        gameState.activeEventName = nil
+        return false
+    end
+
+    Wait.time(function()
+        discoverActiveEventFromTable()
+        if gameState.activeEventId then
+            applyEventImmediateEffects(gameState.activeEventId)
+        end
+        updateVisualState()
+    end, 0.8)
+
+    return true
+end
+
+local function discardActiveEvent()
+    local card = findCardAt(EVENT_DISPLAY_POS, 1.5)
+    if card then
+        card.destruct()
+    end
+    gameState.activeEventId = nil
+    gameState.activeEventName = nil
+end
+
+local function planningPhase()
+    if gameState.activeEventId then
+        broadcastToAll("An event is already active. Resolve Maintenance before starting the next Planning phase.", "Red")
+        return
+    end
+
+    gameState.currentRound = gameState.currentRound + 1
+    gameState.transferWindowBase = (gameState.transferWindowBase + 1) % 6
+    revealEventCard()
+    drawCardsToSeatedPlayers(2)
+
+    Wait.time(function()
+        updateVisualState()
+        broadcastToAll(
+            "Planning Phase: event revealed, TW is now " .. tostring(effectiveTransferWindow()) .. ", and each seated player draws 2 cards. Emergency sell remains manual.",
+            "Yellow"
+        )
+    end, 1.0)
+end
+
+local function maintenancePhase()
+    local hadEvent = gameState.activeEventName
+    discardActiveEvent()
+
+    Wait.time(function()
+        refillMissionDisplay()
+        refillMarket()
+    end, 0.2)
+
+    Wait.time(function()
+        updateVisualState()
+        local eventText = hadEvent and ("Event discarded: " .. hadEvent .. ". ") or ""
+        broadcastToAll(eventText .. "Maintenance: reusable recovery, battery storage, mission refill, and market refill are ready.", "Yellow")
+    end, 1.0)
+end
+
+local function spawnCoreDecks()
+    local componentCards = filterCards(function(card)
+        return card.type ~= "Mission" and card.type ~= "Event"
+    end)
+    local eventCards = filterCards(function(card)
+        return card.type == "Event"
+    end)
+    local tier1Missions = filterCards(function(card)
+        return card.type == "Mission" and card.tier == "Tier 1"
+    end)
+    local tier2Missions = filterCards(function(card)
+        return card.type == "Mission" and card.tier == "Tier 2"
+    end)
+    local tier3Missions = filterCards(function(card)
+        return card.type == "Mission" and card.tier == "Tier 3"
+    end)
+
+    spawnFromState(buildDeckState(componentCards, DECK_LAYOUT.component.name, DECK_LAYOUT.component))
+    spawnFromState(buildDeckState(eventCards, DECK_LAYOUT.event.name, DECK_LAYOUT.event))
+    spawnFromState(buildDeckState(tier1Missions, DECK_LAYOUT.mission.name, DECK_LAYOUT.mission))
+    spawnFromState(buildDeckState(tier2Missions, DECK_LAYOUT.tier2.name, DECK_LAYOUT.tier2))
+    spawnFromState(buildDeckState(tier3Missions, DECK_LAYOUT.tier3.name, DECK_LAYOUT.tier3))
+end
+
+local function shuffleStackAt(position)
+    local stack = findCardStackNear(position, 2.2)
+    if stack and stack.shuffle then
+        stack.shuffle()
+    end
+end
+
+local function setupGame()
+    cleanupTable()
+    resetState()
+
+    Wait.time(function()
+        spawnBoard()
+        spawnCoreDecks()
+
+        for _, color in ipairs(PLAYER_ORDER) do
+            createTracker("vp", color, 0)
+            createTracker("credit", color, CREDIT_TRACK.start)
+            createAgencyMarker(color)
+        end
+
+        ensureAgencyTrackLabels()
+
+        for _, dieSpec in ipairs(RELIABILITY_DICE) do
+            createReliabilityDie(dieSpec.color, dieSpec.pos)
+        end
+
+        createFirstPlayerToken()
+        createCraftBag()
+
+        local marker = spawnObject({
+            type = "Chip_10",
+            position = TRANSFER_WINDOW_POSITIONS[1],
+            scale = { 0.65, 0.65, 0.65 },
+        })
+        marker.setName("Transfer Window Marker")
+        marker.setColorTint({ r = 0.96, g = 0.38, b = 0.60 })
+        marker.setLock(false)
+        markManaged(marker)
+
+        ensureCardLabels()
+
+        ensureControlTiles()
+        ensureRulebookNote()
+        ensureRoundStatusNote()
+
+        Wait.time(function()
+            shuffleStackAt(DECK_LAYOUT.component.pos)
+            shuffleStackAt(DECK_LAYOUT.event.pos)
+            shuffleStackAt(DECK_LAYOUT.mission.pos)
+            shuffleStackAt(DECK_LAYOUT.tier2.pos)
+            shuffleStackAt(DECK_LAYOUT.tier3.pos)
+        end, 0.6)
+
+        Wait.time(function()
+            refillMarket()
+            refillMissionDisplay()
+            updateVisualState()
+            broadcastToAll("Space Agency Race is set up. Seat players, deal starting hands, then begin the Planning phase.", "Yellow")
+        end, 1.2)
+    end, 0.3)
+end
+
+function onSave()
+    return JSON.encode(normalizeState(gameState))
+end
+
+function onResetClicked(_, _, alt_click)
+    if alt_click then
+        return
+    end
     setupGame()
 end
 
--- Global button callback: deal starting hands
-function onDealHandsClicked(obj, player_color, alt_click)
-    if not alt_click then dealStartingHands() end
+function onDealHandsClicked(_, _, alt_click)
+    if alt_click then
+        return
+    end
+    dealStartingHands()
 end
 
--- ── ENTRY POINT ──────────────────────────────────────────────
+function onPlanningPhaseClicked(_, _, alt_click)
+    if alt_click then
+        return
+    end
+    planningPhase()
+end
+
+function onMaintenanceClicked(_, _, alt_click)
+    if alt_click then
+        return
+    end
+    maintenancePhase()
+end
+
+function onRefillMarketClicked(_, _, alt_click)
+    if alt_click then
+        return
+    end
+    refillMarket()
+end
+
+function onRefillMissionsClicked(_, _, alt_click)
+    if alt_click then
+        return
+    end
+    refillMissionDisplay()
+end
+
+function onLevelUpClicked(_, player_color, alt_click)
+    if alt_click then
+        return
+    end
+    levelUpAgency(player_color)
+end
+
+function onBuySterlingClicked(_, player_color, alt_click)
+    if alt_click then
+        return
+    end
+    buyBasicCard(player_color, "E02", 3)
+end
+
+function onBuyTankClicked(_, player_color, alt_click)
+    if alt_click then
+        return
+    end
+    buyBasicCard(player_color, "T01", 2)
+end
+
+function onBuyShieldClicked(_, player_color, alt_click)
+    if alt_click then
+        return
+    end
+    buyBasicCard(player_color, "S01", 1)
+end
+
+function onLayoutPanelClicked()
+end
 
 function onLoad(save_state)
-    -- Spawn control buttons in a corner of the table
-    Wait.time(function()
-        createButton("Reset Table",          "onResetClicked",    {-14, 1.5, -10})
-        createButton("Deal Starting Hands",  "onDealHandsClicked",{-14, 1.5, -12})
-
-        -- Spawn the rulebook PDF once; survives resets (locked, not a ZoneLabel)
-        local hasRulebook = false
-        for _, obj in ipairs(getAllObjects()) do
-            if obj.getName() == "Rulebook" then hasRulebook = true; break end
+    if save_state and save_state ~= "" then
+        local ok, decoded = pcall(function()
+            return JSON.decode(save_state)
+        end)
+        if ok and decoded then
+            gameState = normalizeState(decoded)
+        else
+            resetState()
         end
-        if not hasRulebook then
-            local pdf = spawnObjectJSON({
-                json = JSON.encode({
-                    Name        = "Custom_PDF",
-                    Nickname    = "Rulebook",
-                    Description = "Space Agency Race — Rulebook",
-                    Transform   = {
-                        posX=12, posY=1.5, posZ=-6,
-                        rotX=0,  rotY=0,  rotZ=0,
-                        scaleX=2, scaleY=1, scaleZ=2,
-                    },
-                    CustomPDF = {
-                        PDFUrl        = RULEBOOK_PDF_URL,
-                        PDFPassword   = "",
-                        PDFPage       = 0,
-                        PDFPageOffset = 0,
-                    },
-                    Locked=false, Grid=true, Snap=true,
-                    Autoraise=true, Sticky=true, Tooltip=true,
-                }),
-                sound = false,
-                snap_to_grid = true,
-            })
-            if pdf then pdf.setLock(true) end
-        end
-    end, 1.0)
-
-    -- Auto-setup only on a completely fresh table (no saved state)
-    if save_state == nil or save_state == "" then
-        Wait.time(setupGame, 1.5)
+    else
+        resetState()
     end
+
+    if save_state == nil or save_state == "" then
+        Wait.time(setupGame, 0.8)
+        return
+    end
+
+    Wait.time(function()
+        ensureBoardPresent()
+        syncManagedLayoutObjects()
+        discoverActiveEventFromTable()
+        ensureAgencyTrackLabels()
+        ensureCardLabels()
+        ensureControlTiles()
+        ensureRulebookNote()
+        ensureRoundStatusNote()
+        updateVisualState()
+    end, 0.8)
 end

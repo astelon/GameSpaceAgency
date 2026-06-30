@@ -366,10 +366,8 @@
 
     .setup-steps li {
       counter-increment: step;
-      display: flex;
-      gap: 16px;
-      align-items: flex-start;
-      padding: 12px 0;
+      position: relative;
+      padding: 12px 0 12px 54px;
       border-bottom: 1px solid #1a2d50;
     }
 
@@ -377,7 +375,9 @@
 
     .setup-steps li::before {
       content: counter(step, decimal-leading-zero);
-      flex-shrink: 0;
+      position: absolute;
+      left: 0;
+      top: 12px;
       font-family: 'Orbitron', monospace;
       font-size: .75rem;
       font-weight: 800;
@@ -386,7 +386,6 @@
       border: 1px solid #3a2a00;
       border-radius: 6px;
       padding: 4px 8px;
-      margin-top: 2px;
     }
 
     /* ── Phase flow ───────────────────────────────────────────── */
@@ -609,10 +608,8 @@
 
     .resolution-steps li {
       counter-increment: rs;
-      display: flex;
-      gap: 14px;
-      align-items: flex-start;
-      padding: 10px 0;
+      position: relative;
+      padding: 10px 0 10px 42px;
       border-bottom: 1px solid #1a2d50;
     }
 
@@ -620,7 +617,9 @@
 
     .resolution-steps li::before {
       content: counter(rs);
-      flex-shrink: 0;
+      position: absolute;
+      left: 0;
+      top: 10px;
       width: 28px; height: 28px;
       border-radius: 50%;
       background: linear-gradient(135deg, var(--accent-gold), var(--accent-amber));
@@ -853,7 +852,7 @@
       </div>
       <div>
         <div class="card-type-name" style="color:var(--mission-col)">Mission Cards</div>
-        <div class="card-type-desc">Contracts that score VP and Credits. Each mission shows a Conditions list (destination route + hardware requirements), while reward badges show VP and Credits. Missions come in three types — Public, Exclusive, and Secret — and three Tiers of difficulty.</div>
+        <div class="card-type-desc">Contracts that score VP and Credits. Each mission shows a Conditions list (destination route + hardware requirements), while reward badges show VP and Credits. In this prototype, all missions are Public and sorted into three Tiers of difficulty.</div>
       </div>
     </div>
     <div class="card-type-row">
@@ -1069,7 +1068,7 @@
     </div>
     <div class="action-item">
       <div class="action-name">&#9670; Accept Mission</div>
-      <p>Commit to a Public mission in the display, or claim an Exclusive or Secret mission.</p>
+        <p>Commit to one Public mission in the display. In this prototype, all missions remain public and may be raced by multiple agencies until completed.</p>
     </div>
     <div class="action-item">
       <div class="action-name">&#9670; Assemble Rocket</div>
@@ -1085,7 +1084,7 @@
     </div>
     <div class="action-item">
       <div class="action-name">&#9670; Launch New Craft</div>
-      <p>Place an assembled rocket at Earth, perform the Lift and Reliability checks, then fly along the orbital map. Resolve the mission immediately if the craft reaches its destination.</p>
+      <p>Place an assembled rocket at Earth, perform the <strong>Launch Capability Check</strong> and <strong>Reliability Check</strong>, then fly along the orbital map. Resolve the mission immediately if the craft reaches its destination. <em>You may combine Assemble Rocket and Launch New Craft into a single Command Turn if all components are already in your hand.</em></p>
     </div>
     <div class="action-item">
       <div class="action-name">&#9670; Activate Craft</div>
@@ -1160,10 +1159,12 @@
 
   <div class="box">
     <p style="margin:0;font-size:.95rem"><strong style="color:var(--accent-gold)">Total Rocket Mass</strong> = sum of all Fuel Tank Mass values + Payload Mass + any printed Support Mass</p>
-    <p style="margin:8px 0 0;font-size:.95rem"><strong style="color:var(--accent-gold)">Lift Check</strong> = Engine Thrust ≥ Total Rocket Mass</p>
+    <p style="margin:8px 0 0;font-size:.95rem"><strong style="color:var(--accent-gold)">Launch Capability Check</strong> = Engine Thrust ≥ Total Rocket Mass</p>
   </div>
 
-  <p>Engines have no Mass for lift purposes. Support cards count only if they print a Mass value. If a rocket has no Payload, only tank Mass and printed Support Mass count.</p>
+  <p>Engines have no Mass for launch-capability purposes. Support cards count only if they print a Mass value. If a rocket has no Payload, only tank Mass and printed Support Mass count.</p>
+
+  <p><strong>Design note — physics in two stats:</strong> Space Agency abstracts rocket science into two clean levers. <strong>Thrust</strong> models thrust-to-weight ratio: can this engine lift the fully-loaded stack off the pad? <strong>Range</strong> models total delta-v budget after liftoff: how far can the craft travel? <strong>Staging</strong> models the real-world mass-ratio gain of dropping spent boosters — a lighter post-stage vehicle can reach farther destinations with the same remaining fuel. The <strong>Transfer Window</strong> models Hohmann transfer timing: like real interplanetary windows, launching at optimal planetary alignment dramatically cuts the Range needed to reach Mars. None of this requires knowing the Tsiolkovsky rocket equation — the card stats handle the math.</p>
 
   <table>
     <thead><tr><th>Component</th><th>Mass Range</th><th>Examples</th></tr></thead>
@@ -1191,10 +1192,10 @@
   <p>Cards with the <span class="tag">Stageable</span> tag can be jettisoned for a one-time Range bonus printed on the card.</p>
 
   <ul>
-    <li><strong>Pre-flight staging:</strong> After the Lift check, before movement, you may Stage one Stageable card. Gain its printed bonus Range. The staged card is discarded.</li>
-    <li><strong>Mid-flight staging:</strong> At any point during movement (between nodes), you may Stage one Stageable card (typically an empty tank). Gain its bonus Range and reduce the craft's current Mass — important for relaunch Lift checks.</li>
-    <li>A staged Engine still counts for the initial Lift check.</li>
-    <li>Staging reduces the craft's current Mass (important for relaunch Lift checks) and increases Range.</li>
+    <li><strong>Pre-flight staging:</strong> After the launch capability check, before movement, you may Stage one Stageable card. Gain its printed bonus Range. The staged card is discarded.</li>
+    <li><strong>Mid-flight staging:</strong> At any point during movement (between nodes), you may Stage one Stageable card (typically an empty tank). Gain its bonus Range and reduce the craft's current Mass — important for relaunch capability checks.</li>
+    <li>A staged Engine still counts for the initial launch capability check.</li>
+    <li>Staging reduces the craft's current Mass (important for relaunch capability checks) and increases Range.</li>
     <li>A staged card is <strong>discarded</strong> and cannot be recovered, even if Reusable.</li>
   </ul>
 
@@ -1255,7 +1256,7 @@
   <div class="section-divider"><span class="num">07</span><span class="line"></span></div>
   <h1>Orbital Travel</h1>
 
-  <p><strong>Range</strong> is your rocket's travel budget — a simplified representation of delta-v. Each line crossed on the orbital map costs <strong>1 Range</strong>, except the <strong>Transfer Window</strong> crossing which costs <strong>0–5 extra Range</strong> depending on planetary alignment. When launched or activated, a craft may move <strong>any number of nodes up to its remaining Range</strong> in a single action. Players may voluntarily stop at any node, preserving unspent Range for future activations.</p>
+  <p><strong>Range</strong> is your rocket's travel budget — a simplified representation of delta-v. Each line crossed on the orbital map costs <strong>1 Range</strong>, except the <strong>Transfer Window</strong> crossing which costs <strong>0–5 extra Range</strong> depending on planetary alignment. When launched or activated, a craft may move <strong>any number of nodes up to its remaining Range</strong> in a single action. Players may voluntarily stop at any node, preserving unspent Range for future activations. For Earth-orbit mission effects, <strong>High Orbit</strong> is treated as <strong>GEO</strong>.</p>
 
   <h2>Orbital Node Map (15 Nodes)</h2>
 
@@ -1322,7 +1323,7 @@
     <tbody>
       <tr><td>Sub-Orbital Earth</td><td>1</td><td></td></tr>
       <tr><td>LEO</td><td>2</td><td></td></tr>
-      <tr><td>High Orbit</td><td>3</td><td></td></tr>
+      <tr><td>High Orbit (GEO)</td><td>3</td><td>Earth-orbit GEO effects use this node</td></tr>
       <tr><td>Earth ZOI</td><td>4</td><td>Boundary; branches to Moon and Mars</td></tr>
       <tr><td>Moon Orbit</td><td>5</td><td></td></tr>
       <tr><td>Sub-Orbital Moon</td><td>6</td><td></td></tr>
@@ -1354,13 +1355,23 @@
 
   <div class="box cyan">
     <div class="box-title">&#x1F680; Landing Without a Lander</div>
-    <p>A rocket does <strong>not</strong> need a separate Landing Lander to land. If it has an <strong>Engine</strong> and enough <strong>remaining Range</strong>, it can land directly. To <strong>relaunch from a surface</strong>, the craft must pass a new Lift Check (Thrust ≥ current Mass, accounting for staged-away cards) and a new <strong>Reliability Check</strong>.</p>
+    <p>A rocket does <strong>not</strong> need a separate Landing Lander to land. If it has an <strong>Engine</strong> and enough <strong>remaining Range</strong>, it can land directly. To <strong>relaunch from a surface</strong>, the craft must pass a new Launch Capability Check (Thrust ≥ current Mass, accounting for staged-away cards) and a new <strong>Reliability Check</strong>.</p>
     <p style="color:var(--text-muted);font-size:.85rem;margin-bottom:0">Dedicated landers are still valuable because they free up Range for the rest of the trip. Players can stage away empty tanks before relaunching to reduce Mass.</p>
   </div>
 
   <h2>Persistent Assets</h2>
 
   <p>Payloads with the <span class="tag">Satellite</span> or <span class="tag">Station</span> tag remain on the orbital board after delivery. They use Craft markers and may be activated in future rounds like any other craft.</p>
+
+  <h2>On-Orbit Stations</h2>
+
+  <p><strong>High Orbit (GEO)</strong> is the station node on the Earth branch. A parked station occupies that node and can be visited by docking missions.</p>
+
+  <ul>
+    <li>A craft parked at High Orbit (GEO) may be designated an <strong>On-Orbit Station</strong> if it includes a <strong>Station Hub</strong> payload, at least one attached <span class="tag">Power</span> card, at least one attached <span class="tag">LifeSupport</span> card, and at least one additional <span class="tag">Scientific</span> or <span class="tag">Electronics</span> card.</li>
+    <li>Once designated, the craft remains parked in High Orbit (GEO) until an effect moves it. Docking missions and station-related Events target any such On-Orbit Station.</li>
+    <li>Support cards attached to the station stay with it while it remains in orbit.</li>
+  </ul>
 
 
   <!-- ═══════════════════════════════════════════════════════
@@ -1372,7 +1383,7 @@
   <p>When a craft is <strong>launched</strong> or <strong>activated</strong>, resolve flight immediately during the Action Phase:</p>
 
   <ol class="resolution-steps">
-    <li><strong>Lift Check.</strong> Verify Engine Thrust ≥ Total Rocket Mass (sum of all Fuel Tank Mass + Payload Mass). A rocket launched from a planet must have an Engine.</li>
+    <li><strong>Launch Capability Check.</strong> Verify Engine Thrust ≥ Total Rocket Mass (sum of all Fuel Tank Mass + Payload Mass). A rocket launched from a planet must have an Engine. In this game, Thrust answers "can this stack leave the surface?" while Range answers "how much orbital travel can it still perform?"</li>
     <li><strong>Reliability Check.</strong> Roll a d10. If the result is <strong>≤ the Engine's Reliability</strong> (after modifiers from Technology and Events), the launch succeeds. If the roll is <strong>above</strong> Reliability: the craft does not move; non-Reusable Engines are discarded, Reusable Engines survive but the craft still doesn't launch. <em>Skip this step when activating a craft already in flight. A Rocket-as-Lander relaunching from a surface must pass a new Reliability Check.</em></li>
     <li><strong>Optional Pre-Flight Staging.</strong> Stage one <span class="tag" style="font-size:.7rem">Stageable</span> card. Gain its printed bonus Range. The staged card is discarded.</li>
     <li><strong>Choose Path &amp; Move.</strong> The craft moves along the orbital map, spending 1 Range per node crossed (Transfer Window crossing costs the current TW value). The player may <strong>stop at any node</strong>, preserving unspent Range for future activations.</li>
@@ -1396,7 +1407,7 @@
   <div class="example-scene">
     <h4>Full Launch Example</h4>
     <p>You assemble a <strong>Hydrogen Core</strong> (Thrust 8, Reliability 7) + <strong>Cryo Tank</strong> (Range 8, Mass 3) + <strong>Standard Tank</strong> (Range 5, Mass 2) + <strong>Imaging Probe</strong> (Mass 1) for a <em>Lunar Flyby</em> mission (Route: Earth → Moon Orbit → Earth, Range 10).</p>
-    <p><strong>Lift Check:</strong> Total Mass = 3 + 2 + 1 = 6 ≤ Thrust 8 ✓. <strong>Reliability Check:</strong> Roll d10 → 4 ≤ 7 ✓ Success! Total Range = 8 + 5 = 13. Fly: Earth → Sub-Orbital Earth → LEO → High Orbit → Earth ZOI → Moon Orbit (5 Range spent). Mission destination reached! Check requirements: Scientific payload ✓. Score <strong>6 VP + 3 Credits</strong>. Fly back: Moon Orbit → Earth ZOI → High Orbit → LEO → Sub-Orbital Earth → Earth (5 more = 10 total, 3 Range left over). During Maintenance, the Hydrogen Core (non-Reusable) is discarded. The Cryo Tank and Standard Tank are discarded. The Imaging Probe delivered to Moon Orbit stays on the board.</p>
+    <p><strong>Launch Capability Check:</strong> Total Mass = 3 + 2 + 1 = 6 ≤ Thrust 8 ✓. <strong>Reliability Check:</strong> Roll d10 → 4 ≤ 7 ✓ Success! Total Range = 8 + 5 = 13. Fly: Earth → Sub-Orbital Earth → LEO → High Orbit (GEO) → Earth ZOI → Moon Orbit (5 Range spent). Fly back: Moon Orbit → Earth ZOI → High Orbit (GEO) → LEO → Sub-Orbital Earth → Earth (5 more = 10 total, 3 Range left over). Mission route completed! Score <strong>7 VP + 2 Credits</strong>. During Maintenance, the Hydrogen Core (non-Reusable) is discarded. The Cryo Tank and Standard Tank are discarded. The Imaging Probe, now operating as a small science satellite at Moon Orbit, stays on the board.</p>
   </div>
 
 
@@ -1408,21 +1419,21 @@
 
   <p>Mission cards are your agency's contract system. Each card shows a Conditions list for destination route and hardware requirements. Rewards are shown as VP and Credits badges.</p>
 
-  <h2>Mission Types</h2>
+  <h2>Mission Market</h2>
 
   <div class="box">
     <div style="display:flex;flex-direction:column;gap:14px">
       <div>
         <strong style="color:var(--accent-red)">Public Missions</strong>
-        <p style="margin:4px 0 0;color:var(--text-muted)">Remain in the Mission display after players commit to them. Multiple agencies can race to complete the same Public mission. The card leaves the display only when completed.</p>
+        <p style="margin:4px 0 0;color:var(--text-muted)">In the current prototype, every mission is public. Multiple agencies can race to complete the same mission, and the card leaves the display only when completed.</p>
       </div>
       <div>
-        <strong style="color:var(--accent-amber)">Exclusive Missions</strong>
-        <p style="margin:4px 0 0;color:var(--text-muted)">Leave the display the moment they are claimed. Belong to one player only. No other agency may attempt them.</p>
+        <strong style="color:var(--accent-amber)">Commercial Contracts</strong>
+        <p style="margin:4px 0 0;color:var(--text-muted)">Commercial missions pay more Credits than VP. They model launch services, resupply work, and operational support that fund your next builds.</p>
       </div>
       <div>
-        <strong style="color:var(--tech-col)">Secret Missions</strong>
-        <p style="margin:4px 0 0;color:var(--text-muted)">Kept face-down in your play area. Must be revealed <em>when completed</em> to score. May be gained at setup or through card effects.</p>
+        <strong style="color:var(--tech-col)">Prestige &amp; Infrastructure Contracts</strong>
+        <p style="margin:4px 0 0;color:var(--text-muted)">Prestige missions pay more VP than Credits and represent headline exploration achievements. Infrastructure missions sit between the two, often enabling later station or satellite rewards.</p>
       </div>
     </div>
   </div>
@@ -1440,7 +1451,7 @@
 
   <h2>Mission Requirements</h2>
   <ul>
-    <li>Missions with the <span class="tag" style="font-size:.7rem">Docking</span> tag require a <strong>Docking-tagged support card</strong> on the rocket (e.g., Docking Adapter or Orbital Tug).</li>
+    <li>Missions with the <span class="tag" style="font-size:.7rem">Docking</span> tag require a <strong>Docking-tagged support card</strong> on the rocket (e.g., Docking Adapter or Orbital Tug) and a valid <strong>On-Orbit Station</strong> in High Orbit (GEO) to dock with.</li>
     <li>Missions with the <span class="tag" style="font-size:.7rem">Docking</span> or <span class="tag" style="font-size:.7rem">Maneuver</span> tags require an Engine.</li>
     <li>Missions with the <span class="tag" style="font-size:.7rem">Surface</span> tag require a Landing Lander or Rocket-as-Lander.</li>
     <li>Mission cards that cross the Transfer Window show route Range at TW 0. Add the current TW cost when planning.</li>
@@ -1456,7 +1467,7 @@
       </div>
       <div class="mini-card-art" style="background:linear-gradient(160deg,#100008,#1a0020); font-size:28px;">🌍</div>
       <div class="mini-card-name">LEO Deployment</div>
-      <div class="mini-card-stats">Range 2 · Reward: 3 VP + 2 CR<br><span class="tag" style="font-size:.62rem">Public</span> <span class="tag" style="font-size:.62rem">LEO</span></div>
+      <div class="mini-card-stats">Range 2 · Reward: 2 VP + 5 CR<br><span class="tag" style="font-size:.62rem">Public</span> <span class="tag" style="font-size:.62rem">Commercial</span></div>
       <div class="mini-card-text">Route: Earth → LEO. Requires: Uncrewed payload.</div>
     </div>
     <div class="mini-card">
@@ -1466,7 +1477,7 @@
       </div>
       <div class="mini-card-art" style="background:linear-gradient(160deg,#0e0c00,#181400); font-size:28px;">🌙</div>
       <div class="mini-card-name">Lunar Landing</div>
-      <div class="mini-card-stats">Range 7 · Reward: 8 VP + 4 CR<br><span class="tag" style="font-size:.62rem">Public</span> <span class="tag" style="font-size:.62rem">Surface</span></div>
+      <div class="mini-card-stats">Range 7 · Reward: 9 VP + 3 CR<br><span class="tag" style="font-size:.62rem">Public</span> <span class="tag" style="font-size:.62rem">Prestige</span></div>
       <div class="mini-card-text">Route: Earth → Moon. Requires: Lander or Rocket-as-Lander.</div>
     </div>
     <div class="mini-card">
@@ -1476,7 +1487,7 @@
       </div>
       <div class="mini-card-art" style="background:linear-gradient(160deg,#100005,#0e0018); font-size:28px;">🔴</div>
       <div class="mini-card-name">Mars Orbit Insertion</div>
-      <div class="mini-card-stats">Range 7+TW · Reward: 12 VP + 5 CR<br><span class="tag" style="font-size:.62rem">Public</span> <span class="tag" style="font-size:.62rem">DeepSpace</span></div>
+      <div class="mini-card-stats">Range 7+TW · Reward: 13 VP + 3 CR<br><span class="tag" style="font-size:.62rem">Public</span> <span class="tag" style="font-size:.62rem">Prestige</span></div>
       <div class="mini-card-text">Route: Earth → Mars High Orbit. Crosses Transfer Window. Mass 2+ payload.</div>
     </div>
     <div class="mini-card">
@@ -1486,7 +1497,7 @@
       </div>
       <div class="mini-card-art" style="background:linear-gradient(160deg,#0a0010,#0e0018); font-size:28px;">🪨</div>
       <div class="mini-card-name">Lunar Sample Return</div>
-      <div class="mini-card-stats">Range 14 · Reward: 12 VP + 5 CR<br><span class="tag" style="font-size:.62rem">Recovery</span> <span class="tag" style="font-size:.62rem">Public</span></div>
+      <div class="mini-card-stats">Range 14 · Reward: 13 VP + 3 CR<br><span class="tag" style="font-size:.62rem">Prestige</span> <span class="tag" style="font-size:.62rem">Public</span></div>
       <div class="mini-card-text">Route: Earth → Moon → Earth. Lander or Rocket-as-Lander + Cargo Return + reentry support.</div>
     </div>
   </div>
@@ -1517,13 +1528,12 @@
   <div class="section-divider"><span class="num">11</span><span class="line"></span></div>
   <h1>Scoring &amp; End Game</h1>
 
-  <p>The game ends after <strong>8 rounds</strong>, or sooner when the Mission deck is depleted. After the final round, all players tally their total VP from:</p>
+  <p>The game ends after <strong>8 rounds</strong>, or sooner when the Mission deck is depleted. After the final round, all players compare the VP they earned during play from:</p>
 
   <ul>
     <li>Missions completed during the game</li>
-    <li>Technologies that award end-game VP</li>
     <li>Milestone bonuses (first to Moon/Mars, first to Level 3, and technology milestones)</li>
-    <li>Any bonuses from persistent orbital assets</li>
+    <li>Card and Event effects that grant VP during play, such as docking bonuses or research activations</li>
   </ul>
 
   <p>The player with the <strong>highest VP total wins</strong>.</p>
@@ -1550,7 +1560,7 @@
 
     <p><strong>Action Phase — Command Turn 1:</strong> Starbound pays 5 Credits to <strong>Acquire</strong> a Hydrogen Core engine (Thrust 8, Reliability 7) from the Card Market. The empty slot is immediately refilled. But now hand size is 6 — over the limit of 5! Starbound must discard one card immediately.</p>
 
-    <p><strong>Action Phase — Command Turn 2:</strong> <strong>Assemble Rocket</strong> in the Launch Area: Hydrogen Core + Cryo Tank (Range 8, Mass 3) + Imaging Probe (Mass 1). Total Mass = 4 ≤ Thrust 8 ✓. Then <strong>Launch</strong>: Reliability Check — roll d10 → 3 ≤ 7 ✓ Success! The craft flies immediately: Earth → Sub-Orbital Earth → LEO → High Orbit → Earth ZOI → Moon Orbit (5 Range spent). Starbound stops here to complete the <em>Lunar Flyby</em> mission (Range 10 needed for round trip, 8 available — wait, the craft has 3 Range left after reaching Moon Orbit, enough for the return to Earth ZOI but not all the way home). Starbound decides to complete the one-way flyby portion and will activate the craft next round to return.</p>
+    <p><strong>Action Phase — Command Turn 2:</strong> Starbound combines Assemble and Launch in one Command Turn (legal when all components are in hand). They play <strong>Hydrogen Core + Cryo Tank (Range 8, Mass 3) + Standard Tank (Range 5, Mass 2) + Imaging Probe (Mass 1)</strong> to the Launch Area and immediately launch. <strong>Launch Capability Check:</strong> Total Mass = 3 + 2 + 1 = 6 ≤ Thrust 8 ✓. <strong>Reliability Check:</strong> roll d10 → 3 ≤ 7 ✓ Success! Total Range = 13. The craft flies outbound: Earth → Sub-Orbital Earth → LEO → High Orbit (GEO) → Earth ZOI → Moon Orbit (5 Range). The Imaging Probe detaches at Moon Orbit and stays as a persistent science satellite. The craft returns along the same route (5 more Range = 10 total). Starbound completes <em>Lunar Flyby</em> for <strong>7 VP + 2 Credits</strong>, with 3 Range still unspent on the returning craft.</p>
 
     <p><strong>Maintenance Phase:</strong> The Event card is discarded. The Mission display is refilled to 3. The Card Market is refilled to 5.</p>
   </div>
@@ -1572,11 +1582,17 @@
     <div class="tag-row"><span class="tag">Cryogenic</span><span class="tag-desc">Requires compatible engine (Hydrogen Core); higher Range but heavier Mass.</span></div>
     <div class="tag-row"><span class="tag">Experimental</span><span class="tag-desc">Higher risk, potentially higher reward; lower base Reliability.</span></div>
     <div class="tag-row"><span class="tag">Crewed</span><span class="tag-desc">Enables crewed missions; requires life-support consideration.</span></div>
+    <div class="tag-row"><span class="tag">LifeSupport</span><span class="tag-desc">Habitability systems for long-duration crewed craft and stations.</span></div>
+    <div class="tag-row"><span class="tag">Electronics</span><span class="tag-desc">Computers, comms, and control systems; counts toward station qualification.</span></div>
+    <div class="tag-row"><span class="tag">Power</span><span class="tag-desc">Generates or stores Energy; required to keep an On-Orbit Station operating.</span></div>
     <div class="tag-row"><span class="tag">Satellite</span><span class="tag-desc">Remains on orbital board after delivery as a persistent asset.</span></div>
-    <div class="tag-row"><span class="tag">Station</span><span class="tag-desc">Like Satellite, but larger; enables docking missions.</span></div>
+    <div class="tag-row"><span class="tag">Station</span><span class="tag-desc">A permanent orbital facility, usually anchored by a Station Hub in High Orbit (GEO).</span></div>
     <div class="tag-row"><span class="tag">Heat Shield</span><span class="tag-desc">Required for atmospheric reentry (Earth/Mars). Discarded after use unless Reusable.</span></div>
     <div class="tag-row"><span class="tag">Parachute</span><span class="tag-desc">Alternative to Heat Shield for atmospheric landing.</span></div>
     <div class="tag-row"><span class="tag">Docking</span><span class="tag-desc">Support card tag. Required on the rocket for Docking-tagged missions.</span></div>
+    <div class="tag-row"><span class="tag">Commercial</span><span class="tag-desc">Mission class focused on Credits. Represents launch contracts, logistics, and service work.</span></div>
+    <div class="tag-row"><span class="tag">Prestige</span><span class="tag-desc">Mission class focused on VP. Represents exploration firsts, science headlines, and public glory.</span></div>
+    <div class="tag-row"><span class="tag">Infrastructure</span><span class="tag-desc">Mission class with balanced rewards that helps build long-term station and satellite networks.</span></div>
     <div class="tag-row"><span class="tag">Maneuver</span><span class="tag-desc">Mission requires orbital maneuvering; Engine mandatory.</span></div>
     <div class="tag-row"><span class="tag">In-Flight</span><span class="tag-desc">Mission may be completed by a craft already in flight.</span></div>
     <div class="tag-row"><span class="tag">On-Orbit</span><span class="tag-desc">Mission may be completed by a craft currently in orbit.</span></div>
@@ -1602,19 +1618,20 @@
       <tr><td>Command Turn</td><td>One action taken during the Action Phase. You take one at a time, alternating with other players.</td></tr>
       <tr><td>Component Deck</td><td>All Engines, Tanks, Payloads, Support, and Technology cards shuffled into one draw pile.</td></tr>
       <tr><td>Craft</td><td>Any assembled rocket, satellite, or station on the orbital board. Each may be activated once per Action Phase.</td></tr>
-      <tr><td>Credits</td><td>The game's currency. Earned mainly by completing missions. Used to acquire cards and expand your agency.</td></tr>
+      <tr><td>Credits</td><td>Your operating budget. Earned mainly from commercial missions and operational card effects. Used to acquire cards and expand your agency.</td></tr>
       <tr><td>Government Catch-Up Grant</td><td>Bonus Credits awarded to the trailing player when a new Mission Tier unlocks.</td></tr>
       <tr><td>Hand Limit</td><td>Maximum 5 cards in hand. Exceed → immediately discard down. EV08 raises it to 7 for one round.</td></tr>
-      <tr><td>Mass</td><td>Weight of tanks (1–4) and payloads (1–3). Engine Thrust must be ≥ total Mass to launch.</td></tr>
+      <tr><td>Mass</td><td>Weight of tanks (1–4) and payloads (1–3). Combined with Thrust, it determines whether a craft can launch from a surface.</td></tr>
       <tr><td>Mission Display</td><td>The face-up row of available Mission cards. Refilled from the Mission deck during Maintenance.</td></tr>
+      <tr><td>On-Orbit Station</td><td>A station parked at High Orbit (GEO), created from a Station Hub craft with power, life support, and lab/computer support.</td></tr>
       <tr><td>Orbital Board</td><td>The shared board showing the VP track, orbital node map, and Transfer Window track.</td></tr>
-      <tr><td>Range</td><td>Orbital travel budget. Total = sum of all tank Range values. Each node crossed costs 1 Range.</td></tr>
+      <tr><td>Range</td><td>Abstract delta-v budget for orbital travel. Total = sum of all tank Range values. Each node crossed costs 1 Range.</td></tr>
       <tr><td>Reliability</td><td>Engine stat (1–10). On launch, roll 1d10: success if ≤ Reliability + Tech bonuses − Event penalties. Checked on launch, not on in-flight activation (except Rocket-as-Lander relaunch).</td></tr>
-      <tr><td>Rocket-as-Lander</td><td>Landing without a dedicated Lander by using the rocket's Engine + remaining Range. Relaunch requires new Lift + Reliability checks.</td></tr>
-      <tr><td>Staging</td><td>Jettisoning a Stageable card for bonus Range. Pre-flight (after Lift check) or mid-flight (between nodes). Reduces Mass and grants bonus Range.</td></tr>
-      <tr><td>Thrust</td><td>Engine lift power. Must be ≥ total Rocket Mass (sum of all tank Mass + payload Mass).</td></tr>
+      <tr><td>Rocket-as-Lander</td><td>Landing without a dedicated Lander by using the rocket's Engine + remaining Range. Relaunch requires a new Launch Capability Check + Reliability Check.</td></tr>
+      <tr><td>Staging</td><td>Jettisoning a Stageable card for bonus Range. Pre-flight (after the launch capability check) or mid-flight (between nodes). Reduces Mass and grants bonus Range.</td></tr>
+      <tr><td>Thrust</td><td>Engine launch capability. Must be ≥ total Rocket Mass to leave a surface. It is a launch gate, not a full simulation of the rocket equation.</td></tr>
       <tr><td>Transfer Window (TW)</td><td>Cost (0–5) to cross from Sun Orbit to Mars ZOI. Changes each round on the board track. Events may modify.</td></tr>
-      <tr><td>VP (Victory Points)</td><td>The main scoring currency. Earned from missions, Technologies, and bonuses. Tallied at game end.</td></tr>
+      <tr><td>VP (Victory Points)</td><td>The prestige currency. Earned from exploration missions, milestones, research, and other headline achievements. Tallied at game end.</td></tr>
     </tbody>
   </table>
 

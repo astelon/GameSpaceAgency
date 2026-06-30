@@ -1,11 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
   Space Agency Race — Game Board (Source SVG)
-  3072 × 1920 px  |  Aspect 16:10  |  Maps to TTS Custom_Board scale {24, 1, 15}
+  3072 × 1920 px  |  Aspect 16:10  |  Targets a 24 × 15 TTS board footprint
 
   Pixel → TTS world-space formula (board center = world {0,1.5,-1}):
     world_X = px_x * 0.0078125 − 12
     world_Z = px_y * 0.0078125 − 8.5
+
+  Global.lua measures the loaded Custom_Board bounds in TTS and rescales it to this
+  24 × 15 world-space footprint after the board image finishes loading.
 
   To export to PNG (required by TTS):
     inkscape with export-type=png, export-width=3072, export-height=1920, output board.png
