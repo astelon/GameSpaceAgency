@@ -159,7 +159,7 @@ Tracking note:
    * **Sterling Booster** (E02) – Starting Engine (`Basic`)
    * **Standard Tank** (T01) – Starting Fuel Tank (`Basic`)
    * **Heat Shield** (S01) – Starting Support (`Basic`)
-   * 5 Credits
+   * Credits by turn order: first player 5, second 6, third 7, fourth 8 (offsets first-player advantage)
    * 1 Credit marker and 1 VP marker
    * 1 Agency Level marker set to **Level 1**
    * 6 craft markers for rockets and in-space assets
@@ -216,7 +216,7 @@ The game ends after a fixed number of rounds (**8**). If the Mission deck is dep
 
 ### 7.2 Action Phase
 
-Each player has a number of **Command Turns** equal to their **Agency Level**.
+Each player has a number of **Command Turns** determined by their **Agency Level** (Level 1 = 2, Level 2 = 3, Level 3 = 4).
 
 Starting with the first player, players alternate taking **one Command Turn at a time** until everyone has used all of their Command Turns for the round.
 
@@ -237,9 +237,9 @@ At the **start of the Action Phase**, refill each in-flight craft's Energy to it
 
 ### Agency Levels
 
-* **Level 1** – 1 Command Turn each Action Phase
-* **Level 2** – 2 Command Turns each Action Phase, costs **6 Credits**
-* **Level 3** – 3 Command Turns each Action Phase, costs **14 Credits**
+* **Level 1** – 2 Command Turns each Action Phase
+* **Level 2** – 3 Command Turns each Action Phase, costs **6 Credits**
+* **Level 3** – 4 Command Turns each Action Phase, costs **14 Credits**
 
 New Agency Levels take effect at the start of your next round.
 
@@ -331,7 +331,7 @@ If requirements are not met:
 
 * Reusable parts from craft that returned to `Earth` return to hand if they were not staged
 * Ongoing technology effects trigger
-* **Asset Operations:** Each persistent `Satellite` or `Station` you control may trigger each of its "spend Energy" income abilities **once**, spending the asset's remaining Energy this round. Collect the printed Credits or VP. This is free and costs no Command Turn. (Energy simply refills at the start of the next Action Phase — there is no separate Energy cleanup.)
+* **Asset Operations:** Each persistent `Satellite` or `Station` you control may trigger each of its "spend Energy" income abilities **once**, spending the asset's remaining Energy this round. Collect the Credits or VP. This is free and costs no Command Turn. **Income scales with distance:** Satellite assets pay 1 Credit at `Earth ZOI` or closer, 1 VP beyond `Earth ZOI`; Station cards pay as printed. (Energy simply refills at the start of the next Action Phase — there is no separate Energy cleanup.)
 * Discard the current round's Event card
 * **Mission Sweep:** if no mission was completed this round, discard the mission that has been in the display longest
 * Refill the Mission display to 3 cards if needed (place new missions to the right, so the oldest is always leftmost)
@@ -421,7 +421,8 @@ An Engine-free craft is only legal if it is already **in flight** or **in orbit*
 * To **maneuver**, a craft must have an Engine to turn that Range into orbital changes.
 * Missions with the `Docking` tag require a `Docking`-tagged support card on the rocket (e.g., Docking Adapter or Orbital Tug).
 * Missions with the `Docking` or `Maneuver` tags require a rocket with an Engine.
-* Missions with the `In-Flight` or `On-Orbit` tags may be attempted by legal Engine-free craft that are already in space.
+* Missions with the `In-Space` tag may be attempted by legal Engine-free craft that are already in space.
+* Missions requiring a `Crewed` payload: the craft must also include a `Pressurized` tank.
 * A rocket must satisfy both the Thrust/Mass check and the Range check before it can attempt a mission.
 * If a rocket has no payload, only Fuel Tank Mass counts toward Total Rocket Mass.
 * **Uncrewed** means any payload *without* the `Crewed` tag.
@@ -442,9 +443,9 @@ An Engine-free craft is only legal if it is already **in flight** or **in orbit*
 ### Landing Rules
 
 * To land on a body, a craft must be at the adjacent **Sub-Orbital** node and spend **1 Range** to cross to the surface.
-* **Earth reentry** (Sub-Orbital Earth → Earth): use a `Heat Shield` or `Parachute` card (discard after use), or perform a **propulsive landing** by spending **1 extra Range** with an Engine.
+* **Earth reentry** (Sub-Orbital Earth → Earth): use a `Reentry` card — Heat Shield or Parachute — (discard after use unless Reusable), or perform a **propulsive landing** by spending **1 extra Range** with an Engine.
 * **Moon landing** (Sub-Orbital Moon → Moon): spend 1 Range. The Moon has no atmosphere, so landing always requires an Engine (propulsive). A dedicated Landing Lander payload **or** the rocket itself may serve as the lander (see Rocket-as-Lander below).
-* **Mars landing** (Sub-Orbital Mars → Mars Surface): spend 1 Range. Mars has a thin atmosphere: use a `Heat Shield` or `Parachute` to assist, or perform a fully propulsive landing (1 extra Range + Engine). A dedicated Landing Lander **or** the rocket itself may serve as the lander.
+* **Mars landing** (Sub-Orbital Mars → Mars Surface): spend 1 Range. Mars has a thin atmosphere: use a `Reentry` card to assist, or perform a fully propulsive landing (1 extra Range + Engine). A dedicated Landing Lander **or** the rocket itself may serve as the lander.
 * Each landing uses its own support. A Moon return trip needs propulsive lunar landing plus Earth-reentry support for the trip home.
 * **Atmosphere nodes:** `Earth`, `Sub-Orbital Earth`, `Sub-Orbital Mars`, and `Mars Surface`. The Moon branch has no atmosphere. Cards that react to "entering atmosphere" (e.g., Solar Panel) trigger when a craft moves onto any atmosphere node.
 
@@ -464,7 +465,8 @@ then it may land on the surface directly. To **relaunch from a surface**, the cr
 * Payloads with the `Satellite` or `Station` tags become persistent assets when **deployed** in space (see §7.3 *Deploying Persistent Assets*). A payload may also be left behind automatically if its whole craft strands at a node with 0 Range.
 * A persistent asset keeps any Support cards assigned to it (for example a Solar Panel or RTG that powers it) unless they were staged or discarded.
 * These assets use your craft markers and may be activated like any other craft. To **move** one it must first gain Range (e.g., from an Orbital Tug); to **operate** one in place, use the Activate Craft action or the Maintenance *Asset Operations* step.
-* Many assets carry an **ongoing income** ability ("spend 1 Energy to gain 1 Credit/VP"). Pair the asset with a `Power` card so it has Energy each round, then collect that income for **free every Maintenance** during Asset Operations — you do not spend a Command Turn to bank it.
+* Many assets carry an **ongoing income** ability ("spend 1 Energy for income"). Pair the asset with a `Power` card so it has Energy each round, then collect that income for **free every Maintenance** during Asset Operations — you do not spend a Command Turn to bank it.
+* **Income scales with distance:** a `Satellite` asset's income pays **1 Credit** at `Earth ZOI` or closer and **1 VP** beyond `Earth ZOI`. Near-Earth infrastructure funds the agency; deep-space infrastructure earns glory. `Station` cards (Station Hub, Microgravity Lab) pay as printed — their gate is the expensive station chain itself.
 * Satellites and stations each count as one of your craft and may be activated at most once per Action Phase.
 
 ### On-Orbit Stations
@@ -497,25 +499,27 @@ Design note:
 
 ### Tags
 
-Cards use **tags** instead of keywords:
+Cards use **tags** instead of keywords. Every tag has a rules meaning; flavor lives in card names and flavor text.
 
-* `Reusable`
-* `Experimental`
-* `Crewed`
-* `LifeSupport`
-* `Electronics`
-* `Power`
-* `Deep Space`
-* `Stageable`
-* `Docking`
-* `Maneuver`
-* `In-Flight`
-* `On-Orbit`
-* `Heat Shield`
-* `Parachute`
-* `Satellite`
-* `Station`
-* `Basic`
+Component tags:
+
+* `Basic` — always purchasable at printed cost
+* `Reusable` — returns to hand on Earth return (no tag = discarded after use)
+* `Stageable` — jettison for printed bonus Range
+* `Cryogenic` — Hydrogen Core pairing; Cryo Handling tech
+* `Pressurized` — crew-rated tank; required for Crewed payloads
+* `Crewed` — carries crew (Uncrewed = any payload without this tag)
+* `LifeSupport` — station qualification
+* `Electronics` — electronics requirements + station qualification
+* `Scientific` — science requirements + station qualification
+* `Power` — generates Energy
+* `Reentry` — heat shields and parachutes; atmospheric landing
+* `Lander` — enables surface landing
+* `Docking` — docking hardware
+* `Satellite` — persistent asset when deployed
+* `Station` — station module
+
+Mission tags: `Commercial`, `Prestige`, `Infrastructure` (contract class), `Surface`, `Docking`, `Maneuver`, `In-Space`, plus requirement tags (`Crewed`, `Scientific`).
 
 > Tags allow flexible design space and future expansions.
 
@@ -529,7 +533,7 @@ VP sources:
 * Technologies
 * Exploration milestones (first to Moon / first to Mars)
 * Agency milestones (first to Level 3)
-* End‑game bonuses
+* End‑game infrastructure bonus: **+1 VP per deployed persistent asset** (Satellite or Station) still on the board
 
 ### End Game Trigger (Current)
 
@@ -619,7 +623,7 @@ Technologies should:
 * Mission-driven scoring and economy
 * Commercial / Prestige / Infrastructure mission taxonomy (tag-based)
 * Mission reward split: Commercial skews Credits, Prestige skews VP, Infrastructure balanced
-* Persistent asset economy loops: Comm Satellite and Station Hub generate Credits; Imaging Probe and Microgravity Lab generate VP. Assets must be **deployed** in space and paired with a `Power` card; income is harvested for free during the Maintenance *Asset Operations* step (no Command Turn required)
+* Persistent asset economy loops with **distance-scaled income**: Satellite assets pay Credits near Earth and VP beyond Earth ZOI; Station Hub and Microgravity Lab pay as printed. Assets must be **deployed** in space and paired with a `Power` card; income is harvested for free during the Maintenance *Asset Operations* step (no Command Turn required)
 * Card Market for component acquisition
 * Event cards integrated into Planning Phase
 * Technology tableau (permanent until removed)

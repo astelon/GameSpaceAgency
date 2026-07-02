@@ -816,7 +816,7 @@
       </div>
       <div>
         <div class="card-type-name" style="color:var(--engine-col)">Engine Cards</div>
-        <div class="card-type-desc">Supply <strong>Thrust</strong> to lift payloads from a planet. Engines have a <strong>Reliability</strong> rating checked on launch. They may be Reusable, Disposable, or Stageable — each with its own trade-off of cost, reliability, and repeat-flight value.</div>
+        <div class="card-type-desc">Supply <strong>Thrust</strong> to lift payloads from a planet. Engines have a <strong>Reliability</strong> rating checked on launch. They may be Reusable, single-use (no lifecycle tag — discarded after flight), or Stageable — each with its own trade-off of cost, reliability, and repeat-flight value.</div>
       </div>
     </div>
     <div class="card-type-row">
@@ -975,12 +975,12 @@
       <strong>Sterling Booster</strong> (E02, <span class="tag" style="font-size:.7rem">Basic</span> Engine),
       <strong>Standard Tank</strong> (T01, <span class="tag" style="font-size:.7rem">Basic</span> Tank),
       <strong>Heat Shield</strong> (S01, <span class="tag" style="font-size:.7rem">Basic</span> Support),
-      5 Credits, 1 Credit marker, 1 VP marker (placed on 0), 1 Agency Level marker (set to Level 1), and 6 Craft markers.</li>
+      1 Credit marker, 1 VP marker (placed on 0), 1 Agency Level marker (set to Level 1), and 6 Craft markers.</li>
     <li><strong>Sort Mission cards by Tier.</strong> Shuffle the Tier 1 Mission stack and place it face-down as the Mission deck. Set Tier 2 and Tier 3 Missions aside face-down — they enter the game later.</li>
     <li><strong>Reveal 3 Tier 1 Mission cards</strong> face-up to form the starting Mission display.</li>
     <li>Shuffle all remaining component cards (Engines, Tanks, Payloads, Support, Technology) into one <strong>Component Deck</strong>. Shuffle the <strong>Event Deck</strong> separately.</li>
     <li><strong>Reveal 5 Component cards</strong> face-up to form the starting <strong>Card Market</strong>.</li>
-    <li><strong>Determine the first player</strong> randomly. Give them the First Player token.</li>
+    <li><strong>Determine the first player</strong> randomly. Give them the First Player token. In turn order, players receive <strong>5, 6, 7, and 8 Credits</strong> — later seats get a small budget head start to offset first-player advantage.</li>
     <li>Place the <strong>Transfer Window marker</strong> on the first space of its printed cycle (TW 3).</li>
     <li>The game lasts <strong>8 rounds</strong>.</li>
   </ol>
@@ -992,7 +992,7 @@
 
   <div class="example-scene">
     <h4>Sample Starting Setup — 3 Players</h4>
-    <p>Each player holds: 1 Sterling Booster (Thrust 5, Reliability 9), 1 Standard Tank (Range 5, Mass 2), 1 Heat Shield, and 5 Credits. The Mission display shows <em>LEO Deployment</em>, <em>Emergency Resupply</em>, and <em>Capsule Recovery</em> — all Tier 1 contracts. The Card Market shows 5 random component cards.</p>
+    <p>Each player holds: 1 Sterling Booster (Thrust 5, Reliability 9), 1 Standard Tank (Range 5, Mass 2), 1 Heat Shield, and 5–7 Credits by turn order. The Mission display shows <em>LEO Deployment</em>, <em>Emergency Resupply</em>, and <em>Capsule Recovery</em> — all Tier 1 contracts. The Card Market shows 5 random component cards.</p>
   </div>
 
 
@@ -1013,7 +1013,7 @@
     <div class="phase-card">
       <div class="phase-num">Phase 02</div>
       <div class="phase-name">Action</div>
-      <div class="phase-desc">Players alternate Command Turns equal to their Agency Level. In-flight craft first refill Energy, then launch, build, buy, and fly. Missions resolve immediately on arrival.</div>
+      <div class="phase-desc">Players alternate Command Turns set by their Agency Level (2–4). In-flight craft first refill Energy, then launch, build, buy, and fly. Missions resolve immediately on arrival.</div>
     </div>
     <div class="phase-card">
       <div class="phase-num">Phase 03</div>
@@ -1034,7 +1034,7 @@
   <ul>
     <li>Reusable parts from craft that returned to Earth go back to hand (if not staged).</li>
     <li>Ongoing technology effects trigger.</li>
-    <li><strong>Asset Operations:</strong> each persistent Satellite or Station may trigger each of its "spend Energy" income abilities once, spending the asset's remaining Energy this round. Collect the Credits or VP — free, no Command Turn.</li>
+    <li><strong>Asset Operations:</strong> each persistent Satellite or Station may trigger each of its "spend Energy" income abilities once, spending the asset's remaining Energy this round. Collect the Credits or VP — free, no Command Turn. <em>Income scales with distance: Satellite assets pay 1 Credit at Earth ZOI or closer, 1 VP beyond Earth ZOI. Station cards pay as printed.</em></li>
     <li>Discard the current round's Event card.</li>
     <li><strong>Mission Sweep:</strong> if no mission was completed this round, discard the mission that has been in the display longest.</li>
     <li>Refill the Mission display to 3 cards if needed (place new missions to the right, so the oldest is always leftmost).</li>
@@ -1093,19 +1093,19 @@
     <div class="level-card">
       <div class="lv-label">Level</div>
       <div class="lv-num">1</div>
-      <div class="lv-turns">1 Command Turn</div>
+      <div class="lv-turns">2 Command Turns</div>
       <div class="lv-cost">Starting level — no cost</div>
     </div>
     <div class="level-card">
       <div class="lv-label">Level</div>
       <div class="lv-num">2</div>
-      <div class="lv-turns">2 Command Turns</div>
+      <div class="lv-turns">3 Command Turns</div>
       <div class="lv-cost">Costs 6 Credits</div>
     </div>
     <div class="level-card">
       <div class="lv-label">Level</div>
       <div class="lv-num">3</div>
-      <div class="lv-turns">3 Command Turns</div>
+      <div class="lv-turns">4 Command Turns</div>
       <div class="lv-cost">Costs 14 Credits</div>
     </div>
   </div>
@@ -1204,7 +1204,7 @@
       </div>
       <div class="mini-card-art" style="background:linear-gradient(160deg,#001020,#002244); font-size:28px;">🚀</div>
       <div class="mini-card-name">Sterling Booster</div>
-      <div class="mini-card-stats">Thrust 5 · Reliability 9 · Cost 3<br><span class="tag" style="font-size:.62rem">Disposable</span> <span class="tag" style="font-size:.62rem">Basic</span></div>
+      <div class="mini-card-stats">Thrust 5 · Reliability 9 · Cost 3<br><span class="tag" style="font-size:.62rem">Basic</span></div>
       <div class="mini-card-text">High reliability, single-use. Always available.</div>
     </div>
     <div class="mini-card">
@@ -1214,7 +1214,7 @@
       </div>
       <div class="mini-card-art" style="background:linear-gradient(160deg,#001010,#002020); font-size:28px;">⛽</div>
       <div class="mini-card-name">Standard Tank</div>
-      <div class="mini-card-stats">Range 5 · Mass 2 · Cost 2<br><span class="tag" style="font-size:.62rem">Stable</span> <span class="tag" style="font-size:.62rem">Basic</span></div>
+      <div class="mini-card-stats">Range 5 · Mass 2 · Cost 2<br><span class="tag" style="font-size:.62rem">Basic</span></div>
       <div class="mini-card-text">Compatible with most engines. Always available.</div>
     </div>
     <div class="mini-card">
@@ -1224,7 +1224,7 @@
       </div>
       <div class="mini-card-art" style="background:linear-gradient(160deg,#101000,#201800); font-size:28px;">🛰️</div>
       <div class="mini-card-name">Comm Satellite</div>
-      <div class="mini-card-stats">Mass 2 · Cost 2<br><span class="tag" style="font-size:.62rem">Satellite</span> <span class="tag" style="font-size:.62rem">Uncrewed</span></div>
+      <div class="mini-card-stats">Mass 2 · Cost 2<br><span class="tag" style="font-size:.62rem">Satellite</span> <span class="tag" style="font-size:.62rem">Electronics</span></div>
       <div class="mini-card-text">Remains on board as an on-orbit asset after delivery.</div>
     </div>
     <div class="mini-card">
@@ -1234,7 +1234,7 @@
       </div>
       <div class="mini-card-art" style="background:linear-gradient(160deg,#080010,#100020); font-size:28px;">🪂</div>
       <div class="mini-card-name">Heat Shield</div>
-      <div class="mini-card-stats">Cost 1<br><span class="tag" style="font-size:.62rem">Heat Shield</span> <span class="tag" style="font-size:.62rem">Basic</span></div>
+      <div class="mini-card-stats">Cost 1<br><span class="tag" style="font-size:.62rem">Reentry</span> <span class="tag" style="font-size:.62rem">Basic</span></div>
       <div class="mini-card-text">Use from Sub-Orbital to land safely. Always available.</div>
     </div>
   </div>
@@ -1337,9 +1337,9 @@
   <table>
     <thead><tr><th>Body</th><th>Landing Method</th></tr></thead>
     <tbody>
-      <tr><td>Earth</td><td>Use a <span class="tag" style="font-size:.7rem">Heat Shield</span> or <span class="tag" style="font-size:.7rem">Parachute</span> (discard after use), <strong>or</strong> propulsive landing (1 extra Range + Engine).</td></tr>
+      <tr><td>Earth</td><td>Use a <span class="tag" style="font-size:.7rem">Reentry</span> card — Heat Shield or Parachute — (discard after use unless Reusable), <strong>or</strong> propulsive landing (1 extra Range + Engine).</td></tr>
       <tr><td>Moon</td><td><strong>Propulsive only</strong> (no atmosphere). Requires Engine. Use a Landing Lander <strong>or</strong> Rocket-as-Lander.</td></tr>
-      <tr><td>Mars</td><td>Use a <span class="tag" style="font-size:.7rem">Heat Shield</span> or <span class="tag" style="font-size:.7rem">Parachute</span> (thin atmosphere), <strong>or</strong> propulsive landing (1 extra Range + Engine). Landing Lander or Rocket-as-Lander for surface missions.</td></tr>
+      <tr><td>Mars</td><td>Use a <span class="tag" style="font-size:.7rem">Reentry</span> card (thin atmosphere), <strong>or</strong> propulsive landing (1 extra Range + Engine). Landing Lander or Rocket-as-Lander for surface missions.</td></tr>
     </tbody>
   </table>
 
@@ -1357,7 +1357,8 @@
 
   <div class="box cyan">
     <div class="box-title">&#x1F4E1; Asset Income Loop</div>
-    <p style="margin-bottom:0">A deployed asset keeps the Support cards that power it. Many assets carry an income ability (<em>spend 1 Energy to gain 1 Credit or VP</em>): pair the asset with a <span class="tag">Power</span> card such as a Solar Panel or RTG, deploy it in orbit, and collect that income <strong>free every Maintenance</strong> during Asset Operations — no Command Turn required.</p>
+    <p>A deployed asset keeps the Support cards that power it. Many assets carry an income ability (<em>spend 1 Energy for income</em>): pair the asset with a <span class="tag">Power</span> card such as a Solar Panel or RTG, deploy it in orbit, and collect that income <strong>free every Maintenance</strong> during Asset Operations — no Command Turn required.</p>
+    <p style="margin-bottom:0"><strong>Income scales with distance:</strong> a Satellite asset's income pays <strong>1 Credit</strong> while at Earth ZOI or closer, or <strong>1 VP</strong> while beyond Earth ZOI (Moon or Mars branch). Near-Earth infrastructure funds your agency; deep-space infrastructure earns glory. Station cards (Station Hub, Microgravity Lab) pay as printed — their gate is the station chain itself.</p>
   </div>
 
   <h2>On-Orbit Stations</h2>
@@ -1451,7 +1452,8 @@
   <ul>
     <li>Missions with the <span class="tag" style="font-size:.7rem">Docking</span> tag require a <strong>Docking-tagged support card</strong> on the rocket (e.g., Docking Adapter or Orbital Tug) and a valid <strong>On-Orbit Station</strong> in High Orbit (GEO) to dock with.</li>
     <li>Missions with the <span class="tag" style="font-size:.7rem">Docking</span> or <span class="tag" style="font-size:.7rem">Maneuver</span> tags require an Engine.</li>
-    <li>Missions with the <span class="tag" style="font-size:.7rem">Surface</span> tag require a Landing Lander or Rocket-as-Lander.</li>
+    <li>Missions with the <span class="tag" style="font-size:.7rem">Surface</span> tag require a <span class="tag" style="font-size:.7rem">Lander</span> payload or Rocket-as-Lander.</li>
+    <li>Missions requiring a <span class="tag" style="font-size:.7rem">Crewed</span> payload: the craft must also include a <span class="tag" style="font-size:.7rem">Pressurized</span> tank.</li>
     <li>Mission cards that cross the Transfer Window show route Range at TW 0. Add the current TW cost when planning.</li>
     <li><strong>Uncrewed</strong> means any payload <em>without</em> the <span class="tag" style="font-size:.7rem">Crewed</span> tag.</li>
   </ul>
@@ -1466,7 +1468,7 @@
       </div>
       <div class="mini-card-art" style="background:linear-gradient(160deg,#100008,#1a0020); font-size:28px;">🌍</div>
       <div class="mini-card-name">LEO Deployment</div>
-      <div class="mini-card-stats">Range 2 · Reward: 2 VP + 5 CR<br><span class="tag" style="font-size:.62rem">Public</span> <span class="tag" style="font-size:.62rem">Commercial</span></div>
+      <div class="mini-card-stats">Range 2 · Reward: 2 VP + 5 CR<br><span class="tag" style="font-size:.62rem">Commercial</span></div>
       <div class="mini-card-text">Route: Earth → LEO. Requires: Uncrewed payload.</div>
     </div>
     <div class="mini-card">
@@ -1476,7 +1478,7 @@
       </div>
       <div class="mini-card-art" style="background:linear-gradient(160deg,#0e0c00,#181400); font-size:28px;">🌙</div>
       <div class="mini-card-name">Lunar Landing</div>
-      <div class="mini-card-stats">Range 7 · Reward: 9 VP + 3 CR<br><span class="tag" style="font-size:.62rem">Public</span> <span class="tag" style="font-size:.62rem">Prestige</span></div>
+      <div class="mini-card-stats">Range 7 · Reward: 9 VP + 3 CR<br><span class="tag" style="font-size:.62rem">Surface</span> <span class="tag" style="font-size:.62rem">Prestige</span></div>
       <div class="mini-card-text">Route: Earth → Moon. Requires: Lander or Rocket-as-Lander.</div>
     </div>
     <div class="mini-card">
@@ -1486,7 +1488,7 @@
       </div>
       <div class="mini-card-art" style="background:linear-gradient(160deg,#100005,#0e0018); font-size:28px;">🔴</div>
       <div class="mini-card-name">Mars Orbit Insertion</div>
-      <div class="mini-card-stats">Range 7+TW · Reward: 13 VP + 3 CR<br><span class="tag" style="font-size:.62rem">Public</span> <span class="tag" style="font-size:.62rem">Prestige</span></div>
+      <div class="mini-card-stats">Range 7+TW · Reward: 13 VP + 3 CR<br><span class="tag" style="font-size:.62rem">Prestige</span></div>
       <div class="mini-card-text">Route: Earth → Mars High Orbit. Crosses Transfer Window. Mass 2+ payload.</div>
     </div>
     <div class="mini-card">
@@ -1496,7 +1498,7 @@
       </div>
       <div class="mini-card-art" style="background:linear-gradient(160deg,#0a0010,#0e0018); font-size:28px;">🪨</div>
       <div class="mini-card-name">Lunar Sample Return</div>
-      <div class="mini-card-stats">Range 14 · Reward: 13 VP + 3 CR<br><span class="tag" style="font-size:.62rem">Prestige</span> <span class="tag" style="font-size:.62rem">Public</span></div>
+      <div class="mini-card-stats">Range 14 · Reward: 15 VP + 3 CR<br><span class="tag" style="font-size:.62rem">Surface</span> <span class="tag" style="font-size:.62rem">Prestige</span></div>
       <div class="mini-card-text">Route: Earth → Moon → Earth. Lander or Rocket-as-Lander + Cargo Return + reentry support.</div>
     </div>
   </div>
@@ -1533,6 +1535,7 @@
     <li>Missions completed during the game</li>
     <li>Milestone bonuses (first to Moon/Mars, first to Level 3, and technology milestones)</li>
     <li>Card and Event effects that grant VP during play, such as docking bonuses or research activations</li>
+    <li><strong>End-game infrastructure bonus:</strong> +1 VP per deployed persistent asset (Satellite or Station) you still control on the board</li>
   </ul>
 
   <p>The player with the <strong>highest VP total wins</strong>.</p>
@@ -1571,33 +1574,37 @@
   <div class="section-divider"><span class="num">13</span><span class="line"></span></div>
   <h1>Card Tags</h1>
 
-  <p>Tags on cards create connections between hardware requirements and mission conditions. A card with a tag contributes that capability to the craft.</p>
+  <p>Tags on cards create connections between hardware requirements and mission conditions. A card with a tag contributes that capability to the craft. <strong>Every tag has a rules meaning</strong> — flavor lives in card names and flavor text instead.</p>
 
+  <h3>Component Tags</h3>
   <div class="tag-legend">
-    <div class="tag-row"><span class="tag">Reusable</span><span class="tag-desc">Returns to hand when craft reaches Earth (if not staged).</span></div>
-    <div class="tag-row"><span class="tag">Disposable</span><span class="tag-desc">Discarded after launch; never returns to hand.</span></div>
-    <div class="tag-row"><span class="tag">Stageable</span><span class="tag-desc">Can be jettisoned for a printed bonus Range (pre-flight or mid-flight).</span></div>
     <div class="tag-row"><span class="tag">Basic</span><span class="tag-desc">Always available for purchase at printed cost, even if not in the Card Market.</span></div>
-    <div class="tag-row"><span class="tag">Cryogenic</span><span class="tag-desc">Requires compatible engine (Hydrogen Core); higher Range but heavier Mass.</span></div>
-    <div class="tag-row"><span class="tag">Experimental</span><span class="tag-desc">Higher risk, potentially higher reward; lower base Reliability.</span></div>
-    <div class="tag-row"><span class="tag">Crewed</span><span class="tag-desc">Enables crewed missions; requires life-support consideration.</span></div>
-    <div class="tag-row"><span class="tag">LifeSupport</span><span class="tag-desc">Habitability systems for long-duration crewed craft and stations.</span></div>
-    <div class="tag-row"><span class="tag">Electronics</span><span class="tag-desc">Computers, comms, and control systems; counts toward station qualification.</span></div>
-    <div class="tag-row"><span class="tag">Power</span><span class="tag-desc">Generates or stores Energy; required to keep an On-Orbit Station operating.</span></div>
-    <div class="tag-row"><span class="tag">Satellite</span><span class="tag-desc">Remains on orbital board after delivery as a persistent asset.</span></div>
-    <div class="tag-row"><span class="tag">Station</span><span class="tag-desc">A permanent orbital facility, usually anchored by a Station Hub in High Orbit (GEO).</span></div>
-    <div class="tag-row"><span class="tag">Heat Shield</span><span class="tag-desc">Required for atmospheric reentry (Earth/Mars). Discarded after use unless Reusable.</span></div>
-    <div class="tag-row"><span class="tag">Parachute</span><span class="tag-desc">Alternative to Heat Shield for atmospheric landing.</span></div>
-    <div class="tag-row"><span class="tag">Docking</span><span class="tag-desc">Support card tag. Required on the rocket for Docking-tagged missions.</span></div>
-    <div class="tag-row"><span class="tag">Commercial</span><span class="tag-desc">Mission class focused on Credits. Represents launch contracts, logistics, and service work.</span></div>
-    <div class="tag-row"><span class="tag">Prestige</span><span class="tag-desc">Mission class focused on VP. Represents exploration firsts, science headlines, and public glory.</span></div>
-    <div class="tag-row"><span class="tag">Infrastructure</span><span class="tag-desc">Mission class with balanced rewards that helps build long-term station and satellite networks.</span></div>
+    <div class="tag-row"><span class="tag">Reusable</span><span class="tag-desc">Returns to hand when craft reaches Earth (if not staged). <em>Cards without this tag are discarded after use.</em></span></div>
+    <div class="tag-row"><span class="tag">Stageable</span><span class="tag-desc">Can be jettisoned for a printed bonus Range (pre-flight or mid-flight).</span></div>
+    <div class="tag-row"><span class="tag">Cryogenic</span><span class="tag-desc">Hydrogen Core requires a Cryogenic tank; Cryogenic hardware links to Cryo Handling tech.</span></div>
+    <div class="tag-row"><span class="tag">Pressurized</span><span class="tag-desc">Crew-rated tank. A craft carrying a Crewed payload must include one.</span></div>
+    <div class="tag-row"><span class="tag">Crewed</span><span class="tag-desc">Carries crew. Satisfies Crewed mission requirements; requires a Pressurized tank on the craft. <em>Uncrewed = any payload without this tag.</em></span></div>
+    <div class="tag-row"><span class="tag">LifeSupport</span><span class="tag-desc">Habitability systems; counts toward On-Orbit Station qualification.</span></div>
+    <div class="tag-row"><span class="tag">Electronics</span><span class="tag-desc">Computers and comms; satisfies Electronics requirements and station qualification.</span></div>
+    <div class="tag-row"><span class="tag">Scientific</span><span class="tag-desc">Scientific instruments; satisfies Scientific mission requirements and station qualification.</span></div>
+    <div class="tag-row"><span class="tag">Power</span><span class="tag-desc">Generates Energy (or bursts it, for Batteries); needed for asset income and stations.</span></div>
+    <div class="tag-row"><span class="tag">Reentry</span><span class="tag-desc">Heat shields and parachutes. Lands a craft safely from a Sub-Orbital node (Earth/Mars). Discarded after use unless Reusable.</span></div>
+    <div class="tag-row"><span class="tag">Lander</span><span class="tag-desc">Enables surface landing; satisfies Surface mission requirements (or use Rocket-as-Lander).</span></div>
+    <div class="tag-row"><span class="tag">Docking</span><span class="tag-desc">Docking hardware. Required on the rocket for Docking-tagged missions.</span></div>
+    <div class="tag-row"><span class="tag">Satellite</span><span class="tag-desc">Payload that stays on the board as a persistent asset when deployed.</span></div>
+    <div class="tag-row"><span class="tag">Station</span><span class="tag-desc">Station module; anchors or extends an On-Orbit Station at High Orbit (GEO).</span></div>
+  </div>
+
+  <h3>Mission Tags</h3>
+  <div class="tag-legend">
+    <div class="tag-row"><span class="tag">Commercial</span><span class="tag-desc">Mission class focused on Credits: launch contracts, logistics, and service work.</span></div>
+    <div class="tag-row"><span class="tag">Prestige</span><span class="tag-desc">Mission class focused on VP: exploration firsts, science headlines, public glory.</span></div>
+    <div class="tag-row"><span class="tag">Infrastructure</span><span class="tag-desc">Mission class with balanced rewards that builds long-term station and satellite networks.</span></div>
+    <div class="tag-row"><span class="tag">Surface</span><span class="tag-desc">Mission requires landing: a Lander payload or Rocket-as-Lander.</span></div>
+    <div class="tag-row"><span class="tag">Docking</span><span class="tag-desc">Mission requires a Docking support card and an On-Orbit Station to dock with; Engine mandatory.</span></div>
     <div class="tag-row"><span class="tag">Maneuver</span><span class="tag-desc">Mission requires orbital maneuvering; Engine mandatory.</span></div>
-    <div class="tag-row"><span class="tag">In-Flight</span><span class="tag-desc">Mission may be completed by a craft already in flight.</span></div>
-    <div class="tag-row"><span class="tag">On-Orbit</span><span class="tag-desc">Mission may be completed by a craft currently in orbit.</span></div>
-    <div class="tag-row"><span class="tag">Surface</span><span class="tag-desc">Mission requires landing on a planetary or lunar surface.</span></div>
-    <div class="tag-row"><span class="tag">Scientific</span><span class="tag-desc">Payload carries scientific instruments; gates certain mission requirements.</span></div>
-    <div class="tag-row"><span class="tag">Deep Space</span><span class="tag-desc">Mission or payload related to interplanetary destinations.</span></div>
+    <div class="tag-row"><span class="tag">In-Space</span><span class="tag-desc">Mission may be completed by a craft already in space (in flight or in orbit).</span></div>
+    <div class="tag-row"><span class="tag">Crewed</span> / <span class="tag">Scientific</span><span class="tag-desc">Mission requires a payload with the matching tag.</span></div>
   </div>
 
 
@@ -1610,7 +1617,7 @@
   <table>
     <thead><tr><th>Term</th><th>Definition</th></tr></thead>
     <tbody>
-      <tr><td>Agency Level</td><td>Your operation scale (1–3). Determines how many Command Turns you take each Action Phase.</td></tr>
+      <tr><td>Agency Level</td><td>Your operation scale (1–3). Command Turns per Action Phase = Level + 1 (2/3/4).</td></tr>
       <tr><td>Agency Tableau</td><td>Your personal area of face-up Technology cards. Their effects apply to all your craft permanently.</td></tr>
       <tr><td>Atmosphere</td><td>The nodes Earth, Sub-Orbital Earth, Sub-Orbital Mars, and Mars Surface. The Moon branch has none.</td></tr>
       <tr><td>Basic Card</td><td>A card tagged Basic (E02, T01, S01) that can always be purchased at printed cost, even if not in the Card Market.</td></tr>
