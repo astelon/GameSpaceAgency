@@ -318,4 +318,8 @@ Audit of scoring routes after the Section 3–4 changes. The goal: several viabl
 
 ---
 
-*Review based on: rulebook.html (1,655 lines), cards.csv (39 unique cards / 142 total incl. copies: 24 engines, 25 tanks, 24 payloads, 39 support, 10 tech, 12 missions, 8 events), Space_Agency.md v0.2. All mission Range values were verified against the node-distance table and are internally consistent (M01–M12 ✓).*
+*Review based on: rulebook.html (1,655 lines), cards.csv (58 unique cards / 142 total incl. copies: 24 engines, 25 tanks, 24 payloads, 39 support, 10 tech, 12 missions, 8 events), Space_Agency.md v0.2. All mission Range values were verified against the node-distance table and are internally consistent (M01–M12 ✓).*
+
+---
+
+**Implementation status:** Phases 1–3 of the roadmap have been applied to `cards.csv`, `docs/rulebook.html`, and `Space_Agency.md` (see the commit history on this branch). The card set is now v0.3: 81 unique cards / 176 total, 20 missions (7/8/5 per tier), 13 events. New cards (M13–M20, EV09–EV13, C05–C10, P09–P11, S14) still need art generated via the AI art pipeline and the nanDECK templates re-exported.

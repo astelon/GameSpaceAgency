@@ -306,6 +306,7 @@ A payload that is never deployed simply returns or is discarded with its craft a
 * When a card says to **Spend X Energy**, remove that many tokens from the craft's current Energy.
 * **Batteries are single-use bursts, not storage.** At any time you may discard a Battery attached to a craft to immediately add its printed Energy. A Battery works **anywhere**, including in atmosphere and during launch or relaunch — handy when Solar Panels are unavailable or the craft carries no generator.
 * **Persistent-asset income** abilities (a Comm Satellite, Imaging Probe, Station Hub, or Microgravity Lab) spend the asset's Energy during the **Maintenance Phase** *Asset Operations* step — no Command Turn and no movement, only that the asset still has Energy this round. Because Energy refills every round, just keep a `Power` card on the asset and the income pays out each round.
+* **Conditional activation income:** some `Scientific` and `Electronics` cards (Sensor Array, Science Module, Space Telescope, Comm Satellite relay) pay VP or Credits when activated under the right conditions — a storm Event in play, or a deep-space position. Card text is authoritative; this is how bad space weather becomes an opportunity for a prepared agency.
 
 #### Failure
 
@@ -447,6 +448,7 @@ An Engine-free craft is only legal if it is already **in flight** or **in orbit*
 * **Moon landing** (Sub-Orbital Moon → Moon): spend 1 Range. The Moon has no atmosphere, so landing always requires an Engine (propulsive). A dedicated Landing Lander payload **or** the rocket itself may serve as the lander (see Rocket-as-Lander below).
 * **Mars landing** (Sub-Orbital Mars → Mars Surface): spend 1 Range. Mars has a thin atmosphere: use a `Reentry` card to assist, or perform a fully propulsive landing (1 extra Range + Engine). A dedicated Landing Lander **or** the rocket itself may serve as the lander.
 * Each landing uses its own support. A Moon return trip needs propulsive lunar landing plus Earth-reentry support for the trip home.
+* **Aerobraking:** while moving *toward* a body with atmosphere (descending on the Earth or Mars branch), a craft may discard a `Reentry` card to immediately gain **+2 Range**. The card is spent and cannot also be used for the landing itself.
 * **Atmosphere nodes:** `Earth`, `Sub-Orbital Earth`, `Sub-Orbital Mars`, and `Mars Surface`. The Moon branch has no atmosphere. Cards that react to "entering atmosphere" (e.g., Solar Panel) trigger when a craft moves onto any atmosphere node.
 
 ### Rocket-as-Lander
@@ -641,7 +643,7 @@ Technologies should:
 
 ### Playtest Readiness
 
-* Card list v0.2 complete (142 cards, 12 missions, full component set)
+* Card list v0.3 complete (176 cards, 20 missions — 7 Tier 1 / 8 Tier 2 / 5 Tier 3 — 13 events, full component set)
 * Economy rebalanced — see `docs/playtest_notes.md` for balance targets
 * First blind playtest scheduled
 
