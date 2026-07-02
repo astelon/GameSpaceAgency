@@ -981,7 +981,8 @@
     <li>Shuffle all remaining component cards (Engines, Tanks, Payloads, Support, Technology) into one <strong>Component Deck</strong>. Shuffle the <strong>Event Deck</strong> separately.</li>
     <li><strong>Reveal 5 Component cards</strong> face-up to form the starting <strong>Card Market</strong>.</li>
     <li><strong>Determine the first player</strong> randomly. Give them the First Player token.</li>
-    <li>The game lasts <strong>8 rounds</strong>, or ends sooner if the Mission deck runs out.</li>
+    <li>Place the <strong>Transfer Window marker</strong> on the first space of its printed cycle (TW 3).</li>
+    <li>The game lasts <strong>8 rounds</strong>.</li>
   </ol>
 
   <div class="box cyan">
@@ -1007,7 +1008,7 @@
     <div class="phase-card">
       <div class="phase-num">Phase 01</div>
       <div class="phase-name">Planning</div>
-      <div class="phase-desc">Reveal an Event. Advance the Transfer Window. Each player draws 2 cards (hand limit 5). Optional: discard 1 card for 1 Credit.</div>
+      <div class="phase-desc">Reveal an Event. Advance the Transfer Window. Each player draws 2 cards (hand limit 5). Optional: discard up to 2 cards for 1 Credit each.</div>
     </div>
     <div class="phase-card">
       <div class="phase-num">Phase 02</div>
@@ -1024,9 +1025,9 @@
   <h3>Planning Phase Detail</h3>
   <ol>
     <li><strong>Reveal Event:</strong> Flip the top card of the Event Deck. Its effect applies for the entire round. If the Event Deck is empty, skip this step.</li>
-    <li><strong>Advance Transfer Window:</strong> Move the TW marker one step along its track (range 0–5).</li>
+    <li><strong>Advance Transfer Window:</strong> Move the TW marker one step along its printed cycle: <strong>3 → 2 → 1 → 0 → 1 → 2 → 3 → 4</strong>, then repeat. The full cycle is visible on the board, so future windows can be planned in advance.</li>
     <li><strong>Draw Cards:</strong> Each player draws <strong>2 cards</strong> from the Component Deck. Hand limit is <strong>5</strong> — if you exceed 5, immediately discard down.</li>
-    <li><strong>Emergency Sell:</strong> Each player may discard 1 card from hand to gain 1 Credit.</li>
+    <li><strong>Emergency Sell:</strong> Each player may discard up to 2 cards from hand to gain 1 Credit each. (This is the only way to sell cards.)</li>
   </ol>
 
   <h3>Maintenance Phase Detail</h3>
@@ -1035,7 +1036,8 @@
     <li>Ongoing technology effects trigger.</li>
     <li><strong>Asset Operations:</strong> each persistent Satellite or Station may trigger each of its "spend Energy" income abilities once, spending the asset's remaining Energy this round. Collect the Credits or VP — free, no Command Turn.</li>
     <li>Discard the current round's Event card.</li>
-    <li>Refill the Mission display to 3 cards if needed.</li>
+    <li><strong>Mission Sweep:</strong> if no mission was completed this round, discard the mission that has been in the display longest.</li>
+    <li>Refill the Mission display to 3 cards if needed (place new missions to the right, so the oldest is always leftmost).</li>
     <li>Refill the <strong>Card Market</strong> to 5 cards from the Component Deck.</li>
   </ul>
 
@@ -1062,28 +1064,16 @@
       <p>Buy one face-up card from the <strong>Card Market</strong> (or any <span class="tag" style="font-size:.7rem">Basic</span> card) by paying its Credit cost. Add it to your hand. Immediately refill the empty market slot.</p>
     </div>
     <div class="action-item">
-      <div class="action-name">&#9670; Sell Part</div>
-      <p>Discard a card from your hand and gain Credits equal to half its Cost, rounded down.</p>
-    </div>
-    <div class="action-item">
-      <div class="action-name">&#9670; Accept Mission</div>
-        <p>Commit to one Public mission in the display. In this prototype, all missions remain public and may be raced by multiple agencies until completed.</p>
-    </div>
-    <div class="action-item">
-      <div class="action-name">&#9670; Assemble Rocket</div>
-      <p>Play Engine, Tanks, Payload, and/or Support cards to your Launch Area. A rocket needs an Engine to launch from a planet.</p>
+      <div class="action-name">&#9670; Engineering</div>
+      <p>Play Engine, Tanks, Payload, and/or Support cards to your Launch Area, and/or replace components on an assembled rocket there. A rocket needs an Engine to launch from a planet.</p>
     </div>
     <div class="action-item">
       <div class="action-name">&#9670; Develop Technology</div>
       <p>Pay a Technology card's Credit cost and place it face-up in your <strong>Agency Tableau</strong>. It applies to all your craft permanently. You cannot have two developed Technology cards with the same <strong>Name</strong>.</p>
     </div>
     <div class="action-item">
-      <div class="action-name">&#9670; Upgrade Rocket</div>
-      <p>Replace one or more components on an assembled rocket in your Launch Area.</p>
-    </div>
-    <div class="action-item">
       <div class="action-name">&#9670; Launch New Craft</div>
-      <p>Place an assembled rocket at Earth, perform the <strong>Launch Capability Check</strong> and <strong>Reliability Check</strong>, then fly along the orbital map. Resolve the mission immediately if the craft reaches its destination. <em>You may combine Assemble Rocket and Launch New Craft into a single Command Turn if all components are already in your hand.</em></p>
+      <p>Place an assembled rocket at Earth, perform the <strong>Launch Capability Check</strong> and <strong>Reliability Check</strong>, then fly along the orbital map. Resolve the mission immediately if the craft reaches its destination. <em>You may combine Engineering and Launch New Craft into a single Command Turn if all components are already in your hand.</em></p>
     </div>
     <div class="action-item">
       <div class="action-name">&#9670; Activate Craft</div>
@@ -1132,6 +1122,7 @@
     <ul style="margin-bottom:0">
       <li><strong>First to Moon branch</strong> (Moon Orbit or farther): <strong>+2 VP</strong></li>
       <li><strong>First to Mars branch</strong> (Mars ZOI or farther): <strong>+4 VP</strong></li>
+      <li><strong>Tech starter bonus:</strong> first player to develop their 2nd Technology gains <strong>+1 VP</strong></li>
       <li><strong>Tech pace bonus:</strong> first player to develop 4 Technologies gains <strong>+2 VP</strong></li>
       <li><strong>Orbit-linked innovation:</strong> if you develop a Technology while you control an on-orbit Satellite or Station, gain <strong>+1 VP</strong> (max once per round)</li>
     </ul>
@@ -1194,6 +1185,7 @@
     <li><strong>Mid-flight staging:</strong> At any point during movement (between nodes), you may Stage one Stageable card (typically an empty tank). Gain its bonus Range and reduce the craft's current Mass — important for relaunch capability checks.</li>
     <li>A staged Engine still counts for the initial launch capability check.</li>
     <li>Staging reduces the craft's current Mass (important for relaunch capability checks) and increases Range.</li>
+    <li><strong>Staging limits:</strong> each Stageable card may be staged only once. You may stage any number of cards during a flight, but at most one pre-flight and one per node crossing.</li>
     <li>A staged card is <strong>discarded</strong> and cannot be recovered, even if Reusable.</li>
   </ul>
 
@@ -1340,6 +1332,8 @@
 
   <p>To land on a body, a craft must be at the adjacent <strong>Sub-Orbital</strong> node and spend <strong>1 Range</strong> to reach the surface.</p>
 
+  <p><strong>Atmosphere nodes:</strong> Earth, Sub-Orbital Earth, Sub-Orbital Mars, and Mars Surface. The Moon branch has no atmosphere — that is why Moon landings are propulsive only. Cards that react to "entering atmosphere" (e.g., Solar Panel) trigger when a craft moves onto any atmosphere node.</p>
+
   <table>
     <thead><tr><th>Body</th><th>Landing Method</th></tr></thead>
     <tbody>
@@ -1459,6 +1453,7 @@
     <li>Missions with the <span class="tag" style="font-size:.7rem">Docking</span> or <span class="tag" style="font-size:.7rem">Maneuver</span> tags require an Engine.</li>
     <li>Missions with the <span class="tag" style="font-size:.7rem">Surface</span> tag require a Landing Lander or Rocket-as-Lander.</li>
     <li>Mission cards that cross the Transfer Window show route Range at TW 0. Add the current TW cost when planning.</li>
+    <li><strong>Uncrewed</strong> means any payload <em>without</em> the <span class="tag" style="font-size:.7rem">Crewed</span> tag.</li>
   </ul>
 
   <h2>Sample Mission Cards</h2>
@@ -1532,7 +1527,7 @@
   <div class="section-divider"><span class="num">11</span><span class="line"></span></div>
   <h1>Scoring &amp; End Game</h1>
 
-  <p>The game ends after <strong>8 rounds</strong>, or sooner when the Mission deck is depleted. After the final round, all players compare the VP they earned during play from:</p>
+  <p>The game ends after <strong>8 rounds</strong>. (If the Mission deck runs out, the display simply is not refilled — the game still plays its full 8 rounds.) After the final round, all players compare the VP they earned during play from:</p>
 
   <ul>
     <li>Missions completed during the game</li>
@@ -1617,6 +1612,7 @@
     <tbody>
       <tr><td>Agency Level</td><td>Your operation scale (1–3). Determines how many Command Turns you take each Action Phase.</td></tr>
       <tr><td>Agency Tableau</td><td>Your personal area of face-up Technology cards. Their effects apply to all your craft permanently.</td></tr>
+      <tr><td>Atmosphere</td><td>The nodes Earth, Sub-Orbital Earth, Sub-Orbital Mars, and Mars Surface. The Moon branch has none.</td></tr>
       <tr><td>Basic Card</td><td>A card tagged Basic (E02, T01, S01) that can always be purchased at printed cost, even if not in the Card Market.</td></tr>
       <tr><td>Card Market</td><td>5 face-up component cards. Refilled immediately when a card is bought and during Maintenance.</td></tr>
       <tr><td>Command Turn</td><td>One action taken during the Action Phase. You take one at a time, alternating with other players.</td></tr>

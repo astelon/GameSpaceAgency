@@ -197,7 +197,7 @@ The game proceeds over a series of **Rounds**.
 
 Launches and in-flight activations resolve **immediately** during the Action Phase. There is no separate resolution phase.
 
-The game ends after a fixed number of rounds **or** when the Mission deck is depleted (final trigger TBD).
+The game ends after a fixed number of rounds (**8**). If the Mission deck is depleted, the display simply is not refilled — the game still plays its full round count.
 
 ---
 
@@ -206,9 +206,9 @@ The game ends after a fixed number of rounds **or** when the Mission deck is dep
 ### 7.1 Planning Phase
 
 1. **Reveal Event:** Flip the top card of the Event Deck. Its effect applies for the entire round. If the Event Deck is empty, skip this step.
-2. **Advance Transfer Window:** Move the TW marker one step along its track.
+2. **Advance Transfer Window:** Move the TW marker one step along its printed cycle: **3 → 2 → 1 → 0 → 1 → 2 → 3 → 4**, repeating. The full cycle is visible on the board so windows can be planned in advance. (The marker starts on the first space at setup.)
 3. **Draw Cards:** Each player draws **2 cards** from the Component Deck into their hand (hand limit is **5**).
-4. **Emergency Sell:** Each player may discard 1 card from hand to gain 1 Credit.
+4. **Emergency Sell:** Each player may discard up to 2 cards from hand to gain 1 Credit each. (This is the only way to sell cards — there is no Sell action.)
 
 > Design intent: The Event reveal creates round-to-round variety and timing pressure. Drawing 2 cards keeps hands flowing without flooding.
 
@@ -227,12 +227,9 @@ At the **start of the Action Phase**, refill each in-flight craft's Energy to it
 #### Available Actions
 
 * **Acquire Card** – Buy one face-up card from the **Card Market** (or any `Basic` card) by paying its Credit cost; add it to your hand. Immediately refill the empty market slot from the Component Deck.
-* **Sell Part** – On your turn, discard a card from your hand and gain Credits equal to half its cost, rounded down
 * **Develop Technology** – Pay the Technology card's Credit cost and place it face-up in your **Agency Tableau**. It applies to **all your craft** from now on. Technology cards remain in your tableau permanently unless another card effect removes them. A player may not have two developed Technology cards with the same **Name**.
-* **Assemble Rocket** – Attach Engine, Fuel, Payload, and optional Support cards
-* **Upgrade Rocket** – Replace components
-* **Accept Mission** – Commit to a Public mission in the display. In this prototype, all missions stay public and can be raced by multiple players.
-* **Launch New Craft** – Place an assembled rocket at `Earth`, perform the launch capability check, optionally Stage, then fly it along the orbital map spending Range. Resolve the mission immediately if the craft reaches its destination. (See §7.3 Launch Resolution.)
+* **Engineering** – Attach Engine, Fuel, Payload, and optional Support cards to a rocket in your Launch Area, and/or replace components on it
+* **Launch New Craft** – Place an assembled rocket at `Earth`, perform the launch capability check, optionally Stage, then fly it along the orbital map spending Range. Resolve the mission immediately if the craft reaches its destination. May be combined with Engineering into a single Command Turn if all components are in hand. (See §7.3 Launch Resolution.)
 * **Activate Craft** – Choose one of your in-flight craft and **move** it (spend 1 Range per node crossed), **operate** it (spend Energy to trigger an ability printed on an attached card), or both. A craft with **0 remaining Range** can still be activated to operate in place — it simply cannot move. May resolve a mission if it reaches the destination. *(Routine persistent-asset income is collected for free during Maintenance instead — see §7.4 Asset Operations — so you rarely need to spend a Command Turn just to bank it.)*
 * **Expand Agency** – Increase your Agency Level by paying Credits
 
@@ -282,9 +279,9 @@ When a craft is launched or activated, resolve the flight immediately:
 
 1. **Launch Capability Check:** Verify Engine Thrust ≥ Total Rocket Mass (sum of all Fuel Tank Mass values + Payload Mass). In design terms, this answers whether the stack can leave the surface; `Range` handles orbital travel after liftoff.
 2. **Reliability Check:** Roll a d10. If the result is **≤ the Engine's Reliability value** (after modifiers from Technology cards and Events), the launch succeeds. If the roll is **above** Reliability, the launch **fails** — the craft does not move, and any non-Reusable Engine is discarded. Reusable Engines survive a failed check but the craft still does not launch this action. *(Skip this step when activating a craft already in flight. A Rocket-as-Lander relaunching from a surface must pass a new Reliability Check.)*
-3. Optionally **Stage** one card with the `Stageable` tag to gain its printed bonus Range for this launch.
+3. Optionally **Stage** one card with the `Stageable` tag to gain its printed bonus Range for this launch (at most one card pre-flight).
 4. The player chooses a path on the orbital map. The craft moves along this path, spending **1 Range per node** crossed. The player may **stop at any node**, preserving unspent Range for future activations.
-5. **Mid-Flight Staging:** At any point during movement (between nodes), a player may stage a `Stageable` card (typically an empty Fuel Tank) to gain its stage bonus Range. The staged card is discarded. This also reduces the craft's Mass for future relaunch capability checks.
+5. **Mid-Flight Staging:** During movement, a player may stage `Stageable` cards (typically empty Fuel Tanks) to gain their stage bonus Range — each card may be staged only once, and at most one card per node crossing. The staged card is discarded. This also reduces the craft's Mass for future relaunch capability checks.
 6. Track the craft's **remaining Range** with a token or small die beside its marker on the board.
 7. If a card on the craft says to **Spend Energy**, remove that many Energy tokens from the craft's current Energy when the effect is used. If the craft is short, you may **discard a Battery** attached to it to add its printed burst of Energy (a Battery works anywhere, even in atmosphere or at launch).
 8. If the craft reaches the mission route's required destination, check **Mission Requirements** (Mass, tags, special conditions).
@@ -336,7 +333,8 @@ If requirements are not met:
 * Ongoing technology effects trigger
 * **Asset Operations:** Each persistent `Satellite` or `Station` you control may trigger each of its "spend Energy" income abilities **once**, spending the asset's remaining Energy this round. Collect the printed Credits or VP. This is free and costs no Command Turn. (Energy simply refills at the start of the next Action Phase — there is no separate Energy cleanup.)
 * Discard the current round's Event card
-* Refill the Mission display to 3 cards if needed
+* **Mission Sweep:** if no mission was completed this round, discard the mission that has been in the display longest
+* Refill the Mission display to 3 cards if needed (place new missions to the right, so the oldest is always leftmost)
 * Refill the **Card Market** to 5 cards from the Component Deck
 
 ---
@@ -426,6 +424,7 @@ An Engine-free craft is only legal if it is already **in flight** or **in orbit*
 * Missions with the `In-Flight` or `On-Orbit` tags may be attempted by legal Engine-free craft that are already in space.
 * A rocket must satisfy both the Thrust/Mass check and the Range check before it can attempt a mission.
 * If a rocket has no payload, only Fuel Tank Mass counts toward Total Rocket Mass.
+* **Uncrewed** means any payload *without* the `Crewed` tag.
 * Card text is authoritative. When a card gives a more specific instruction than the general rules, resolve that card effect as written.
 
 ### Orbital Node Travel
@@ -447,6 +446,7 @@ An Engine-free craft is only legal if it is already **in flight** or **in orbit*
 * **Moon landing** (Sub-Orbital Moon → Moon): spend 1 Range. The Moon has no atmosphere, so landing always requires an Engine (propulsive). A dedicated Landing Lander payload **or** the rocket itself may serve as the lander (see Rocket-as-Lander below).
 * **Mars landing** (Sub-Orbital Mars → Mars Surface): spend 1 Range. Mars has a thin atmosphere: use a `Heat Shield` or `Parachute` to assist, or perform a fully propulsive landing (1 extra Range + Engine). A dedicated Landing Lander **or** the rocket itself may serve as the lander.
 * Each landing uses its own support. A Moon return trip needs propulsive lunar landing plus Earth-reentry support for the trip home.
+* **Atmosphere nodes:** `Earth`, `Sub-Orbital Earth`, `Sub-Orbital Mars`, and `Mars Surface`. The Moon branch has no atmosphere. Cards that react to "entering atmosphere" (e.g., Solar Panel) trigger when a craft moves onto any atmosphere node.
 
 ### Rocket-as-Lander
 
@@ -479,7 +479,7 @@ then it may land on the surface directly. To **relaunch from a surface**, the cr
 
 * Some cards have the `Stageable` tag and a printed **Stage** effect.
 * **Pre-flight staging:** During Launch, after the launch capability check and before movement, you may Stage **one** `Stageable` card. If the staged card is an Engine, it still counts for the launch capability check.
-* **Mid-flight staging:** At any point during movement (between nodes), a player may stage one `Stageable` card (typically an empty Fuel Tank) to gain its stage bonus Range. This also reduces the craft's current Mass, which matters for relaunch capability checks.
+* **Mid-flight staging:** During movement, a player may stage `Stageable` cards (typically empty Fuel Tanks) to gain their stage bonus Range — each card may be staged only once, and at most one card per node crossing. This also reduces the craft's current Mass, which matters for relaunch capability checks.
 * When you Stage a card, gain the printed bonus Range for that flight.
 * Staging reduces the craft's current **Mass** (important for relaunch capability checks) and increases how much Range your rocket can reach.
 * Fuel use is abstracted into the card values. The printed Stage bonus already represents the efficiency gained by dropping spent parts.
@@ -533,8 +533,7 @@ VP sources:
 
 ### End Game Trigger (Current)
 
-* After **N rounds** *(default: 8)*
-* Or when the Mission deck runs out
+* After **8 rounds** (fixed). An empty Mission deck stops display refills but does not end the game.
 
 Highest VP wins. Ties broken by:
 
@@ -634,8 +633,6 @@ Technologies should:
 ### Under Evaluation
 
 * Player asymmetry (agency specialization or starting bonuses)
-* Exact TW track schedule per round
-* Final round count / end-game trigger tuning
 * Whether second players completing a mission should get a reduced reward
 
 ### Playtest Readiness
