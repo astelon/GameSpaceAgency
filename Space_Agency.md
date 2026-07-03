@@ -171,8 +171,9 @@ Tracking note:
    * Separate Mission cards by **Tier 1**, **Tier 2**, and **Tier 3** before shuffling.
    * Shuffle only the **Tier 1 Mission** stack at setup.
    * Keep Tier 2 and Tier 3 Missions face-down beside the board until they unlock.
-   * Shuffle all component cards (Engines, Tanks, Payloads, Support, Technology) into one **Component Deck**.
-   * Shuffle the **Event Deck** separately.
+   * **Scale the Component Deck to the player count:** 4 players use all cards (~143); 3 players remove 1 copy of every card with 3+ copies (~114); 2 players remove 1 copy of every card plus a 2nd copy of every card with 5+ copies (~91). Removed copies go back in the box unseen. (Players cycle ~16 drawn cards each plus market churn; this keeps ~60% of the deck flowing per game at any count, so combo pieces like the Station Hub stay findable.)
+   * Shuffle the remaining component cards (Engines, Tanks, Payloads, Support, Technology) into one **Component Deck**.
+   * Shuffle the **Event Deck** separately. Missions and Events are always used in full.
 
 3. Reveal:
 
@@ -389,6 +390,7 @@ Mission economy note:
 * Tier 1 should stay readable at a glance: low Range, few prerequisites, and short routes
 * Tier 2 should introduce combo requirements such as satellites in orbit or lunar hardware
 * Tier 3 should be reserved for deep-space distance, crewed coordination, or full return missions
+* Tier 3 science missions require a **Mass 2+ Scientific payload** — this gives the heavy science hardware (Science Module, Rover, Space Telescope) an exclusive job the light Imaging Probe cannot poach
 * Missions encourage **different strategies**, not linear progression
 * Commercial missions should keep the economy moving; prestige missions should tempt players to delay cashflow for headlines
 
@@ -446,7 +448,7 @@ An Engine-free craft is only legal if it is already **in flight** or **in orbit*
 * To land on a body, a craft must be at the adjacent **Sub-Orbital** node and spend **1 Range** to cross to the surface.
 * **Earth reentry** (Sub-Orbital Earth → Earth): use a `Reentry` card — Heat Shield or Parachute — (discard after use unless Reusable), or perform a **propulsive landing** by spending **1 extra Range** with an Engine.
 * **Moon landing** (Sub-Orbital Moon → Moon): spend 1 Range. The Moon has no atmosphere, so landing always requires an Engine (propulsive). A dedicated Landing Lander payload **or** the rocket itself may serve as the lander (see Rocket-as-Lander below).
-* **Mars landing** (Sub-Orbital Mars → Mars Surface): spend 1 Range. Mars has a thin atmosphere: use a `Reentry` card to assist, or perform a fully propulsive landing (1 extra Range + Engine). A dedicated Landing Lander **or** the rocket itself may serve as the lander.
+* **Mars landing** (Sub-Orbital Mars → Mars Surface): spend 1 Range. Mars has a thin atmosphere: use a heat-shield-type `Reentry` card to assist (parachute-type Reentry cards are **Earth only**, as printed on the card — Mars air is too thin for them), or perform a fully propulsive landing (1 extra Range + Engine). A dedicated Landing Lander **or** the rocket itself may serve as the lander.
 * Each landing uses its own support. A Moon return trip needs propulsive lunar landing plus Earth-reentry support for the trip home.
 * **Aerobraking:** while moving *toward* a body with atmosphere (descending on the Earth or Mars branch), a craft may discard a `Reentry` card to immediately gain **+2 Range**. The card is spent and cannot also be used for the landing itself.
 * **Atmosphere nodes:** `Earth`, `Sub-Orbital Earth`, `Sub-Orbital Mars`, and `Mars Surface`. The Moon branch has no atmosphere. Cards that react to "entering atmosphere" (e.g., Solar Panel) trigger when a craft moves onto any atmosphere node.

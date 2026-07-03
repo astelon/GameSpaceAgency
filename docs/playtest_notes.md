@@ -11,6 +11,10 @@ Current balance focus (v0.3 — after the design-review rebalance, see docs/desi
 - Staggered starting credits (5/6/7/8). Watch whether the first player still wins the round-1 mission race.
 - Conditional activations (Sensor Array in storms, Science Module beyond Moon Orbit). Watch whether they get used or forgotten.
 - Mission Sweep in Maintenance. Watch whether good missions get swept too fast.
+- Space Telescope pays 1 VP/round at GEO — the one premium exception to distance-scaled income. If it dominates, move its deploy requirement to Moon Orbit or beyond.
+- Parachute-type Reentry cards are now Earth-only with a 1-Credit recovery payout. Watch whether the Earth-only limit reads clearly and whether the payout makes them attractive vs Heat Shields.
+- Hybrid Cycle (+1 Thrust with a Cryogenic tank). Watch whether the cryo combo ever gets built.
+- Component deck scaling (143/114/91 for 4/3/2 players). Watch whether 2p games still surface Station Hubs and Hydrogen Cores often enough.
 
 Suggested metrics to record:
 - Average VP per player
