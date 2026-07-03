@@ -159,7 +159,7 @@ Tracking note:
    * **Sterling Booster** (E02) – Starting Engine (`Basic`)
    * **Standard Tank** (T01) – Starting Fuel Tank (`Basic`)
    * **Heat Shield** (S01) – Starting Support (`Basic`)
-   * 5 Credits
+   * Credits by turn order: first player 5, second 6, third 7, fourth 8 (offsets first-player advantage)
    * 1 Credit marker and 1 VP marker
    * 1 Agency Level marker set to **Level 1**
    * 6 craft markers for rockets and in-space assets
@@ -171,8 +171,9 @@ Tracking note:
    * Separate Mission cards by **Tier 1**, **Tier 2**, and **Tier 3** before shuffling.
    * Shuffle only the **Tier 1 Mission** stack at setup.
    * Keep Tier 2 and Tier 3 Missions face-down beside the board until they unlock.
-   * Shuffle all component cards (Engines, Tanks, Payloads, Support, Technology) into one **Component Deck**.
-   * Shuffle the **Event Deck** separately.
+   * **Scale the Component Deck to the player count:** 4 players use all cards (~143); 3 players remove 1 copy of every card with 3+ copies (~114); 2 players remove 1 copy of every card plus a 2nd copy of every card with 5+ copies (~91). Removed copies go back in the box unseen. (Players cycle ~16 drawn cards each plus market churn; this keeps ~60% of the deck flowing per game at any count, so combo pieces like the Station Hub stay findable.)
+   * Shuffle the remaining component cards (Engines, Tanks, Payloads, Support, Technology) into one **Component Deck**.
+   * Shuffle the **Event Deck** separately. Missions and Events are always used in full.
 
 3. Reveal:
 
@@ -197,7 +198,7 @@ The game proceeds over a series of **Rounds**.
 
 Launches and in-flight activations resolve **immediately** during the Action Phase. There is no separate resolution phase.
 
-The game ends after a fixed number of rounds **or** when the Mission deck is depleted (final trigger TBD).
+The game ends after a fixed number of rounds (**8**). If the Mission deck is depleted, the display simply is not refilled — the game still plays its full round count.
 
 ---
 
@@ -206,9 +207,9 @@ The game ends after a fixed number of rounds **or** when the Mission deck is dep
 ### 7.1 Planning Phase
 
 1. **Reveal Event:** Flip the top card of the Event Deck. Its effect applies for the entire round. If the Event Deck is empty, skip this step.
-2. **Advance Transfer Window:** Move the TW marker one step along its track.
+2. **Advance Transfer Window:** Move the TW marker one step along its printed cycle: **3 → 2 → 1 → 0 → 1 → 2 → 3 → 4**, repeating. The full cycle is visible on the board so windows can be planned in advance. (The marker starts on the first space at setup.)
 3. **Draw Cards:** Each player draws **2 cards** from the Component Deck into their hand (hand limit is **5**).
-4. **Emergency Sell:** Each player may discard 1 card from hand to gain 1 Credit.
+4. **Emergency Sell:** Each player may discard up to 2 cards from hand to gain 1 Credit each. (This is the only way to sell cards — there is no Sell action.)
 
 > Design intent: The Event reveal creates round-to-round variety and timing pressure. Drawing 2 cards keeps hands flowing without flooding.
 
@@ -216,7 +217,7 @@ The game ends after a fixed number of rounds **or** when the Mission deck is dep
 
 ### 7.2 Action Phase
 
-Each player has a number of **Command Turns** equal to their **Agency Level**.
+Each player has a number of **Command Turns** determined by their **Agency Level** (Level 1 = 2, Level 2 = 3, Level 3 = 4).
 
 Starting with the first player, players alternate taking **one Command Turn at a time** until everyone has used all of their Command Turns for the round.
 
@@ -227,12 +228,9 @@ At the **start of the Action Phase**, refill each in-flight craft's Energy to it
 #### Available Actions
 
 * **Acquire Card** – Buy one face-up card from the **Card Market** (or any `Basic` card) by paying its Credit cost; add it to your hand. Immediately refill the empty market slot from the Component Deck.
-* **Sell Part** – On your turn, discard a card from your hand and gain Credits equal to half its cost, rounded down
 * **Develop Technology** – Pay the Technology card's Credit cost and place it face-up in your **Agency Tableau**. It applies to **all your craft** from now on. Technology cards remain in your tableau permanently unless another card effect removes them. A player may not have two developed Technology cards with the same **Name**.
-* **Assemble Rocket** – Attach Engine, Fuel, Payload, and optional Support cards
-* **Upgrade Rocket** – Replace components
-* **Accept Mission** – Commit to a Public mission in the display. In this prototype, all missions stay public and can be raced by multiple players.
-* **Launch New Craft** – Place an assembled rocket at `Earth`, perform the launch capability check, optionally Stage, then fly it along the orbital map spending Range. Resolve the mission immediately if the craft reaches its destination. (See §7.3 Launch Resolution.)
+* **Engineering** – Attach Engine, Fuel, Payload, and optional Support cards to a rocket in your Launch Area, and/or replace components on it
+* **Launch New Craft** – Place an assembled rocket at `Earth`, perform the launch capability check, optionally Stage, then fly it along the orbital map spending Range. Resolve the mission immediately if the craft reaches its destination. May be combined with Engineering into a single Command Turn if all components are in hand. (See §7.3 Launch Resolution.)
 * **Activate Craft** – Choose one of your in-flight craft and **move** it (spend 1 Range per node crossed), **operate** it (spend Energy to trigger an ability printed on an attached card), or both. A craft with **0 remaining Range** can still be activated to operate in place — it simply cannot move. May resolve a mission if it reaches the destination. *(Routine persistent-asset income is collected for free during Maintenance instead — see §7.4 Asset Operations — so you rarely need to spend a Command Turn just to bank it.)*
 * **Expand Agency** – Increase your Agency Level by paying Credits
 
@@ -240,9 +238,9 @@ At the **start of the Action Phase**, refill each in-flight craft's Energy to it
 
 ### Agency Levels
 
-* **Level 1** – 1 Command Turn each Action Phase
-* **Level 2** – 2 Command Turns each Action Phase, costs **6 Credits**
-* **Level 3** – 3 Command Turns each Action Phase, costs **14 Credits**
+* **Level 1** – 2 Command Turns each Action Phase
+* **Level 2** – 3 Command Turns each Action Phase, costs **6 Credits**
+* **Level 3** – 4 Command Turns each Action Phase, costs **14 Credits**
 
 New Agency Levels take effect at the start of your next round.
 
@@ -282,9 +280,9 @@ When a craft is launched or activated, resolve the flight immediately:
 
 1. **Launch Capability Check:** Verify Engine Thrust ≥ Total Rocket Mass (sum of all Fuel Tank Mass values + Payload Mass). In design terms, this answers whether the stack can leave the surface; `Range` handles orbital travel after liftoff.
 2. **Reliability Check:** Roll a d10. If the result is **≤ the Engine's Reliability value** (after modifiers from Technology cards and Events), the launch succeeds. If the roll is **above** Reliability, the launch **fails** — the craft does not move, and any non-Reusable Engine is discarded. Reusable Engines survive a failed check but the craft still does not launch this action. *(Skip this step when activating a craft already in flight. A Rocket-as-Lander relaunching from a surface must pass a new Reliability Check.)*
-3. Optionally **Stage** one card with the `Stageable` tag to gain its printed bonus Range for this launch.
+3. Optionally **Stage** one card with the `Stageable` tag to gain its printed bonus Range for this launch (at most one card pre-flight).
 4. The player chooses a path on the orbital map. The craft moves along this path, spending **1 Range per node** crossed. The player may **stop at any node**, preserving unspent Range for future activations.
-5. **Mid-Flight Staging:** At any point during movement (between nodes), a player may stage a `Stageable` card (typically an empty Fuel Tank) to gain its stage bonus Range. The staged card is discarded. This also reduces the craft's Mass for future relaunch capability checks.
+5. **Mid-Flight Staging:** During movement, a player may stage `Stageable` cards (typically empty Fuel Tanks) to gain their stage bonus Range — each card may be staged only once, and at most one card per node crossing. The staged card is discarded. This also reduces the craft's Mass for future relaunch capability checks.
 6. Track the craft's **remaining Range** with a token or small die beside its marker on the board.
 7. If a card on the craft says to **Spend Energy**, remove that many Energy tokens from the craft's current Energy when the effect is used. If the craft is short, you may **discard a Battery** attached to it to add its printed burst of Energy (a Battery works anywhere, even in atmosphere or at launch).
 8. If the craft reaches the mission route's required destination, check **Mission Requirements** (Mass, tags, special conditions).
@@ -309,6 +307,7 @@ A payload that is never deployed simply returns or is discarded with its craft a
 * When a card says to **Spend X Energy**, remove that many tokens from the craft's current Energy.
 * **Batteries are single-use bursts, not storage.** At any time you may discard a Battery attached to a craft to immediately add its printed Energy. A Battery works **anywhere**, including in atmosphere and during launch or relaunch — handy when Solar Panels are unavailable or the craft carries no generator.
 * **Persistent-asset income** abilities (a Comm Satellite, Imaging Probe, Station Hub, or Microgravity Lab) spend the asset's Energy during the **Maintenance Phase** *Asset Operations* step — no Command Turn and no movement, only that the asset still has Energy this round. Because Energy refills every round, just keep a `Power` card on the asset and the income pays out each round.
+* **Conditional activation income:** some `Scientific` and `Electronics` cards (Sensor Array, Science Module, Space Telescope, Comm Satellite relay) pay VP or Credits when activated under the right conditions — a storm Event in play, or a deep-space position. Card text is authoritative; this is how bad space weather becomes an opportunity for a prepared agency.
 
 #### Failure
 
@@ -334,9 +333,10 @@ If requirements are not met:
 
 * Reusable parts from craft that returned to `Earth` return to hand if they were not staged
 * Ongoing technology effects trigger
-* **Asset Operations:** Each persistent `Satellite` or `Station` you control may trigger each of its "spend Energy" income abilities **once**, spending the asset's remaining Energy this round. Collect the printed Credits or VP. This is free and costs no Command Turn. (Energy simply refills at the start of the next Action Phase — there is no separate Energy cleanup.)
+* **Asset Operations:** Each persistent `Satellite` or `Station` you control may trigger each of its "spend Energy" income abilities **once**, spending the asset's remaining Energy this round. Collect the Credits or VP. This is free and costs no Command Turn. **Income scales with distance:** Satellite assets pay 1 Credit at `Earth ZOI` or closer, 1 VP beyond `Earth ZOI`; Station cards pay as printed. (Energy simply refills at the start of the next Action Phase — there is no separate Energy cleanup.)
 * Discard the current round's Event card
-* Refill the Mission display to 3 cards if needed
+* **Mission Sweep:** if no mission was completed this round, discard the mission that has been in the display longest
+* Refill the Mission display to 3 cards if needed (place new missions to the right, so the oldest is always leftmost)
 * Refill the **Card Market** to 5 cards from the Component Deck
 
 ---
@@ -390,6 +390,7 @@ Mission economy note:
 * Tier 1 should stay readable at a glance: low Range, few prerequisites, and short routes
 * Tier 2 should introduce combo requirements such as satellites in orbit or lunar hardware
 * Tier 3 should be reserved for deep-space distance, crewed coordination, or full return missions
+* Tier 3 science missions require a **Mass 2+ Scientific payload** — this gives the heavy science hardware (Science Module, Rover, Space Telescope) an exclusive job the light Imaging Probe cannot poach
 * Missions encourage **different strategies**, not linear progression
 * Commercial missions should keep the economy moving; prestige missions should tempt players to delay cashflow for headlines
 
@@ -423,9 +424,11 @@ An Engine-free craft is only legal if it is already **in flight** or **in orbit*
 * To **maneuver**, a craft must have an Engine to turn that Range into orbital changes.
 * Missions with the `Docking` tag require a `Docking`-tagged support card on the rocket (e.g., Docking Adapter or Orbital Tug).
 * Missions with the `Docking` or `Maneuver` tags require a rocket with an Engine.
-* Missions with the `In-Flight` or `On-Orbit` tags may be attempted by legal Engine-free craft that are already in space.
+* Missions with the `In-Space` tag may be attempted by legal Engine-free craft that are already in space.
+* Missions requiring a `Crewed` payload: the craft must also include a `Pressurized` tank.
 * A rocket must satisfy both the Thrust/Mass check and the Range check before it can attempt a mission.
 * If a rocket has no payload, only Fuel Tank Mass counts toward Total Rocket Mass.
+* **Uncrewed** means any payload *without* the `Crewed` tag.
 * Card text is authoritative. When a card gives a more specific instruction than the general rules, resolve that card effect as written.
 
 ### Orbital Node Travel
@@ -443,10 +446,12 @@ An Engine-free craft is only legal if it is already **in flight** or **in orbit*
 ### Landing Rules
 
 * To land on a body, a craft must be at the adjacent **Sub-Orbital** node and spend **1 Range** to cross to the surface.
-* **Earth reentry** (Sub-Orbital Earth → Earth): use a `Heat Shield` or `Parachute` card (discard after use), or perform a **propulsive landing** by spending **1 extra Range** with an Engine.
+* **Earth reentry** (Sub-Orbital Earth → Earth): use a `Reentry` card — Heat Shield or Parachute — (discard after use unless Reusable), or perform a **propulsive landing** by spending **1 extra Range** with an Engine.
 * **Moon landing** (Sub-Orbital Moon → Moon): spend 1 Range. The Moon has no atmosphere, so landing always requires an Engine (propulsive). A dedicated Landing Lander payload **or** the rocket itself may serve as the lander (see Rocket-as-Lander below).
-* **Mars landing** (Sub-Orbital Mars → Mars Surface): spend 1 Range. Mars has a thin atmosphere: use a `Heat Shield` or `Parachute` to assist, or perform a fully propulsive landing (1 extra Range + Engine). A dedicated Landing Lander **or** the rocket itself may serve as the lander.
+* **Mars landing** (Sub-Orbital Mars → Mars Surface): spend 1 Range. Mars has a thin atmosphere: use a heat-shield-type `Reentry` card to assist (parachute-type Reentry cards are **Earth only**, as printed on the card — Mars air is too thin for them), or perform a fully propulsive landing (1 extra Range + Engine). A dedicated Landing Lander **or** the rocket itself may serve as the lander.
 * Each landing uses its own support. A Moon return trip needs propulsive lunar landing plus Earth-reentry support for the trip home.
+* **Aerobraking:** while moving *toward* a body with atmosphere (descending on the Earth or Mars branch), a craft may discard a `Reentry` card to immediately gain **+2 Range**. The card is spent and cannot also be used for the landing itself.
+* **Atmosphere nodes:** `Earth`, `Sub-Orbital Earth`, `Sub-Orbital Mars`, and `Mars Surface`. The Moon branch has no atmosphere. Cards that react to "entering atmosphere" (e.g., Solar Panel) trigger when a craft moves onto any atmosphere node.
 
 ### Rocket-as-Lander
 
@@ -464,7 +469,8 @@ then it may land on the surface directly. To **relaunch from a surface**, the cr
 * Payloads with the `Satellite` or `Station` tags become persistent assets when **deployed** in space (see §7.3 *Deploying Persistent Assets*). A payload may also be left behind automatically if its whole craft strands at a node with 0 Range.
 * A persistent asset keeps any Support cards assigned to it (for example a Solar Panel or RTG that powers it) unless they were staged or discarded.
 * These assets use your craft markers and may be activated like any other craft. To **move** one it must first gain Range (e.g., from an Orbital Tug); to **operate** one in place, use the Activate Craft action or the Maintenance *Asset Operations* step.
-* Many assets carry an **ongoing income** ability ("spend 1 Energy to gain 1 Credit/VP"). Pair the asset with a `Power` card so it has Energy each round, then collect that income for **free every Maintenance** during Asset Operations — you do not spend a Command Turn to bank it.
+* Many assets carry an **ongoing income** ability ("spend 1 Energy for income"). Pair the asset with a `Power` card so it has Energy each round, then collect that income for **free every Maintenance** during Asset Operations — you do not spend a Command Turn to bank it.
+* **Income scales with distance:** a `Satellite` asset's income pays **1 Credit** at `Earth ZOI` or closer and **1 VP** beyond `Earth ZOI`. Near-Earth infrastructure funds the agency; deep-space infrastructure earns glory. `Station` cards (Station Hub, Microgravity Lab) pay as printed — their gate is the expensive station chain itself.
 * Satellites and stations each count as one of your craft and may be activated at most once per Action Phase.
 
 ### On-Orbit Stations
@@ -479,7 +485,7 @@ then it may land on the surface directly. To **relaunch from a surface**, the cr
 
 * Some cards have the `Stageable` tag and a printed **Stage** effect.
 * **Pre-flight staging:** During Launch, after the launch capability check and before movement, you may Stage **one** `Stageable` card. If the staged card is an Engine, it still counts for the launch capability check.
-* **Mid-flight staging:** At any point during movement (between nodes), a player may stage one `Stageable` card (typically an empty Fuel Tank) to gain its stage bonus Range. This also reduces the craft's current Mass, which matters for relaunch capability checks.
+* **Mid-flight staging:** During movement, a player may stage `Stageable` cards (typically empty Fuel Tanks) to gain their stage bonus Range — each card may be staged only once, and at most one card per node crossing. This also reduces the craft's current Mass, which matters for relaunch capability checks.
 * When you Stage a card, gain the printed bonus Range for that flight.
 * Staging reduces the craft's current **Mass** (important for relaunch capability checks) and increases how much Range your rocket can reach.
 * Fuel use is abstracted into the card values. The printed Stage bonus already represents the efficiency gained by dropping spent parts.
@@ -497,25 +503,27 @@ Design note:
 
 ### Tags
 
-Cards use **tags** instead of keywords:
+Cards use **tags** instead of keywords. Every tag has a rules meaning; flavor lives in card names and flavor text.
 
-* `Reusable`
-* `Experimental`
-* `Crewed`
-* `LifeSupport`
-* `Electronics`
-* `Power`
-* `Deep Space`
-* `Stageable`
-* `Docking`
-* `Maneuver`
-* `In-Flight`
-* `On-Orbit`
-* `Heat Shield`
-* `Parachute`
-* `Satellite`
-* `Station`
-* `Basic`
+Component tags:
+
+* `Basic` — always purchasable at printed cost
+* `Reusable` — returns to hand on Earth return (no tag = discarded after use)
+* `Stageable` — jettison for printed bonus Range
+* `Cryogenic` — Hydrogen Core pairing; Cryo Handling tech
+* `Pressurized` — crew-rated tank; required for Crewed payloads
+* `Crewed` — carries crew (Uncrewed = any payload without this tag)
+* `LifeSupport` — station qualification
+* `Electronics` — electronics requirements + station qualification
+* `Scientific` — science requirements + station qualification
+* `Power` — generates Energy
+* `Reentry` — heat shields and parachutes; atmospheric landing
+* `Lander` — enables surface landing
+* `Docking` — docking hardware
+* `Satellite` — persistent asset when deployed
+* `Station` — station module
+
+Mission tags: `Commercial`, `Prestige`, `Infrastructure` (contract class), `Surface`, `Docking`, `Maneuver`, `In-Space`, plus requirement tags (`Crewed`, `Scientific`).
 
 > Tags allow flexible design space and future expansions.
 
@@ -529,12 +537,11 @@ VP sources:
 * Technologies
 * Exploration milestones (first to Moon / first to Mars)
 * Agency milestones (first to Level 3)
-* End‑game bonuses
+* End‑game infrastructure bonus: **+1 VP per deployed persistent asset** (Satellite or Station) still on the board
 
 ### End Game Trigger (Current)
 
-* After **N rounds** *(default: 8)*
-* Or when the Mission deck runs out
+* After **8 rounds** (fixed). An empty Mission deck stops display refills but does not end the game.
 
 Highest VP wins. Ties broken by:
 
@@ -620,7 +627,7 @@ Technologies should:
 * Mission-driven scoring and economy
 * Commercial / Prestige / Infrastructure mission taxonomy (tag-based)
 * Mission reward split: Commercial skews Credits, Prestige skews VP, Infrastructure balanced
-* Persistent asset economy loops: Comm Satellite and Station Hub generate Credits; Imaging Probe and Microgravity Lab generate VP. Assets must be **deployed** in space and paired with a `Power` card; income is harvested for free during the Maintenance *Asset Operations* step (no Command Turn required)
+* Persistent asset economy loops with **distance-scaled income**: Satellite assets pay Credits near Earth and VP beyond Earth ZOI; Station Hub and Microgravity Lab pay as printed. Assets must be **deployed** in space and paired with a `Power` card; income is harvested for free during the Maintenance *Asset Operations* step (no Command Turn required)
 * Card Market for component acquisition
 * Event cards integrated into Planning Phase
 * Technology tableau (permanent until removed)
@@ -634,13 +641,11 @@ Technologies should:
 ### Under Evaluation
 
 * Player asymmetry (agency specialization or starting bonuses)
-* Exact TW track schedule per round
-* Final round count / end-game trigger tuning
 * Whether second players completing a mission should get a reduced reward
 
 ### Playtest Readiness
 
-* Card list v0.2 complete (142 cards, 12 missions, full component set)
+* Card list v0.3 complete (176 cards, 20 missions — 7 Tier 1 / 8 Tier 2 / 5 Tier 3 — 13 events, full component set)
 * Economy rebalanced — see `docs/playtest_notes.md` for balance targets
 * First blind playtest scheduled
 

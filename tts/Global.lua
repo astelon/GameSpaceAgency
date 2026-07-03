@@ -75,22 +75,25 @@ local TRANSFER_WINDOW_POSITIONS = {
     { 0.0, BOARD_MARKER_Y, 1.60 },
 }
 
+-- Printed TW cycle (rulebook: marker starts on the first entry, advances one step each Planning)
+local TW_CYCLE = { 3, 2, 1, 0, 1, 2, 3, 4 }
+
 local TRACKER_Y_BASE = 1.63
 local TRACKER_Y_STEP = 0.04
 
 local VP_TRACK = {
-    x0 = -10.945,
+    x0 = -11.0,
     z = 4.273,
-    step = 0.730,
-    max = 30,
+    step = 0.44,
+    max = 50,
     prefix = "VP - ",
 }
 
 local CREDIT_TRACK = {
-    x0 = -10.828,
+    x0 = -10.945,
     z = 5.719,
-    step = 0.938,
-    max = 20,
+    step = 0.7305,
+    max = 30,
     prefix = "Credits - ",
     start = 5,
 }
@@ -401,7 +404,8 @@ end
 local function normalizeState(state)
     state = state or {}
     state.currentRound = tonumber(state.currentRound) or 0
-    state.transferWindowBase = clamp(tonumber(state.transferWindowBase) or 0, 0, 5)
+    state.transferWindowBase = clamp(tonumber(state.transferWindowBase) or 3, 0, 5)
+    state.twCycleIndex = clamp(tonumber(state.twCycleIndex) or 1, 1, #TW_CYCLE)
     state.activeEventId = state.activeEventId
     state.activeEventName = state.activeEventName
     state.unlockedTier2 = state.unlockedTier2 == true
@@ -418,7 +422,8 @@ end
 local function resetState()
     gameState = normalizeState({
         currentRound = 0,
-        transferWindowBase = 0,
+        transferWindowBase = 3,
+        twCycleIndex = 1,
         activeEventId = nil,
         activeEventName = nil,
         unlockedTier2 = false,
@@ -1138,7 +1143,7 @@ local function ensureRoundStatusNote()
 
     local statusText = table.concat({
         "Round " .. tostring(gameState.currentRound),
-        "TW " .. tostring(tw) .. " (base " .. tostring(gameState.transferWindowBase) .. ")",
+        "TW " .. tostring(tw) .. " (cycle 3-2-1-0-1-2-3-4, base " .. tostring(gameState.transferWindowBase) .. ")",
         "Event: " .. eventLine,
         "Hand limit: " .. tostring(currentHandLimit()),
         "Tier 2: " .. tier2Text,
@@ -1713,7 +1718,8 @@ local function planningPhase()
     end
 
     gameState.currentRound = gameState.currentRound + 1
-    gameState.transferWindowBase = (gameState.transferWindowBase + 1) % 6
+    gameState.twCycleIndex = (gameState.twCycleIndex % #TW_CYCLE) + 1
+    gameState.transferWindowBase = TW_CYCLE[gameState.twCycleIndex]
     revealEventCard()
     drawCardsToSeatedPlayers(2)
 
@@ -1798,7 +1804,7 @@ local function setupGame()
 
         local marker = spawnObject({
             type = "Chip_10",
-            position = TRANSFER_WINDOW_POSITIONS[1],
+            position = TRANSFER_WINDOW_POSITIONS[4], -- TW 3: cycle start
             scale = { 0.65, 0.65, 0.65 },
         })
         marker.setName("Transfer Window Marker")
