@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  Space Agency Race — Game Board (Source SVG)
+  Space Agency Race — Game Board (Source SVG, rules v0.4)
+  v0.4: TW cycle dial (6 spaces, matches TRANSFER_WINDOW_POSITIONS in Global.lua),
+        VP track 0-50, CR track 0-30, round track 1-8, single Sun Orbit node,
+        ZOI naming, GEO station note, atmosphere + milestone reminders.
   3072 × 1920 px  |  Aspect 16:10  |  Targets a 24 × 15 TTS board footprint
 
   Pixel → TTS world-space formula (board center = world {0,1.5,-1}):
@@ -235,9 +238,8 @@
 
   <!-- Solar orbit + transfer window node spaces -->
   <rect x="1380" y="0" width="310" height="1530" rx="24" fill="#ec4899" opacity="0.05"/>
-  <line x1="1380" y1="0" x2="1380" y2="1530" stroke="#f5a6cf" stroke-width="4" opacity="0.8"/>
-  <line x1="1535" y1="0" x2="1535" y2="1530" stroke="#aeb4be" stroke-width="4" opacity="0.8"/>
-  <line x1="1690" y1="0" x2="1690" y2="1530" stroke="#f5a6cf" stroke-width="4" opacity="0.8"/>
+  <line x1="1380" y1="0" x2="1380" y2="1530" stroke="#f5a6cf" stroke-width="3" opacity="0.45" stroke-dasharray="14,10"/>
+  <line x1="1690" y1="0" x2="1690" y2="1530" stroke="#f5a6cf" stroke-width="3" opacity="0.45" stroke-dasharray="14,10"/>
 
   <!-- planet bodies -->
 
@@ -387,28 +389,65 @@
   <text x="2870" y="1056" text-anchor="middle" font-family="Arial,sans-serif" font-size="20" font-weight="bold" fill="#fff1eb">MARS</text>
 
   <text x="260" y="1058" font-family="Arial,sans-serif" font-size="17" fill="#d8fff1" font-weight="bold">SUB-ORBITAL</text>
+  <text x="260" y="1080" font-family="Arial,sans-serif" font-size="11" font-style="italic" fill="#9ddffc" opacity="0.8">atmosphere</text>
   <text x="445" y="1058" font-family="Arial,sans-serif" font-size="19" fill="#d8f2ff" font-weight="bold">LEO</text>
   <text x="602" y="1058" font-family="Arial,sans-serif" font-size="19" fill="#f7de84" font-weight="bold">HIGH ORBIT</text>
+  <text x="602" y="1080" font-family="Arial,sans-serif" font-size="12" fill="#f7de84" opacity="0.85" font-weight="bold">GEO · STATION NODE</text>
 
   <text x="320" y="325" text-anchor="middle" font-family="Arial,sans-serif" font-size="17" fill="#eef4fb" font-weight="bold">SUB-ORBITAL</text>
   <text x="320" y="400" text-anchor="middle" font-family="Arial,sans-serif" font-size="17" fill="#e7eff8" font-weight="bold">MOON ORBIT</text>
+  <text x="320" y="426" text-anchor="middle" font-family="Arial,sans-serif" font-size="13" fill="#f5c842" font-weight="bold">first agency: +2 VP</text>
+  <text x="320" y="447" text-anchor="middle" font-family="Arial,sans-serif" font-size="11" font-style="italic" fill="#b8c7d9">no atmosphere — propulsive landing only</text>
 
   <text x="2810" y="1058" text-anchor="end" font-family="Arial,sans-serif" font-size="17" fill="#ffe6db" font-weight="bold">SUB-ORBITAL</text>
-  <text x="2620" y="1058" text-anchor="end" font-family="Arial,sans-serif" font-size="17" fill="#ffe6db" font-weight="bold">LMO</text>
-  <text x="2430" y="1058" text-anchor="end" font-family="Arial,sans-serif" font-size="19" fill="#ffd4c0" font-weight="bold">HMO</text>
-  <text x="2240" y="1058" text-anchor="end" font-family="Arial,sans-serif" font-size="19" fill="#ffc6ae" font-weight="bold">MARS INFLUENCE ZONE</text>
+  <text x="2810" y="1080" text-anchor="end" font-family="Arial,sans-serif" font-size="11" font-style="italic" fill="#ff9f7f" opacity="0.8">thin atmosphere</text>
+  <text x="2620" y="1058" text-anchor="end" font-family="Arial,sans-serif" font-size="17" fill="#ffe6db" font-weight="bold">LOW ORBIT</text>
+  <text x="2430" y="1058" text-anchor="end" font-family="Arial,sans-serif" font-size="19" fill="#ffd4c0" font-weight="bold">HIGH ORBIT</text>
+  <text x="2240" y="1058" text-anchor="end" font-family="Arial,sans-serif" font-size="19" fill="#ffc6ae" font-weight="bold">MARS ZOI</text>
+  <text x="2240" y="1080" text-anchor="end" font-family="Arial,sans-serif" font-size="12" fill="#ffc6ae" opacity="0.8">zone of influence</text>
+  <text x="2240" y="1104" text-anchor="end" font-family="Arial,sans-serif" font-size="13" fill="#f5c842" font-weight="bold">first agency here or beyond: +4 VP</text>
 
-  <text x="1225" y="208" text-anchor="middle" font-family="Arial,sans-serif" font-size="24" fill="#ffe2b5" font-weight="bold">SOLAR ORBIT</text>
-  <text x="1225" y="238" text-anchor="middle" font-family="Arial,sans-serif" font-size="14" fill="#ffe2b5" opacity="0.88" font-weight="bold">EARTH</text>
-  <text x="1535" y="954" text-anchor="middle" font-family="Arial,sans-serif" font-size="24" fill="#ffd3ea" font-weight="bold" letter-spacing="1">TRANSFER WINDOW</text>
-  <text x="1535" y="995" text-anchor="middle" font-family="Arial,sans-serif" font-size="16" fill="#ffd3ea" opacity="0.85">Event: may cost 0 movement</text>
-  <text x="1850" y="208" text-anchor="middle" font-family="Arial,sans-serif" font-size="22" fill="#ffe2b5" font-weight="bold">SOLAR ORBIT</text>
-  <text x="1850" y="238" text-anchor="middle" font-family="Arial,sans-serif" font-size="14" fill="#ffe2b5" opacity="0.88" font-weight="bold">MARS</text>
-  <text x="1140" y="1058" text-anchor="end" font-family="Arial,sans-serif" font-size="20" fill="#d8f2ff" font-weight="bold">EARTH INFLUENCE ZONE</text>
+  <text x="1225" y="208" text-anchor="middle" font-family="Arial,sans-serif" font-size="24" fill="#ffe2b5" font-weight="bold">SUN ORBIT</text>
+  <text x="1850" y="208" text-anchor="middle" font-family="Arial,sans-serif" font-size="24" fill="#ffe2b5" font-weight="bold">SUN ORBIT</text>
+  <text x="1536" y="1500" text-anchor="middle" font-family="Arial,sans-serif" font-size="16" fill="#ffd3ea" opacity="0.85" font-weight="bold">SUN ORBIT is one node — crossing to/from MARS ZOI costs the current TW</text>
+  <text x="1140" y="1058" text-anchor="end" font-family="Arial,sans-serif" font-size="20" fill="#d8f2ff" font-weight="bold">EARTH ZOI</text>
+  <text x="1140" y="1080" text-anchor="end" font-family="Arial,sans-serif" font-size="12" fill="#d8f2ff" opacity="0.8">zone of influence</text>
+
+  <!-- Transfer Window cost dial: TW 0 (top) .. TW 5 (bottom). Marker positions match Global.lua TRANSFER_WINDOW_POSITIONS. -->
+  <g font-family="Arial,sans-serif" font-weight="bold" text-anchor="middle" dominant-baseline="middle">
+    <text x="1536" y="470" font-size="26" fill="#ffd3ea" letter-spacing="2">TRANSFER WINDOW</text>
+    <text x="1536" y="502" font-size="14" fill="#ffd3ea" opacity="0.8">crossing cost</text>
+    <circle cx="1536" cy="588.8" r="42" fill="#1c1408" stroke="#f5c842" stroke-width="3.5" filter="url(#glow-sm)"/> <text x="1536" y="591.8" font-size="26" fill="#f5c842">0</text>
+    <text x="1620" y="591.8" text-anchor="start" font-size="13" fill="#f5c842" opacity="0.85">free!</text>
+    <circle cx="1536" cy="729.6" r="40" fill="#140812" stroke="#ec4899" stroke-width="2.5"/> <text x="1536" y="732.6" font-size="24" fill="#ffd3ea">1</text>
+    <circle cx="1536" cy="870.4" r="40" fill="#140812" stroke="#ec4899" stroke-width="2.5"/> <text x="1536" y="873.4" font-size="24" fill="#ffd3ea">2</text>
+    <circle cx="1536" cy="1011.2" r="40" fill="#140812" stroke="#ec4899" stroke-width="2.5"/> <text x="1536" y="1014.2" font-size="24" fill="#ffd3ea">3</text>
+    <circle cx="1536" cy="1152.0" r="40" fill="#140812" stroke="#ec4899" stroke-width="2.5"/> <text x="1536" y="1155.0" font-size="24" fill="#ffd3ea">4</text>
+    <circle cx="1536" cy="1292.8" r="40" fill="#180608" stroke="#e05050" stroke-width="3"/> <text x="1536" y="1295.8" font-size="24" fill="#ff9090">5</text>
+    <text x="1462" y="1014" text-anchor="end" font-size="14" fill="#f5c842">START</text>
+    <polygon points="1470,1004 1470,1018 1486,1011" fill="#f5c842"/>
+    <text x="1536" y="1372" font-size="18" fill="#ffd3ea" letter-spacing="1">CYCLE  3→2→1→0→1→2→3→4</text>
+    <text x="1536" y="1400" font-size="13" fill="#ffd3ea" opacity="0.8">advance one step each Planning · repeat</text>
+  </g>
 
   <text x="400" y="1454" font-family="Arial,sans-serif" font-size="38" fill="#74f8cd" opacity="0.28" font-weight="bold" letter-spacing="4">EARTH SYSTEM</text>
   <text x="418" y="208" font-family="Arial,sans-serif" font-size="32" fill="#b9cae0" opacity="0.32" font-weight="bold" letter-spacing="3">LUNAR SYSTEM</text>
   <text x="2258" y="1454" font-family="Arial,sans-serif" font-size="38" fill="#ff9f7f" opacity="0.30" font-weight="bold" letter-spacing="4">MARS SYSTEM</text>
+</g>
+
+<!-- Round track (1-8) -->
+<g font-family="Arial,sans-serif" font-weight="bold" text-anchor="middle" dominant-baseline="middle">
+  <text x="2436" y="92" text-anchor="end" font-size="20" fill="#8a9ab8" letter-spacing="2">ROUND</text>
+  <circle cx="2480" cy="88" r="26" fill="#07101e" stroke="#3a4a70" stroke-width="2"/> <text x="2480" y="91" font-size="18" fill="#cdd6e8">1</text>
+  <circle cx="2550" cy="88" r="26" fill="#07101e" stroke="#3a4a70" stroke-width="2"/> <text x="2550" y="91" font-size="18" fill="#cdd6e8">2</text>
+  <circle cx="2620" cy="88" r="26" fill="#07101e" stroke="#3a4a70" stroke-width="2"/> <text x="2620" y="91" font-size="18" fill="#cdd6e8">3</text>
+  <circle cx="2690" cy="88" r="26" fill="#07101e" stroke="#3a4a70" stroke-width="2"/> <text x="2690" y="91" font-size="18" fill="#cdd6e8">4</text>
+  <circle cx="2760" cy="88" r="26" fill="#07101e" stroke="#3a4a70" stroke-width="2"/> <text x="2760" y="91" font-size="18" fill="#cdd6e8">5</text>
+  <circle cx="2830" cy="88" r="26" fill="#07101e" stroke="#3a4a70" stroke-width="2"/> <text x="2830" y="91" font-size="18" fill="#cdd6e8">6</text>
+  <circle cx="2900" cy="88" r="26" fill="#07101e" stroke="#3a4a70" stroke-width="2"/> <text x="2900" y="91" font-size="18" fill="#cdd6e8">7</text>
+  <circle cx="2970" cy="88" r="27" fill="#1c1408" stroke="#f5c842" stroke-width="3"/> <text x="2970" y="91" font-size="18" fill="#f5c842">8</text>
+  <text x="2725" y="140" font-size="13" fill="#8a9ab8">Planning · Action · Maintenance</text>
+  <text x="2970" y="140" font-size="11" fill="#f5c842" opacity="0.85">final</text>
 </g>
 
 <!-- track section panels -->
@@ -420,7 +459,7 @@
 <!-- track section labels -->
 <text x="52" y="1688" font-family="Arial,sans-serif" font-size="28" fill="#f5c842" font-weight="bold" letter-spacing="1">VP</text>
 <text x="52" y="1870" font-family="Arial,sans-serif" font-size="28" fill="#4ade80" font-weight="bold" letter-spacing="1">CR</text>
-<text x="2710" y="1870" font-family="Arial,sans-serif" font-size="18" fill="#4ade80" opacity="0.70">start: 5 ▶</text>
+<text x="40" y="1774" font-family="Arial,sans-serif" font-size="14" fill="#4ade80" opacity="0.75">start by seat: 5 · 6 · 7 · 8</text>
 
 <!-- title panel -->
 <g>
@@ -477,84 +516,103 @@
       fill="#8a9ab8" letter-spacing="3">ORBITAL MAP</text>
 
 <!-- ══════════════════════════════════════════════════════════════ -->
-<!--  VP TRACK  (31 spaces 0–30,  y=1635,  x: 135→2940, step 93.5) -->
+<!--  VP TRACK  (51 spaces 0–50,  y=1635,  x: 128→2944, step 56.32)     -->
+<!--  Global.lua VP_TRACK: x0=-11.0, z=4.273, step=0.44, max=50        -->
 <!-- ══════════════════════════════════════════════════════════════ -->
 <g font-family="Arial,sans-serif" font-weight="bold" text-anchor="middle" dominant-baseline="middle">
-  <!-- normal -->
-  <circle cx="135"   cy="1635" r="37" fill="#07101e" stroke="#806010" stroke-width="2"/> <text x="135"   y="1638" font-size="21" fill="white">0</text>
-  <circle cx="228.5" cy="1635" r="37" fill="#07101e" stroke="#806010" stroke-width="2"/> <text x="228.5" y="1638" font-size="21" fill="white">1</text>
-  <circle cx="322"   cy="1635" r="37" fill="#07101e" stroke="#806010" stroke-width="2"/> <text x="322"   y="1638" font-size="21" fill="white">2</text>
-  <circle cx="415.5" cy="1635" r="37" fill="#07101e" stroke="#806010" stroke-width="2"/> <text x="415.5" y="1638" font-size="21" fill="white">3</text>
-  <circle cx="509"   cy="1635" r="37" fill="#07101e" stroke="#806010" stroke-width="2"/> <text x="509"   y="1638" font-size="21" fill="white">4</text>
-  <!-- milestone 5 -->
-  <circle cx="602.5" cy="1635" r="40" fill="#0d1c08" stroke="#f5c842" stroke-width="3" filter="url(#glow-sm)"/> <text x="602.5" y="1638" font-size="22" fill="#f5c842">5</text>
-  <!-- normal -->
-  <circle cx="696"   cy="1635" r="37" fill="#07101e" stroke="#806010" stroke-width="2"/> <text x="696"   y="1638" font-size="21" fill="white">6</text>
-  <circle cx="789.5" cy="1635" r="37" fill="#07101e" stroke="#806010" stroke-width="2"/> <text x="789.5" y="1638" font-size="21" fill="white">7</text>
-  <circle cx="883"   cy="1635" r="37" fill="#07101e" stroke="#806010" stroke-width="2"/> <text x="883"   y="1638" font-size="21" fill="white">8</text>
-  <circle cx="976.5" cy="1635" r="37" fill="#07101e" stroke="#806010" stroke-width="2"/> <text x="976.5" y="1638" font-size="21" fill="white">9</text>
-  <!-- milestone 10 -->
-  <circle cx="1070"  cy="1635" r="40" fill="#0d1c08" stroke="#f5c842" stroke-width="3" filter="url(#glow-sm)"/> <text x="1070"  y="1638" font-size="18" fill="#f5c842">10</text>
-  <!-- normal -->
-  <circle cx="1163.5" cy="1635" r="37" fill="#07101e" stroke="#806010" stroke-width="2"/> <text x="1163.5" y="1638" font-size="18" fill="white">11</text>
-  <circle cx="1257"   cy="1635" r="37" fill="#07101e" stroke="#806010" stroke-width="2"/> <text x="1257"   y="1638" font-size="18" fill="white">12</text>
-  <circle cx="1350.5" cy="1635" r="37" fill="#07101e" stroke="#806010" stroke-width="2"/> <text x="1350.5" y="1638" font-size="18" fill="white">13</text>
-  <circle cx="1444"   cy="1635" r="37" fill="#07101e" stroke="#806010" stroke-width="2"/> <text x="1444"   y="1638" font-size="18" fill="white">14</text>
-  <!-- milestone 15 -->
-  <circle cx="1537.5" cy="1635" r="40" fill="#0d1c08" stroke="#f5c842" stroke-width="3" filter="url(#glow-sm)"/> <text x="1537.5" y="1638" font-size="18" fill="#f5c842">15</text>
-  <!-- normal -->
-  <circle cx="1631"   cy="1635" r="37" fill="#07101e" stroke="#806010" stroke-width="2"/> <text x="1631"   y="1638" font-size="18" fill="white">16</text>
-  <circle cx="1724.5" cy="1635" r="37" fill="#07101e" stroke="#806010" stroke-width="2"/> <text x="1724.5" y="1638" font-size="18" fill="white">17</text>
-  <circle cx="1818"   cy="1635" r="37" fill="#07101e" stroke="#806010" stroke-width="2"/> <text x="1818"   y="1638" font-size="18" fill="white">18</text>
-  <circle cx="1911.5" cy="1635" r="37" fill="#07101e" stroke="#806010" stroke-width="2"/> <text x="1911.5" y="1638" font-size="18" fill="white">19</text>
-  <!-- milestone 20 -->
-  <circle cx="2005"   cy="1635" r="40" fill="#0d1c08" stroke="#f5c842" stroke-width="3" filter="url(#glow-sm)"/> <text x="2005"   y="1638" font-size="18" fill="#f5c842">20</text>
-  <!-- normal -->
-  <circle cx="2098.5" cy="1635" r="37" fill="#07101e" stroke="#806010" stroke-width="2"/> <text x="2098.5" y="1638" font-size="18" fill="white">21</text>
-  <circle cx="2192"   cy="1635" r="37" fill="#07101e" stroke="#806010" stroke-width="2"/> <text x="2192"   y="1638" font-size="18" fill="white">22</text>
-  <circle cx="2285.5" cy="1635" r="37" fill="#07101e" stroke="#806010" stroke-width="2"/> <text x="2285.5" y="1638" font-size="18" fill="white">23</text>
-  <circle cx="2379"   cy="1635" r="37" fill="#07101e" stroke="#806010" stroke-width="2"/> <text x="2379"   y="1638" font-size="18" fill="white">24</text>
-  <!-- milestone 25 -->
-  <circle cx="2472.5" cy="1635" r="40" fill="#0d1c08" stroke="#f5c842" stroke-width="3" filter="url(#glow-sm)"/> <text x="2472.5" y="1638" font-size="18" fill="#f5c842">25</text>
-  <!-- normal -->
-  <circle cx="2566"   cy="1635" r="37" fill="#07101e" stroke="#806010" stroke-width="2"/> <text x="2566"   y="1638" font-size="18" fill="white">26</text>
-  <circle cx="2659.5" cy="1635" r="37" fill="#07101e" stroke="#806010" stroke-width="2"/> <text x="2659.5" y="1638" font-size="18" fill="white">27</text>
-  <circle cx="2753"   cy="1635" r="37" fill="#07101e" stroke="#806010" stroke-width="2"/> <text x="2753"   y="1638" font-size="18" fill="white">28</text>
-  <circle cx="2846.5" cy="1635" r="37" fill="#07101e" stroke="#806010" stroke-width="2"/> <text x="2846.5" y="1638" font-size="18" fill="white">29</text>
-  <!-- end 30 -->
-  <circle cx="2940"   cy="1635" r="42" fill="#101e04" stroke="#ffdd00" stroke-width="4" filter="url(#glow-sm)"/> <text x="2940"   y="1638" font-size="20" fill="#ffdd00">30</text>
+  <circle cx="128" cy="1635" r="25" fill="#07101e" stroke="#806010" stroke-width="2"/> <text x="128" y="1638" font-size="17" fill="white">0</text>
+  <circle cx="184.32" cy="1635" r="25" fill="#07101e" stroke="#806010" stroke-width="2"/> <text x="184.32" y="1638" font-size="17" fill="white">1</text>
+  <circle cx="240.64" cy="1635" r="25" fill="#07101e" stroke="#806010" stroke-width="2"/> <text x="240.64" y="1638" font-size="17" fill="white">2</text>
+  <circle cx="296.96" cy="1635" r="25" fill="#07101e" stroke="#806010" stroke-width="2"/> <text x="296.96" y="1638" font-size="17" fill="white">3</text>
+  <circle cx="353.28" cy="1635" r="25" fill="#07101e" stroke="#806010" stroke-width="2"/> <text x="353.28" y="1638" font-size="17" fill="white">4</text>
+  <circle cx="409.6" cy="1635" r="27" fill="#0d1c08" stroke="#f5c842" stroke-width="2.5" filter="url(#glow-sm)"/> <text x="409.6" y="1638" font-size="17" fill="#f5c842">5</text>
+  <circle cx="465.92" cy="1635" r="25" fill="#07101e" stroke="#806010" stroke-width="2"/> <text x="465.92" y="1638" font-size="17" fill="white">6</text>
+  <circle cx="522.24" cy="1635" r="25" fill="#07101e" stroke="#806010" stroke-width="2"/> <text x="522.24" y="1638" font-size="17" fill="white">7</text>
+  <circle cx="578.56" cy="1635" r="25" fill="#07101e" stroke="#806010" stroke-width="2"/> <text x="578.56" y="1638" font-size="17" fill="white">8</text>
+  <circle cx="634.88" cy="1635" r="25" fill="#07101e" stroke="#806010" stroke-width="2"/> <text x="634.88" y="1638" font-size="17" fill="white">9</text>
+  <circle cx="691.2" cy="1635" r="27" fill="#0d1c08" stroke="#f5c842" stroke-width="2.5" filter="url(#glow-sm)"/> <text x="691.2" y="1638" font-size="14" fill="#f5c842">10</text>
+  <circle cx="747.52" cy="1635" r="25" fill="#07101e" stroke="#806010" stroke-width="2"/> <text x="747.52" y="1638" font-size="14" fill="white">11</text>
+  <circle cx="803.84" cy="1635" r="25" fill="#07101e" stroke="#806010" stroke-width="2"/> <text x="803.84" y="1638" font-size="14" fill="white">12</text>
+  <circle cx="860.16" cy="1635" r="25" fill="#07101e" stroke="#806010" stroke-width="2"/> <text x="860.16" y="1638" font-size="14" fill="white">13</text>
+  <circle cx="916.48" cy="1635" r="25" fill="#07101e" stroke="#806010" stroke-width="2"/> <text x="916.48" y="1638" font-size="14" fill="white">14</text>
+  <circle cx="972.8" cy="1635" r="27" fill="#0d1c08" stroke="#f5c842" stroke-width="2.5" filter="url(#glow-sm)"/> <text x="972.8" y="1638" font-size="14" fill="#f5c842">15</text>
+  <circle cx="1029.12" cy="1635" r="25" fill="#07101e" stroke="#806010" stroke-width="2"/> <text x="1029.12" y="1638" font-size="14" fill="white">16</text>
+  <circle cx="1085.44" cy="1635" r="25" fill="#07101e" stroke="#806010" stroke-width="2"/> <text x="1085.44" y="1638" font-size="14" fill="white">17</text>
+  <circle cx="1141.76" cy="1635" r="25" fill="#07101e" stroke="#806010" stroke-width="2"/> <text x="1141.76" y="1638" font-size="14" fill="white">18</text>
+  <circle cx="1198.08" cy="1635" r="25" fill="#07101e" stroke="#806010" stroke-width="2"/> <text x="1198.08" y="1638" font-size="14" fill="white">19</text>
+  <circle cx="1254.4" cy="1635" r="27" fill="#0d1c08" stroke="#f5c842" stroke-width="2.5" filter="url(#glow-sm)"/> <text x="1254.4" y="1638" font-size="14" fill="#f5c842">20</text>
+  <circle cx="1310.72" cy="1635" r="25" fill="#07101e" stroke="#806010" stroke-width="2"/> <text x="1310.72" y="1638" font-size="14" fill="white">21</text>
+  <circle cx="1367.04" cy="1635" r="25" fill="#07101e" stroke="#806010" stroke-width="2"/> <text x="1367.04" y="1638" font-size="14" fill="white">22</text>
+  <circle cx="1423.36" cy="1635" r="25" fill="#07101e" stroke="#806010" stroke-width="2"/> <text x="1423.36" y="1638" font-size="14" fill="white">23</text>
+  <circle cx="1479.68" cy="1635" r="25" fill="#07101e" stroke="#806010" stroke-width="2"/> <text x="1479.68" y="1638" font-size="14" fill="white">24</text>
+  <circle cx="1536" cy="1635" r="27" fill="#0d1c08" stroke="#f5c842" stroke-width="2.5" filter="url(#glow-sm)"/> <text x="1536" y="1638" font-size="14" fill="#f5c842">25</text>
+  <circle cx="1592.32" cy="1635" r="25" fill="#07101e" stroke="#806010" stroke-width="2"/> <text x="1592.32" y="1638" font-size="14" fill="white">26</text>
+  <circle cx="1648.64" cy="1635" r="25" fill="#07101e" stroke="#806010" stroke-width="2"/> <text x="1648.64" y="1638" font-size="14" fill="white">27</text>
+  <circle cx="1704.96" cy="1635" r="25" fill="#07101e" stroke="#806010" stroke-width="2"/> <text x="1704.96" y="1638" font-size="14" fill="white">28</text>
+  <circle cx="1761.28" cy="1635" r="25" fill="#07101e" stroke="#806010" stroke-width="2"/> <text x="1761.28" y="1638" font-size="14" fill="white">29</text>
+  <circle cx="1817.6" cy="1635" r="27" fill="#0d1c08" stroke="#f5c842" stroke-width="2.5" filter="url(#glow-sm)"/> <text x="1817.6" y="1638" font-size="14" fill="#f5c842">30</text>
+  <circle cx="1873.92" cy="1635" r="25" fill="#07101e" stroke="#806010" stroke-width="2"/> <text x="1873.92" y="1638" font-size="14" fill="white">31</text>
+  <circle cx="1930.24" cy="1635" r="25" fill="#07101e" stroke="#806010" stroke-width="2"/> <text x="1930.24" y="1638" font-size="14" fill="white">32</text>
+  <circle cx="1986.56" cy="1635" r="25" fill="#07101e" stroke="#806010" stroke-width="2"/> <text x="1986.56" y="1638" font-size="14" fill="white">33</text>
+  <circle cx="2042.88" cy="1635" r="25" fill="#07101e" stroke="#806010" stroke-width="2"/> <text x="2042.88" y="1638" font-size="14" fill="white">34</text>
+  <circle cx="2099.2" cy="1635" r="27" fill="#0d1c08" stroke="#f5c842" stroke-width="2.5" filter="url(#glow-sm)"/> <text x="2099.2" y="1638" font-size="14" fill="#f5c842">35</text>
+  <circle cx="2155.52" cy="1635" r="25" fill="#07101e" stroke="#806010" stroke-width="2"/> <text x="2155.52" y="1638" font-size="14" fill="white">36</text>
+  <circle cx="2211.84" cy="1635" r="25" fill="#07101e" stroke="#806010" stroke-width="2"/> <text x="2211.84" y="1638" font-size="14" fill="white">37</text>
+  <circle cx="2268.16" cy="1635" r="25" fill="#07101e" stroke="#806010" stroke-width="2"/> <text x="2268.16" y="1638" font-size="14" fill="white">38</text>
+  <circle cx="2324.48" cy="1635" r="25" fill="#07101e" stroke="#806010" stroke-width="2"/> <text x="2324.48" y="1638" font-size="14" fill="white">39</text>
+  <circle cx="2380.8" cy="1635" r="27" fill="#0d1c08" stroke="#f5c842" stroke-width="2.5" filter="url(#glow-sm)"/> <text x="2380.8" y="1638" font-size="14" fill="#f5c842">40</text>
+  <circle cx="2437.12" cy="1635" r="25" fill="#07101e" stroke="#806010" stroke-width="2"/> <text x="2437.12" y="1638" font-size="14" fill="white">41</text>
+  <circle cx="2493.44" cy="1635" r="25" fill="#07101e" stroke="#806010" stroke-width="2"/> <text x="2493.44" y="1638" font-size="14" fill="white">42</text>
+  <circle cx="2549.76" cy="1635" r="25" fill="#07101e" stroke="#806010" stroke-width="2"/> <text x="2549.76" y="1638" font-size="14" fill="white">43</text>
+  <circle cx="2606.08" cy="1635" r="25" fill="#07101e" stroke="#806010" stroke-width="2"/> <text x="2606.08" y="1638" font-size="14" fill="white">44</text>
+  <circle cx="2662.4" cy="1635" r="27" fill="#0d1c08" stroke="#f5c842" stroke-width="2.5" filter="url(#glow-sm)"/> <text x="2662.4" y="1638" font-size="14" fill="#f5c842">45</text>
+  <circle cx="2718.72" cy="1635" r="25" fill="#07101e" stroke="#806010" stroke-width="2"/> <text x="2718.72" y="1638" font-size="14" fill="white">46</text>
+  <circle cx="2775.04" cy="1635" r="25" fill="#07101e" stroke="#806010" stroke-width="2"/> <text x="2775.04" y="1638" font-size="14" fill="white">47</text>
+  <circle cx="2831.36" cy="1635" r="25" fill="#07101e" stroke="#806010" stroke-width="2"/> <text x="2831.36" y="1638" font-size="14" fill="white">48</text>
+  <circle cx="2887.68" cy="1635" r="25" fill="#07101e" stroke="#806010" stroke-width="2"/> <text x="2887.68" y="1638" font-size="14" fill="white">49</text>
+  <circle cx="2944" cy="1635" r="30" fill="#101e04" stroke="#ffdd00" stroke-width="3.5" filter="url(#glow-sm)"/> <text x="2944" y="1638" font-size="14" fill="#ffdd00">50</text>
 </g>
 
 <!-- ══════════════════════════════════════════════════════════════ -->
-<!--  CREDIT TRACK  (21 spaces 0–20,  y=1820,  x: 150→2550, step 120) -->
+<!--  CREDIT TRACK  (31 spaces 0–30,  y=1820,  x: 135→2940, step 93.5) -->
+<!--  Global.lua CREDIT_TRACK: x0=-10.945, z=5.719, step=0.7305, max=30 -->
 <!-- ══════════════════════════════════════════════════════════════ -->
 <g font-family="Arial,sans-serif" font-weight="bold" text-anchor="middle" dominant-baseline="middle">
-  <!-- start marker at 0 -->
-  <circle cx="150"  cy="1820" r="37" fill="#050f10" stroke="#1a5028" stroke-width="2"/> <text x="150"  y="1823" font-size="21" fill="white">0</text>
-  <circle cx="270"  cy="1820" r="37" fill="#050f10" stroke="#1a5028" stroke-width="2"/> <text x="270"  y="1823" font-size="21" fill="white">1</text>
-  <circle cx="390"  cy="1820" r="37" fill="#050f10" stroke="#1a5028" stroke-width="2"/> <text x="390"  y="1823" font-size="21" fill="white">2</text>
-  <circle cx="510"  cy="1820" r="37" fill="#050f10" stroke="#1a5028" stroke-width="2"/> <text x="510"  y="1823" font-size="21" fill="white">3</text>
-  <circle cx="630"  cy="1820" r="37" fill="#050f10" stroke="#1a5028" stroke-width="2"/> <text x="630"  y="1823" font-size="21" fill="white">4</text>
-  <!-- milestone 5 (starting position) -->
-  <circle cx="750"  cy="1820" r="40" fill="#0a1e10" stroke="#4ade80" stroke-width="3" filter="url(#glow-sm)"/> <text x="750"  y="1823" font-size="22" fill="#4ade80">5</text>
-  <circle cx="870"  cy="1820" r="37" fill="#050f10" stroke="#1a5028" stroke-width="2"/> <text x="870"  y="1823" font-size="21" fill="white">6</text>
-  <circle cx="990"  cy="1820" r="37" fill="#050f10" stroke="#1a5028" stroke-width="2"/> <text x="990"  y="1823" font-size="21" fill="white">7</text>
-  <circle cx="1110" cy="1820" r="37" fill="#050f10" stroke="#1a5028" stroke-width="2"/> <text x="1110" y="1823" font-size="21" fill="white">8</text>
-  <circle cx="1230" cy="1820" r="37" fill="#050f10" stroke="#1a5028" stroke-width="2"/> <text x="1230" y="1823" font-size="21" fill="white">9</text>
-  <!-- milestone 10 -->
-  <circle cx="1350" cy="1820" r="40" fill="#0a1e10" stroke="#4ade80" stroke-width="3" filter="url(#glow-sm)"/> <text x="1350" y="1823" font-size="18" fill="#4ade80">10</text>
-  <circle cx="1470" cy="1820" r="37" fill="#050f10" stroke="#1a5028" stroke-width="2"/> <text x="1470" y="1823" font-size="18" fill="white">11</text>
-  <circle cx="1590" cy="1820" r="37" fill="#050f10" stroke="#1a5028" stroke-width="2"/> <text x="1590" y="1823" font-size="18" fill="white">12</text>
-  <circle cx="1710" cy="1820" r="37" fill="#050f10" stroke="#1a5028" stroke-width="2"/> <text x="1710" y="1823" font-size="18" fill="white">13</text>
-  <circle cx="1830" cy="1820" r="37" fill="#050f10" stroke="#1a5028" stroke-width="2"/> <text x="1830" y="1823" font-size="18" fill="white">14</text>
-  <!-- milestone 15 -->
-  <circle cx="1950" cy="1820" r="40" fill="#0a1e10" stroke="#4ade80" stroke-width="3" filter="url(#glow-sm)"/> <text x="1950" y="1823" font-size="18" fill="#4ade80">15</text>
-  <circle cx="2070" cy="1820" r="37" fill="#050f10" stroke="#1a5028" stroke-width="2"/> <text x="2070" y="1823" font-size="18" fill="white">16</text>
-  <circle cx="2190" cy="1820" r="37" fill="#050f10" stroke="#1a5028" stroke-width="2"/> <text x="2190" y="1823" font-size="18" fill="white">17</text>
-  <circle cx="2310" cy="1820" r="37" fill="#050f10" stroke="#1a5028" stroke-width="2"/> <text x="2310" y="1823" font-size="18" fill="white">18</text>
-  <circle cx="2430" cy="1820" r="37" fill="#050f10" stroke="#1a5028" stroke-width="2"/> <text x="2430" y="1823" font-size="18" fill="white">19</text>
-  <!-- end 20 -->
-  <circle cx="2550" cy="1820" r="42" fill="#102010" stroke="#86efac" stroke-width="4" filter="url(#glow-sm)"/> <text x="2550" y="1823" font-size="20" fill="#86efac">20</text>
+  <circle cx="135" cy="1820" r="37" fill="#050f10" stroke="#1a5028" stroke-width="2"/> <text x="135" y="1823" font-size="21" fill="white">0</text>
+  <circle cx="228.5" cy="1820" r="37" fill="#050f10" stroke="#1a5028" stroke-width="2"/> <text x="228.5" y="1823" font-size="21" fill="white">1</text>
+  <circle cx="322" cy="1820" r="37" fill="#050f10" stroke="#1a5028" stroke-width="2"/> <text x="322" y="1823" font-size="21" fill="white">2</text>
+  <circle cx="415.5" cy="1820" r="37" fill="#050f10" stroke="#1a5028" stroke-width="2"/> <text x="415.5" y="1823" font-size="21" fill="white">3</text>
+  <circle cx="509" cy="1820" r="37" fill="#050f10" stroke="#1a5028" stroke-width="2"/> <text x="509" y="1823" font-size="21" fill="white">4</text>
+  <circle cx="602.5" cy="1820" r="40" fill="#0a1e10" stroke="#4ade80" stroke-width="3" filter="url(#glow-sm)"/> <text x="602.5" y="1823" font-size="21" fill="#4ade80">5</text>
+  <circle cx="696" cy="1820" r="37" fill="#050f10" stroke="#1a5028" stroke-width="2"/> <text x="696" y="1823" font-size="21" fill="white">6</text>
+  <circle cx="789.5" cy="1820" r="37" fill="#050f10" stroke="#1a5028" stroke-width="2"/> <text x="789.5" y="1823" font-size="21" fill="white">7</text>
+  <circle cx="883" cy="1820" r="37" fill="#050f10" stroke="#1a5028" stroke-width="2"/> <text x="883" y="1823" font-size="21" fill="white">8</text>
+  <circle cx="976.5" cy="1820" r="37" fill="#050f10" stroke="#1a5028" stroke-width="2"/> <text x="976.5" y="1823" font-size="21" fill="white">9</text>
+  <circle cx="1070" cy="1820" r="40" fill="#0a1e10" stroke="#4ade80" stroke-width="3" filter="url(#glow-sm)"/> <text x="1070" y="1823" font-size="18" fill="#4ade80">10</text>
+  <circle cx="1163.5" cy="1820" r="37" fill="#050f10" stroke="#1a5028" stroke-width="2"/> <text x="1163.5" y="1823" font-size="18" fill="white">11</text>
+  <circle cx="1257" cy="1820" r="37" fill="#050f10" stroke="#1a5028" stroke-width="2"/> <text x="1257" y="1823" font-size="18" fill="white">12</text>
+  <circle cx="1350.5" cy="1820" r="37" fill="#050f10" stroke="#1a5028" stroke-width="2"/> <text x="1350.5" y="1823" font-size="18" fill="white">13</text>
+  <circle cx="1444" cy="1820" r="37" fill="#050f10" stroke="#1a5028" stroke-width="2"/> <text x="1444" y="1823" font-size="18" fill="white">14</text>
+  <circle cx="1537.5" cy="1820" r="40" fill="#0a1e10" stroke="#4ade80" stroke-width="3" filter="url(#glow-sm)"/> <text x="1537.5" y="1823" font-size="18" fill="#4ade80">15</text>
+  <circle cx="1631" cy="1820" r="37" fill="#050f10" stroke="#1a5028" stroke-width="2"/> <text x="1631" y="1823" font-size="18" fill="white">16</text>
+  <circle cx="1724.5" cy="1820" r="37" fill="#050f10" stroke="#1a5028" stroke-width="2"/> <text x="1724.5" y="1823" font-size="18" fill="white">17</text>
+  <circle cx="1818" cy="1820" r="37" fill="#050f10" stroke="#1a5028" stroke-width="2"/> <text x="1818" y="1823" font-size="18" fill="white">18</text>
+  <circle cx="1911.5" cy="1820" r="37" fill="#050f10" stroke="#1a5028" stroke-width="2"/> <text x="1911.5" y="1823" font-size="18" fill="white">19</text>
+  <circle cx="2005" cy="1820" r="40" fill="#0a1e10" stroke="#4ade80" stroke-width="3" filter="url(#glow-sm)"/> <text x="2005" y="1823" font-size="18" fill="#4ade80">20</text>
+  <circle cx="2098.5" cy="1820" r="37" fill="#050f10" stroke="#1a5028" stroke-width="2"/> <text x="2098.5" y="1823" font-size="18" fill="white">21</text>
+  <circle cx="2192" cy="1820" r="37" fill="#050f10" stroke="#1a5028" stroke-width="2"/> <text x="2192" y="1823" font-size="18" fill="white">22</text>
+  <circle cx="2285.5" cy="1820" r="37" fill="#050f10" stroke="#1a5028" stroke-width="2"/> <text x="2285.5" y="1823" font-size="18" fill="white">23</text>
+  <circle cx="2379" cy="1820" r="37" fill="#050f10" stroke="#1a5028" stroke-width="2"/> <text x="2379" y="1823" font-size="18" fill="white">24</text>
+  <circle cx="2472.5" cy="1820" r="40" fill="#0a1e10" stroke="#4ade80" stroke-width="3" filter="url(#glow-sm)"/> <text x="2472.5" y="1823" font-size="18" fill="#4ade80">25</text>
+  <circle cx="2566" cy="1820" r="37" fill="#050f10" stroke="#1a5028" stroke-width="2"/> <text x="2566" y="1823" font-size="18" fill="white">26</text>
+  <circle cx="2659.5" cy="1820" r="37" fill="#050f10" stroke="#1a5028" stroke-width="2"/> <text x="2659.5" y="1823" font-size="18" fill="white">27</text>
+  <circle cx="2753" cy="1820" r="37" fill="#050f10" stroke="#1a5028" stroke-width="2"/> <text x="2753" y="1823" font-size="18" fill="white">28</text>
+  <circle cx="2846.5" cy="1820" r="37" fill="#050f10" stroke="#1a5028" stroke-width="2"/> <text x="2846.5" y="1823" font-size="18" fill="white">29</text>
+  <circle cx="2940" cy="1820" r="42" fill="#102010" stroke="#86efac" stroke-width="4" filter="url(#glow-sm)"/> <text x="2940" y="1823" font-size="20" fill="#86efac">30</text>
+  <text x="602.5" y="1877" font-size="11" fill="#4ade80" opacity="0.7">seat 1</text>
+  <text x="696" y="1877" font-size="11" fill="#4ade80" opacity="0.7">seat 2</text>
+  <text x="789.5" y="1877" font-size="11" fill="#4ade80" opacity="0.7">seat 3</text>
+  <text x="883" y="1877" font-size="11" fill="#4ade80" opacity="0.7">seat 4</text>
 </g>
 
 </svg>
