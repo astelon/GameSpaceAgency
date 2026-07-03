@@ -9,7 +9,7 @@
         "Model":  "black-forest-labs/FLUX.1-schnell",
         "Seed":  0,
         "ArtFile":  "art/generated/E01.jpg",
-        "GeneratedAt":  "2026-06-30T07:49:29.4459851-06:00"
+        "GeneratedAt":  "2026-07-03T04:59:39.9132429-06:00"
     },
     {
         "CardID":  "E02",
@@ -21,7 +21,7 @@
         "Model":  "black-forest-labs/FLUX.1-schnell",
         "Seed":  0,
         "ArtFile":  "art/generated/E02.jpg",
-        "GeneratedAt":  "2026-06-30T07:49:32.7545810-06:00"
+        "GeneratedAt":  "2026-07-03T04:59:39.9465176-06:00"
     },
     {
         "CardID":  "E03",
@@ -33,7 +33,7 @@
         "Model":  "black-forest-labs/FLUX.1-schnell",
         "Seed":  0,
         "ArtFile":  "art/generated/E03.jpg",
-        "GeneratedAt":  "2026-06-30T07:49:35.5114990-06:00"
+        "GeneratedAt":  "2026-07-03T04:59:39.9505197-06:00"
     },
     {
         "CardID":  "E04",
@@ -45,7 +45,7 @@
         "Model":  "black-forest-labs/FLUX.1-schnell",
         "Seed":  0,
         "ArtFile":  "art/generated/E04.jpg",
-        "GeneratedAt":  "2026-06-30T07:49:38.2839579-06:00"
+        "GeneratedAt":  "2026-07-03T04:59:39.9545177-06:00"
     },
     {
         "CardID":  "E05",
@@ -57,7 +57,7 @@
         "Model":  "black-forest-labs/FLUX.1-schnell",
         "Seed":  0,
         "ArtFile":  "art/generated/E05.jpg",
-        "GeneratedAt":  "2026-06-30T07:49:41.0336342-06:00"
+        "GeneratedAt":  "2026-07-03T04:59:39.9575193-06:00"
     },
     {
         "CardID":  "E06",
@@ -69,7 +69,7 @@
         "Model":  "black-forest-labs/FLUX.1-schnell",
         "Seed":  0,
         "ArtFile":  "art/generated/E06.jpg",
-        "GeneratedAt":  "2026-06-30T07:49:43.8103591-06:00"
+        "GeneratedAt":  "2026-07-03T04:59:39.9615184-06:00"
     },
     {
         "CardID":  "E07",
@@ -81,7 +81,7 @@
         "Model":  "black-forest-labs/FLUX.1-schnell",
         "Seed":  0,
         "ArtFile":  "art/generated/E07.jpg",
-        "GeneratedAt":  "2026-06-30T07:49:46.7363179-06:00"
+        "GeneratedAt":  "2026-07-03T04:59:39.9645222-06:00"
     },
     {
         "CardID":  "T01",
@@ -93,7 +93,7 @@
         "Model":  "black-forest-labs/FLUX.1-schnell",
         "Seed":  0,
         "ArtFile":  "art/generated/T01.jpg",
-        "GeneratedAt":  "2026-06-30T07:49:49.5240901-06:00"
+        "GeneratedAt":  "2026-07-03T04:59:39.9685195-06:00"
     },
     {
         "CardID":  "T02",
@@ -105,7 +105,7 @@
         "Model":  "black-forest-labs/FLUX.1-schnell",
         "Seed":  0,
         "ArtFile":  "art/generated/T02.jpg",
-        "GeneratedAt":  "2026-06-30T07:49:52.2884451-06:00"
+        "GeneratedAt":  "2026-07-03T04:59:39.9734767-06:00"
     },
     {
         "CardID":  "T03",
@@ -117,7 +117,7 @@
         "Model":  "black-forest-labs/FLUX.1-schnell",
         "Seed":  0,
         "ArtFile":  "art/generated/T03.jpg",
-        "GeneratedAt":  "2026-06-30T07:49:55.1395836-06:00"
+        "GeneratedAt":  "2026-07-03T04:59:39.9774793-06:00"
     },
     {
         "CardID":  "T04",
@@ -129,7 +129,7 @@
         "Model":  "black-forest-labs/FLUX.1-schnell",
         "Seed":  0,
         "ArtFile":  "art/generated/T04.jpg",
-        "GeneratedAt":  "2026-06-30T07:49:57.9163789-06:00"
+        "GeneratedAt":  "2026-07-03T04:59:39.9816546-06:00"
     },
     {
         "CardID":  "T05",
@@ -141,7 +141,7 @@
         "Model":  "black-forest-labs/FLUX.1-schnell",
         "Seed":  0,
         "ArtFile":  "art/generated/T05.jpg",
-        "GeneratedAt":  "2026-06-30T07:50:00.6919644-06:00"
+        "GeneratedAt":  "2026-07-03T04:59:39.9856561-06:00"
     },
     {
         "CardID":  "T06",
@@ -153,7 +153,7 @@
         "Model":  "black-forest-labs/FLUX.1-schnell",
         "Seed":  0,
         "ArtFile":  "art/generated/T06.jpg",
-        "GeneratedAt":  "2026-06-30T07:50:03.6750737-06:00"
+        "GeneratedAt":  "2026-07-03T04:59:39.9893809-06:00"
     },
     {
         "CardID":  "P01",
@@ -165,7 +165,7 @@
         "Model":  "black-forest-labs/FLUX.1-schnell",
         "Seed":  0,
         "ArtFile":  "art/generated/P01.jpg",
-        "GeneratedAt":  "2026-06-30T07:50:06.4424659-06:00"
+        "GeneratedAt":  "2026-07-03T04:59:39.9934384-06:00"
     },
     {
         "CardID":  "P02",
@@ -177,7 +177,7 @@
         "Model":  "black-forest-labs/FLUX.1-schnell",
         "Seed":  0,
         "ArtFile":  "art/generated/P02.jpg",
-        "GeneratedAt":  "2026-06-30T07:50:09.2790257-06:00"
+        "GeneratedAt":  "2026-07-03T04:59:39.9987896-06:00"
     },
     {
         "CardID":  "P03",
@@ -189,7 +189,7 @@
         "Model":  "black-forest-labs/FLUX.1-schnell",
         "Seed":  0,
         "ArtFile":  "art/generated/P03.jpg",
-        "GeneratedAt":  "2026-06-30T07:50:12.2305466-06:00"
+        "GeneratedAt":  "2026-07-03T04:59:40.0017887-06:00"
     },
     {
         "CardID":  "P04",
@@ -201,7 +201,7 @@
         "Model":  "black-forest-labs/FLUX.1-schnell",
         "Seed":  0,
         "ArtFile":  "art/generated/P04.jpg",
-        "GeneratedAt":  "2026-06-30T07:50:15.0661553-06:00"
+        "GeneratedAt":  "2026-07-03T04:59:40.0067872-06:00"
     },
     {
         "CardID":  "P05",
@@ -213,7 +213,7 @@
         "Model":  "black-forest-labs/FLUX.1-schnell",
         "Seed":  0,
         "ArtFile":  "art/generated/P05.jpg",
-        "GeneratedAt":  "2026-06-30T07:50:17.8620890-06:00"
+        "GeneratedAt":  "2026-07-03T04:59:40.0144911-06:00"
     },
     {
         "CardID":  "P06",
@@ -225,7 +225,7 @@
         "Model":  "black-forest-labs/FLUX.1-schnell",
         "Seed":  0,
         "ArtFile":  "art/generated/P06.jpg",
-        "GeneratedAt":  "2026-06-30T07:50:20.8700506-06:00"
+        "GeneratedAt":  "2026-07-03T04:59:40.0204894-06:00"
     },
     {
         "CardID":  "P07",
@@ -237,7 +237,7 @@
         "Model":  "black-forest-labs/FLUX.1-schnell",
         "Seed":  0,
         "ArtFile":  "art/generated/P07.jpg",
-        "GeneratedAt":  "2026-06-30T07:50:23.6649564-06:00"
+        "GeneratedAt":  "2026-07-03T04:59:40.0279732-06:00"
     },
     {
         "CardID":  "P08",
@@ -249,7 +249,7 @@
         "Model":  "black-forest-labs/FLUX.1-schnell",
         "Seed":  0,
         "ArtFile":  "art/generated/P01.jpg",
-        "GeneratedAt":  "2026-06-30T07:50:26.4862605-06:00"
+        "GeneratedAt":  "2026-07-03T04:59:40.0329756-06:00"
     },
     {
         "CardID":  "S01",
@@ -261,7 +261,7 @@
         "Model":  "black-forest-labs/FLUX.1-schnell",
         "Seed":  0,
         "ArtFile":  "art/generated/S01.jpg",
-        "GeneratedAt":  "2026-06-30T07:50:26.5075366-06:00"
+        "GeneratedAt":  "2026-07-03T04:59:40.0661446-06:00"
     },
     {
         "CardID":  "S02",
@@ -273,7 +273,7 @@
         "Model":  "black-forest-labs/FLUX.1-schnell",
         "Seed":  0,
         "ArtFile":  "art/generated/S02.jpg",
-        "GeneratedAt":  "2026-06-30T07:50:29.2874974-06:00"
+        "GeneratedAt":  "2026-07-03T04:59:40.0701437-06:00"
     },
     {
         "CardID":  "S03",
@@ -285,7 +285,7 @@
         "Model":  "black-forest-labs/FLUX.1-schnell",
         "Seed":  0,
         "ArtFile":  "art/generated/S03.jpg",
-        "GeneratedAt":  "2026-06-30T07:50:34.4247100-06:00"
+        "GeneratedAt":  "2026-07-03T04:59:40.0751452-06:00"
     },
     {
         "CardID":  "S04",
@@ -297,7 +297,7 @@
         "Model":  "black-forest-labs/FLUX.1-schnell",
         "Seed":  0,
         "ArtFile":  "art/generated/S04.jpg",
-        "GeneratedAt":  "2026-06-30T07:50:37.2387056-06:00"
+        "GeneratedAt":  "2026-07-03T04:59:40.0791568-06:00"
     },
     {
         "CardID":  "M01",
@@ -309,7 +309,7 @@
         "Model":  "black-forest-labs/FLUX.1-schnell",
         "Seed":  0,
         "ArtFile":  "art/generated/M01.jpg",
-        "GeneratedAt":  "2026-06-30T07:50:42.2923169-06:00"
+        "GeneratedAt":  "2026-07-03T04:59:40.0841464-06:00"
     },
     {
         "CardID":  "M02",
@@ -321,7 +321,7 @@
         "Model":  "black-forest-labs/FLUX.1-schnell",
         "Seed":  0,
         "ArtFile":  "art/generated/M02.jpg",
-        "GeneratedAt":  "2026-06-30T07:50:47.3951926-06:00"
+        "GeneratedAt":  "2026-07-03T04:59:40.0881442-06:00"
     },
     {
         "CardID":  "M03",
@@ -333,7 +333,7 @@
         "Model":  "black-forest-labs/FLUX.1-schnell",
         "Seed":  0,
         "ArtFile":  "art/generated/M03.jpg",
-        "GeneratedAt":  "2026-06-30T07:50:54.9219632-06:00"
+        "GeneratedAt":  "2026-07-03T04:59:40.0911434-06:00"
     },
     {
         "CardID":  "M04",
@@ -345,7 +345,7 @@
         "Model":  "black-forest-labs/FLUX.1-schnell",
         "Seed":  0,
         "ArtFile":  "art/generated/M04.jpg",
-        "GeneratedAt":  "2026-06-30T07:50:57.7831117-06:00"
+        "GeneratedAt":  "2026-07-03T04:59:40.0958537-06:00"
     },
     {
         "CardID":  "M05",
@@ -357,7 +357,7 @@
         "Model":  "black-forest-labs/FLUX.1-schnell",
         "Seed":  0,
         "ArtFile":  "art/generated/M05.jpg",
-        "GeneratedAt":  "2026-06-30T07:51:05.4619224-06:00"
+        "GeneratedAt":  "2026-07-03T04:59:40.1029576-06:00"
     },
     {
         "CardID":  "M06",
@@ -369,7 +369,7 @@
         "Model":  "black-forest-labs/FLUX.1-schnell",
         "Seed":  0,
         "ArtFile":  "art/generated/M06.jpg",
-        "GeneratedAt":  "2026-06-30T07:51:08.3876635-06:00"
+        "GeneratedAt":  "2026-07-03T04:59:40.1059590-06:00"
     },
     {
         "CardID":  "M07",
@@ -381,7 +381,7 @@
         "Model":  "black-forest-labs/FLUX.1-schnell",
         "Seed":  0,
         "ArtFile":  "art/generated/M07.jpg",
-        "GeneratedAt":  "2026-06-30T07:51:11.2600475-06:00"
+        "GeneratedAt":  "2026-07-03T04:59:40.1108484-06:00"
     },
     {
         "CardID":  "M08",
@@ -393,7 +393,7 @@
         "Model":  "black-forest-labs/FLUX.1-schnell",
         "Seed":  0,
         "ArtFile":  "art/generated/M08.jpg",
-        "GeneratedAt":  "2026-06-30T07:51:16.3907468-06:00"
+        "GeneratedAt":  "2026-07-03T04:59:40.1178476-06:00"
     },
     {
         "CardID":  "M09",
@@ -405,7 +405,7 @@
         "Model":  "black-forest-labs/FLUX.1-schnell",
         "Seed":  0,
         "ArtFile":  "art/generated/M09.jpg",
-        "GeneratedAt":  "2026-06-30T07:51:19.2833444-06:00"
+        "GeneratedAt":  "2026-07-03T04:59:40.1218446-06:00"
     },
     {
         "CardID":  "M10",
@@ -417,7 +417,7 @@
         "Model":  "black-forest-labs/FLUX.1-schnell",
         "Seed":  0,
         "ArtFile":  "art/generated/M10.jpg",
-        "GeneratedAt":  "2026-06-30T07:51:22.1754871-06:00"
+        "GeneratedAt":  "2026-07-03T04:59:40.1277249-06:00"
     },
     {
         "CardID":  "M11",
@@ -429,7 +429,7 @@
         "Model":  "black-forest-labs/FLUX.1-schnell",
         "Seed":  0,
         "ArtFile":  "art/generated/M11.jpg",
-        "GeneratedAt":  "2026-06-30T07:51:24.9947433-06:00"
+        "GeneratedAt":  "2026-07-03T04:59:40.1347251-06:00"
     },
     {
         "CardID":  "M12",
@@ -441,7 +441,7 @@
         "Model":  "black-forest-labs/FLUX.1-schnell",
         "Seed":  0,
         "ArtFile":  "art/generated/M12.jpg",
-        "GeneratedAt":  "2026-06-30T07:51:27.9289893-06:00"
+        "GeneratedAt":  "2026-07-03T04:59:40.1407249-06:00"
     },
     {
         "CardID":  "C01",
@@ -453,7 +453,7 @@
         "Model":  "black-forest-labs/FLUX.1-schnell",
         "Seed":  0,
         "ArtFile":  "art/generated/C01.jpg",
-        "GeneratedAt":  "2026-06-30T07:51:30.7515304-06:00"
+        "GeneratedAt":  "2026-07-03T04:59:40.1460485-06:00"
     },
     {
         "CardID":  "C02",
@@ -465,7 +465,7 @@
         "Model":  "black-forest-labs/FLUX.1-schnell",
         "Seed":  0,
         "ArtFile":  "art/generated/C02.jpg",
-        "GeneratedAt":  "2026-06-30T07:51:35.9325037-06:00"
+        "GeneratedAt":  "2026-07-03T04:59:40.1460485-06:00"
     },
     {
         "CardID":  "C03",
@@ -477,7 +477,7 @@
         "Model":  "black-forest-labs/FLUX.1-schnell",
         "Seed":  0,
         "ArtFile":  "art/generated/C03.jpg",
-        "GeneratedAt":  "2026-06-30T07:51:41.4632852-06:00"
+        "GeneratedAt":  "2026-07-03T04:59:40.1460485-06:00"
     },
     {
         "CardID":  "C04",
@@ -489,7 +489,7 @@
         "Model":  "black-forest-labs/FLUX.1-schnell",
         "Seed":  0,
         "ArtFile":  "art/generated/C04.jpg",
-        "GeneratedAt":  "2026-06-30T07:51:44.2860224-06:00"
+        "GeneratedAt":  "2026-07-03T04:59:40.1652247-06:00"
     },
     {
         "CardID":  "EV01",
@@ -501,7 +501,7 @@
         "Model":  "black-forest-labs/FLUX.1-schnell",
         "Seed":  0,
         "ArtFile":  "art/generated/EV01.jpg",
-        "GeneratedAt":  "2026-06-30T07:51:47.1871287-06:00"
+        "GeneratedAt":  "2026-07-03T04:59:40.1722282-06:00"
     },
     {
         "CardID":  "EV02",
@@ -513,7 +513,7 @@
         "Model":  "black-forest-labs/FLUX.1-schnell",
         "Seed":  0,
         "ArtFile":  "art/generated/EV02.jpg",
-        "GeneratedAt":  "2026-06-30T07:51:50.0594573-06:00"
+        "GeneratedAt":  "2026-07-03T04:59:40.1762242-06:00"
     },
     {
         "CardID":  "EV03",
@@ -525,7 +525,7 @@
         "Model":  "black-forest-labs/FLUX.1-schnell",
         "Seed":  0,
         "ArtFile":  "art/generated/EV03.jpg",
-        "GeneratedAt":  "2026-06-30T07:51:52.8876474-06:00"
+        "GeneratedAt":  "2026-07-03T04:59:40.1790687-06:00"
     },
     {
         "CardID":  "EV04",
@@ -537,7 +537,7 @@
         "Model":  "black-forest-labs/FLUX.1-schnell",
         "Seed":  0,
         "ArtFile":  "art/generated/EV04.jpg",
-        "GeneratedAt":  "2026-06-30T07:51:58.0255154-06:00"
+        "GeneratedAt":  "2026-07-03T04:59:40.1790687-06:00"
     },
     {
         "CardID":  "S05",
@@ -549,7 +549,7 @@
         "Model":  "black-forest-labs/FLUX.1-schnell",
         "Seed":  0,
         "ArtFile":  "art/generated/S05.jpg",
-        "GeneratedAt":  "2026-06-30T07:52:03.1420535-06:00"
+        "GeneratedAt":  "2026-07-03T04:59:40.1790687-06:00"
     },
     {
         "CardID":  "S06",
@@ -561,7 +561,7 @@
         "Model":  "black-forest-labs/FLUX.1-schnell",
         "Seed":  0,
         "ArtFile":  "art/generated/S06.jpg",
-        "GeneratedAt":  "2026-06-30T07:52:08.3174848-06:00"
+        "GeneratedAt":  "2026-07-03T04:59:40.1950894-06:00"
     },
     {
         "CardID":  "EV05",
@@ -573,7 +573,7 @@
         "Model":  "black-forest-labs/FLUX.1-schnell",
         "Seed":  0,
         "ArtFile":  "art/generated/EV05.jpg",
-        "GeneratedAt":  "2026-06-30T07:52:13.4749627-06:00"
+        "GeneratedAt":  "2026-07-03T04:59:40.1956078-06:00"
     },
     {
         "CardID":  "EV06",
@@ -585,7 +585,7 @@
         "Model":  "black-forest-labs/FLUX.1-schnell",
         "Seed":  0,
         "ArtFile":  "art/generated/EV06.jpg",
-        "GeneratedAt":  "2026-06-30T07:52:18.5995389-06:00"
+        "GeneratedAt":  "2026-07-03T04:59:40.1956078-06:00"
     },
     {
         "CardID":  "EV07",
@@ -597,7 +597,7 @@
         "Model":  "black-forest-labs/FLUX.1-schnell",
         "Seed":  0,
         "ArtFile":  "art/generated/EV07.jpg",
-        "GeneratedAt":  "2026-06-30T07:52:23.8071820-06:00"
+        "GeneratedAt":  "2026-07-03T04:59:40.1956078-06:00"
     },
     {
         "CardID":  "EV08",
@@ -609,7 +609,7 @@
         "Model":  "black-forest-labs/FLUX.1-schnell",
         "Seed":  0,
         "ArtFile":  "art/generated/EV08.jpg",
-        "GeneratedAt":  "2026-06-30T07:52:28.9156035-06:00"
+        "GeneratedAt":  "2026-07-03T04:59:40.2141596-06:00"
     },
     {
         "CardID":  "S07",
@@ -621,7 +621,7 @@
         "Model":  "black-forest-labs/FLUX.1-schnell",
         "Seed":  0,
         "ArtFile":  "art/generated/S07.jpg",
-        "GeneratedAt":  "2026-06-30T07:52:36.9418381-06:00"
+        "GeneratedAt":  "2026-07-03T04:59:40.2181608-06:00"
     },
     {
         "CardID":  "S08",
@@ -633,7 +633,7 @@
         "Model":  "black-forest-labs/FLUX.1-schnell",
         "Seed":  0,
         "ArtFile":  "art/generated/S08.jpg",
-        "GeneratedAt":  "2026-06-30T07:52:44.5816608-06:00"
+        "GeneratedAt":  "2026-07-03T04:59:40.2221582-06:00"
     },
     {
         "CardID":  "S09",
@@ -645,7 +645,7 @@
         "Model":  "black-forest-labs/FLUX.1-schnell",
         "Seed":  0,
         "ArtFile":  "art/generated/S09.jpg",
-        "GeneratedAt":  "2026-06-30T07:52:49.6303618-06:00"
+        "GeneratedAt":  "2026-07-03T04:59:40.2241581-06:00"
     },
     {
         "CardID":  "S10",
@@ -657,7 +657,7 @@
         "Model":  "black-forest-labs/FLUX.1-schnell",
         "Seed":  0,
         "ArtFile":  "art/generated/S10.jpg",
-        "GeneratedAt":  "2026-06-30T07:52:54.7497367-06:00"
+        "GeneratedAt":  "2026-07-03T04:59:40.2271596-06:00"
     },
     {
         "CardID":  "S11",
@@ -669,7 +669,7 @@
         "Model":  "black-forest-labs/FLUX.1-schnell",
         "Seed":  0,
         "ArtFile":  "art/generated/S11.jpg",
-        "GeneratedAt":  "2026-06-30T07:52:59.8780029-06:00"
+        "GeneratedAt":  "2026-07-03T04:59:40.2288521-06:00"
     },
     {
         "CardID":  "S12",
@@ -681,7 +681,7 @@
         "Model":  "black-forest-labs/FLUX.1-schnell",
         "Seed":  0,
         "ArtFile":  "art/generated/P04.jpg",
-        "GeneratedAt":  "2026-06-30T07:53:07.4894904-06:00"
+        "GeneratedAt":  "2026-07-03T04:59:40.2288521-06:00"
     },
     {
         "CardID":  "S13",
@@ -693,6 +693,282 @@
         "Model":  "black-forest-labs/FLUX.1-schnell",
         "Seed":  0,
         "ArtFile":  "art/generated/P03.jpg",
-        "GeneratedAt":  "2026-06-30T07:53:07.5056559-06:00"
+        "GeneratedAt":  "2026-07-03T04:59:40.2288521-06:00"
+    },
+    {
+        "CardID":  "M13",
+        "Name":  "Tourist Hop",
+        "Type":  "Mission",
+        "Prompt":  "A friendly suborbital tourist capsule at apogee, passengers floating at round windows marveling at the curve of Earth below, joyful mood, playful Kerbal-inspired educational sci-fi illustration, clean vector linework, bright readable silhouette, single centered subject, plain uncluttered background, cinematic studio lighting, vivid colors, no text, no lettering, no watermark",
+        "PromptField":  "ImageDescription",
+        "NegativePrompt":  "",
+        "Model":  "black-forest-labs/FLUX.1-schnell",
+        "Seed":  0,
+        "ArtFile":  "art/generated/M13.jpg",
+        "GeneratedAt":  "2026-07-03T04:59:40.2417740-06:00"
+    },
+    {
+        "CardID":  "M14",
+        "Name":  "Weather Satellite",
+        "Type":  "Mission",
+        "Prompt":  "A weather satellite with wide solar wings watching a swirling storm system on Earth from high geostationary orbit, playful Kerbal-inspired educational sci-fi illustration, clean vector linework, bright readable silhouette, single centered subject, plain uncluttered background, cinematic studio lighting, vivid colors, no text, no lettering, no watermark",
+        "PromptField":  "ImageDescription",
+        "NegativePrompt":  "",
+        "Model":  "black-forest-labs/FLUX.1-schnell",
+        "Seed":  0,
+        "ArtFile":  "art/generated/M14.jpg",
+        "GeneratedAt":  "2026-07-03T04:59:43.5003735-06:00"
+    },
+    {
+        "CardID":  "M15",
+        "Name":  "Sounding Flight",
+        "Type":  "Mission",
+        "Prompt":  "A slender sounding rocket arcing just above the atmosphere with instrument bay open, sensors sampling the thin air, dawn light on the horizon, playful Kerbal-inspired educational sci-fi illustration, clean vector linework, bright readable silhouette, single centered subject, plain uncluttered background, cinematic studio lighting, vivid colors, no text, no lettering, no watermark",
+        "PromptField":  "ImageDescription",
+        "NegativePrompt":  "",
+        "Model":  "black-forest-labs/FLUX.1-schnell",
+        "Seed":  0,
+        "ArtFile":  "art/generated/M15.jpg",
+        "GeneratedAt":  "2026-07-03T04:59:48.3148414-06:00"
+    },
+    {
+        "CardID":  "M16",
+        "Name":  "Lunar Orbiter",
+        "Type":  "Mission",
+        "Prompt":  "A relay satellite unfolding gold antennae in orbit above the cratered gray Moon, Earth a small blue marble in the distance, playful Kerbal-inspired educational sci-fi illustration, clean vector linework, bright readable silhouette, single centered subject, plain uncluttered background, cinematic studio lighting, vivid colors, no text, no lettering, no watermark",
+        "PromptField":  "ImageDescription",
+        "NegativePrompt":  "",
+        "Model":  "black-forest-labs/FLUX.1-schnell",
+        "Seed":  0,
+        "ArtFile":  "art/generated/M16.jpg",
+        "GeneratedAt":  "2026-07-03T04:59:53.3559798-06:00"
+    },
+    {
+        "CardID":  "M17",
+        "Name":  "Crewed Lunar Flyby",
+        "Type":  "Mission",
+        "Prompt":  "A crewed capsule rounding the far side of the Moon, tiny astronauts at the window gazing at Earthrise beyond the cratered horizon, heroic warm mood, playful Kerbal-inspired educational sci-fi illustration, clean vector linework, bright readable silhouette, single centered subject, plain uncluttered background, cinematic studio lighting, vivid colors, no text, no lettering, no watermark",
+        "PromptField":  "ImageDescription",
+        "NegativePrompt":  "",
+        "Model":  "black-forest-labs/FLUX.1-schnell",
+        "Seed":  0,
+        "ArtFile":  "art/generated/M17.jpg",
+        "GeneratedAt":  "2026-07-03T04:59:56.1181639-06:00"
+    },
+    {
+        "CardID":  "M18",
+        "Name":  "Station Assembly",
+        "Type":  "Mission",
+        "Prompt":  "Orbital station modules being joined together by a robotic arm high above Earth, sparks of work lights, optimistic orbital construction scene, playful Kerbal-inspired educational sci-fi illustration, clean vector linework, bright readable silhouette, single centered subject, plain uncluttered background, cinematic studio lighting, vivid colors, no text, no lettering, no watermark",
+        "PromptField":  "ImageDescription",
+        "NegativePrompt":  "",
+        "Model":  "black-forest-labs/FLUX.1-schnell",
+        "Seed":  0,
+        "ArtFile":  "art/generated/M18.jpg",
+        "GeneratedAt":  "2026-07-03T05:00:00.8201562-06:00"
+    },
+    {
+        "CardID":  "M19",
+        "Name":  "Mars Landing",
+        "Type":  "Mission",
+        "Prompt":  "A lander touching down on the rust-red Martian surface, dust plume under the engines, butterscotch sky and distant mesas, historic triumphant first-landing mood, playful Kerbal-inspired educational sci-fi illustration, clean vector linework, bright readable silhouette, single centered subject, plain uncluttered background, cinematic studio lighting, vivid colors, no text, no lettering, no watermark",
+        "PromptField":  "ImageDescription",
+        "NegativePrompt":  "",
+        "Model":  "black-forest-labs/FLUX.1-schnell",
+        "Seed":  0,
+        "ArtFile":  "art/generated/M19.jpg",
+        "GeneratedAt":  "2026-07-03T05:00:03.5969947-06:00"
+    },
+    {
+        "CardID":  "M20",
+        "Name":  "Asteroid Rendezvous",
+        "Type":  "Mission",
+        "Prompt":  "A survey probe stationkeeping beside a tumbling potato-shaped asteroid in deep space, scanning beams tracing the rocky surface, distant Sun, playful Kerbal-inspired educational sci-fi illustration, clean vector linework, bright readable silhouette, single centered subject, plain uncluttered background, cinematic studio lighting, vivid colors, no text, no lettering, no watermark",
+        "PromptField":  "ImageDescription",
+        "NegativePrompt":  "",
+        "Model":  "black-forest-labs/FLUX.1-schnell",
+        "Seed":  0,
+        "ArtFile":  "art/generated/M20.jpg",
+        "GeneratedAt":  "2026-07-03T05:00:08.9736080-06:00"
+    },
+    {
+        "CardID":  "EV09",
+        "Name":  "Solar Flare Watch",
+        "Type":  "Event",
+        "Prompt":  "A bright solar flare erupting from the Sun while an orbiting observatory tracks it with instruments aglow, dramatic but hopeful science mood, playful Kerbal-inspired educational sci-fi illustration, clean vector linework, bright readable silhouette, single centered subject, plain uncluttered background, cinematic studio lighting, vivid colors, no text, no lettering, no watermark",
+        "PromptField":  "ImageDescription",
+        "NegativePrompt":  "",
+        "Model":  "black-forest-labs/FLUX.1-schnell",
+        "Seed":  0,
+        "ArtFile":  "art/generated/EV09.jpg",
+        "GeneratedAt":  "2026-07-03T05:00:13.3755192-06:00"
+    },
+    {
+        "CardID":  "EV10",
+        "Name":  "Broadcast Rights",
+        "Type":  "Event",
+        "Prompt":  "A cheerful broadcast control room with screens full of orbital footage and a satellite dish on the roof beaming signals, lively commercial energy, playful Kerbal-inspired educational sci-fi illustration, clean vector linework, bright readable silhouette, single centered subject, plain uncluttered background, cinematic studio lighting, vivid colors, no text, no lettering, no watermark",
+        "PromptField":  "ImageDescription",
+        "NegativePrompt":  "",
+        "Model":  "black-forest-labs/FLUX.1-schnell",
+        "Seed":  0,
+        "ArtFile":  "art/generated/EV10.jpg",
+        "GeneratedAt":  "2026-07-03T05:00:20.7829831-06:00"
+    },
+    {
+        "CardID":  "EV11",
+        "Name":  "Media Frenzy",
+        "Type":  "Event",
+        "Prompt":  "Crowds with cameras and giant public screens watching a rocket launch, flashbulbs and confetti, celebratory headline mood, playful Kerbal-inspired educational sci-fi illustration, clean vector linework, bright readable silhouette, single centered subject, plain uncluttered background, cinematic studio lighting, vivid colors, no text, no lettering, no watermark",
+        "PromptField":  "ImageDescription",
+        "NegativePrompt":  "",
+        "Model":  "black-forest-labs/FLUX.1-schnell",
+        "Seed":  0,
+        "ArtFile":  "art/generated/EV11.jpg",
+        "GeneratedAt":  "2026-07-03T05:00:30.8162462-06:00"
+    },
+    {
+        "CardID":  "EV12",
+        "Name":  "Comms Blackout",
+        "Type":  "Event",
+        "Prompt":  "A mission control room staring at static-filled screens while one relay dish glows with a working signal, tense but playful mood, playful Kerbal-inspired educational sci-fi illustration, clean vector linework, bright readable silhouette, single centered subject, plain uncluttered background, cinematic studio lighting, vivid colors, no text, no lettering, no watermark",
+        "PromptField":  "ImageDescription",
+        "NegativePrompt":  "",
+        "Model":  "black-forest-labs/FLUX.1-schnell",
+        "Seed":  0,
+        "ArtFile":  "art/generated/EV12.jpg",
+        "GeneratedAt":  "2026-07-03T05:00:40.8391028-06:00"
+    },
+    {
+        "CardID":  "EV13",
+        "Name":  "Stranded Crew",
+        "Type":  "Event",
+        "Prompt":  "A lone astronaut waving beside a drifting damaged capsule in low Earth orbit while a rescue craft approaches with lights on, hopeful dramatic mood, playful Kerbal-inspired educational sci-fi illustration, clean vector linework, bright readable silhouette, single centered subject, plain uncluttered background, cinematic studio lighting, vivid colors, no text, no lettering, no watermark",
+        "PromptField":  "ImageDescription",
+        "NegativePrompt":  "",
+        "Model":  "black-forest-labs/FLUX.1-schnell",
+        "Seed":  0,
+        "ArtFile":  "art/generated/EV13.jpg",
+        "GeneratedAt":  "2026-07-03T05:00:43.7203201-06:00"
+    },
+    {
+        "CardID":  "C05",
+        "Name":  "Trajectory Planning",
+        "Type":  "Tech",
+        "Prompt":  "Mission planners tracing glowing interplanetary transfer arcs on a large orbital chart table, focused clever planning mood, playful Kerbal-inspired educational sci-fi illustration, clean vector linework, bright readable silhouette, single centered subject, plain uncluttered background, cinematic studio lighting, vivid colors, no text, no lettering, no watermark",
+        "PromptField":  "ImageDescription",
+        "NegativePrompt":  "",
+        "Model":  "black-forest-labs/FLUX.1-schnell",
+        "Seed":  0,
+        "ArtFile":  "art/generated/C05.jpg",
+        "GeneratedAt":  "2026-07-03T05:00:48.3593540-06:00"
+    },
+    {
+        "CardID":  "C06",
+        "Name":  "Launch Abort System",
+        "Type":  "Tech",
+        "Prompt":  "An abort tower firing to pull a crew capsule safely away from a failing booster below, decisive dramatic save, playful Kerbal-inspired educational sci-fi illustration, clean vector linework, bright readable silhouette, single centered subject, plain uncluttered background, cinematic studio lighting, vivid colors, no text, no lettering, no watermark",
+        "PromptField":  "ImageDescription",
+        "NegativePrompt":  "",
+        "Model":  "black-forest-labs/FLUX.1-schnell",
+        "Seed":  0,
+        "ArtFile":  "art/generated/C06.jpg",
+        "GeneratedAt":  "2026-07-03T05:00:54.6263046-06:00"
+    },
+    {
+        "CardID":  "C07",
+        "Name":  "Contracting Office",
+        "Type":  "Tech",
+        "Prompt":  "A busy space agency contracts office, signed launch agreements stacked beside a model rocket on the desk, warm satisfied business mood, playful Kerbal-inspired educational sci-fi illustration, clean vector linework, bright readable silhouette, single centered subject, plain uncluttered background, cinematic studio lighting, vivid colors, no text, no lettering, no watermark",
+        "PromptField":  "ImageDescription",
+        "NegativePrompt":  "",
+        "Model":  "black-forest-labs/FLUX.1-schnell",
+        "Seed":  0,
+        "ArtFile":  "art/generated/C07.jpg",
+        "GeneratedAt":  "2026-07-03T05:01:03.2570615-06:00"
+    },
+    {
+        "CardID":  "C08",
+        "Name":  "Mass Production",
+        "Type":  "Tech",
+        "Prompt":  "A cheerful factory line producing identical rocket boosters on conveyors with robotic arms, bright industrial energy, playful Kerbal-inspired educational sci-fi illustration, clean vector linework, bright readable silhouette, single centered subject, plain uncluttered background, cinematic studio lighting, vivid colors, no text, no lettering, no watermark",
+        "PromptField":  "ImageDescription",
+        "NegativePrompt":  "",
+        "Model":  "black-forest-labs/FLUX.1-schnell",
+        "Seed":  0,
+        "ArtFile":  "art/generated/C08.jpg",
+        "GeneratedAt":  "2026-07-03T05:01:10.6725733-06:00"
+    },
+    {
+        "CardID":  "C09",
+        "Name":  "Staging Simulations",
+        "Type":  "Tech",
+        "Prompt":  "Engineers running stage-separation simulations on wall screens with an exploded-view rocket diagram, analytical confident mood, playful Kerbal-inspired educational sci-fi illustration, clean vector linework, bright readable silhouette, single centered subject, plain uncluttered background, cinematic studio lighting, vivid colors, no text, no lettering, no watermark",
+        "PromptField":  "ImageDescription",
+        "NegativePrompt":  "",
+        "Model":  "black-forest-labs/FLUX.1-schnell",
+        "Seed":  0,
+        "ArtFile":  "art/generated/C09.jpg",
+        "GeneratedAt":  "2026-07-03T05:01:13.5832844-06:00"
+    },
+    {
+        "CardID":  "C10",
+        "Name":  "Deep Space Network",
+        "Type":  "Tech",
+        "Prompt":  "Huge deep-space network antenna dishes at dusk tracking faint distant probes, quiet grand scale and starry sky, playful Kerbal-inspired educational sci-fi illustration, clean vector linework, bright readable silhouette, single centered subject, plain uncluttered background, cinematic studio lighting, vivid colors, no text, no lettering, no watermark",
+        "PromptField":  "ImageDescription",
+        "NegativePrompt":  "",
+        "Model":  "black-forest-labs/FLUX.1-schnell",
+        "Seed":  0,
+        "ArtFile":  "art/generated/C10.jpg",
+        "GeneratedAt":  "2026-07-03T05:01:17.1154028-06:00"
+    },
+    {
+        "CardID":  "P09",
+        "Name":  "Rover",
+        "Type":  "Payload",
+        "Prompt":  "A plucky six-wheeled exploration rover with a raised camera mast studying rocks on a dusty planetary surface, charming explorer character, playful Kerbal-inspired educational sci-fi illustration, clean vector linework, bright readable silhouette, single centered subject, plain uncluttered background, cinematic studio lighting, vivid colors, no text, no lettering, no watermark",
+        "PromptField":  "ImageDescription",
+        "NegativePrompt":  "",
+        "Model":  "black-forest-labs/FLUX.1-schnell",
+        "Seed":  0,
+        "ArtFile":  "art/generated/P09.jpg",
+        "GeneratedAt":  "2026-07-03T05:01:19.9631979-06:00"
+    },
+    {
+        "CardID":  "P10",
+        "Name":  "Space Telescope",
+        "Type":  "Payload",
+        "Prompt":  "An elegant space telescope with a golden segmented mirror and layered sunshield unfolding in high orbit, majestic scientific mood, playful Kerbal-inspired educational sci-fi illustration, clean vector linework, bright readable silhouette, single centered subject, plain uncluttered background, cinematic studio lighting, vivid colors, no text, no lettering, no watermark",
+        "PromptField":  "ImageDescription",
+        "NegativePrompt":  "",
+        "Model":  "black-forest-labs/FLUX.1-schnell",
+        "Seed":  0,
+        "ArtFile":  "art/generated/P10.jpg",
+        "GeneratedAt":  "2026-07-03T05:01:25.0975019-06:00"
+    },
+    {
+        "CardID":  "P11",
+        "Name":  "Fuel Depot",
+        "Type":  "Payload",
+        "Prompt":  "An orbital fuel depot with big spherical tanks and a docked tanker transferring propellant through glowing umbilical lines, industrious orbital truck-stop mood, playful Kerbal-inspired educational sci-fi illustration, clean vector linework, bright readable silhouette, single centered subject, plain uncluttered background, cinematic studio lighting, vivid colors, no text, no lettering, no watermark",
+        "PromptField":  "ImageDescription",
+        "NegativePrompt":  "",
+        "Model":  "black-forest-labs/FLUX.1-schnell",
+        "Seed":  0,
+        "ArtFile":  "art/generated/P11.jpg",
+        "GeneratedAt":  "2026-07-03T05:01:31.8691185-06:00"
+    },
+    {
+        "CardID":  "S14",
+        "Name":  "Landing Legs",
+        "Type":  "Support",
+        "Prompt":  "Sturdy deployable landing legs with shock absorbers touching down on rocky ground under a rocket, close mechanical detail, playful Kerbal-inspired educational sci-fi illustration, clean vector linework, bright readable silhouette, single centered subject, plain uncluttered background, cinematic studio lighting, vivid colors, no text, no lettering, no watermark",
+        "PromptField":  "ImageDescription",
+        "NegativePrompt":  "",
+        "Model":  "black-forest-labs/FLUX.1-schnell",
+        "Seed":  0,
+        "ArtFile":  "art/generated/S14.jpg",
+        "GeneratedAt":  "2026-07-03T05:01:34.6143490-06:00"
     }
 ]
