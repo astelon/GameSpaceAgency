@@ -1,0 +1,392 @@
+// Card database + client-side mirror of the core rules (for previews/hints).
+// The PHP engine is authoritative; everything here is UX support.
+
+export let CARDS = {};
+
+export async function loadCards() {
+  const res = await fetch('data/cards.json');
+  CARDS = await res.json();
+}
+
+export function cardOf(uid) {
+  return CARDS[String(uid).split('#')[0]];
+}
+export function cidOf(uid) { return String(uid).split('#')[0]; }
+export function hasTag(uid, tag) { return cardOf(uid)?.tags.includes(tag); }
+
+// ---------------------------------------------------------------- map
+export const NODES = {
+  earth:     { name: 'Earth',             short: 'Earth',    surface: true,  atmo: true },
+  subEarth:  { name: 'Sub-Orbital Earth', short: 'Sub-Orb',  surface: false, atmo: true },
+  leo:       { name: 'LEO',               short: 'LEO',      surface: false, atmo: false },
+  geo:       { name: 'High Orbit (GEO)',  short: 'GEO',      surface: false, atmo: false },
+  earthZoi:  { name: 'Earth ZOI',         short: 'ZOI',      surface: false, atmo: false },
+  moonOrbit: { name: 'Moon Orbit',        short: 'Moon Orb', surface: false, atmo: false },
+  subMoon:   { name: 'Sub-Orbital Moon',  short: 'Sub-Orb',  surface: false, atmo: false },
+  moon:      { name: 'Moon',              short: 'Moon',     surface: true,  atmo: false },
+  sunOrbit:  { name: 'Sun Orbit',         short: 'Sun Orb',  surface: false, atmo: false },
+  marsZoi:   { name: 'Mars ZOI',          short: 'ZOI',      surface: false, atmo: false },
+  marsHigh:  { name: 'Mars High Orbit',   short: 'High Orb', surface: false, atmo: false },
+  marsLow:   { name: 'Mars Low Orbit',    short: 'Low Orb',  surface: false, atmo: false },
+  subMars:   { name: 'Sub-Orbital Mars',  short: 'Sub-Orb',  surface: false, atmo: false },
+  mars:      { name: 'Mars Surface',      short: 'Mars',     surface: true,  atmo: true },
+};
+export const EDGES = [
+  ['earth','subEarth'], ['subEarth','leo'], ['leo','geo'], ['geo','earthZoi'],
+  ['earthZoi','moonOrbit'], ['moonOrbit','subMoon'], ['subMoon','moon'],
+  ['earthZoi','sunOrbit'], ['sunOrbit','marsZoi','tw'],
+  ['marsZoi','marsHigh'], ['marsHigh','marsLow'], ['marsLow','subMars'], ['subMars','mars'],
+];
+export const TW_CYCLE = [3,2,1,0,1,2,3,4];
+export const MOON_BRANCH = ['moonOrbit','subMoon','moon'];
+export const MARS_BRANCH = ['marsZoi','marsHigh','marsLow','subMars','mars'];
+export const EARTH_ONLY_REENTRY = ['S02','S04'];
+
+export function edgeBetween(a, b) {
+  for (const e of EDGES) {
+    if ((e[0]===a && e[1]===b) || (e[0]===b && e[1]===a)) return { tw: e[2]==='tw' };
+  }
+  return null;
+}
+export function neighborsOf(node) {
+  const out = [];
+  for (const e of EDGES) {
+    if (e[0]===node) out.push(e[1]);
+    if (e[1]===node) out.push(e[0]);
+  }
+  return out;
+}
+export const isSurface = n => !NODES[n] || NODES[n].surface;
+export const isAtmo = n => NODES[n] ? NODES[n].atmo : true;
+export const inSpace = n => !!NODES[n] && !NODES[n].surface;
+export const beyondZoi = n => !['earth','subEarth','leo','geo','earthZoi'].includes(n);
+
+// ---------------------------------------------------------------- derived rules
+export function eventId(g) { return g.event ? cidOf(g.event) : null; }
+export function stormActive(g) { return ['EV01','EV06','EV09'].includes(eventId(g)); }
+export function handLimit(g) { return eventId(g) === 'EV08' ? 7 : 5; }
+export function hasTech(g, seat, cid) {
+  return g.players[seat].tableau.some(u => cidOf(u) === cid);
+}
+export function twCost(g, seat) {
+  let tw = TW_CYCLE[g.twIdx];
+  const ev = eventId(g);
+  if (ev === 'EV06') tw = Math.min(5, tw + 2);
+  if (ev === 'EV07') tw = Math.max(0, tw - 2);
+  if (hasTech(g, seat, 'C05')) tw = Math.max(0, tw - 1);
+  return tw;
+}
+export function basicCost(g, seat, card) {
+  let c = card.cost;
+  if (card.tags.includes('Basic') && hasTech(g, seat, 'C08')) c = Math.max(1, c - 1);
+  return c;
+}
+
+export function craftCards(craft, type, tag) {
+  return craft.cards.filter(u => {
+    const c = cardOf(u);
+    if (type && c.type !== type) return false;
+    if (tag && !c.tags.includes(tag)) return false;
+    return true;
+  });
+}
+export const craftEngine = c => craftCards(c, 'Engine')[0] || null;
+export const craftPayload = c => craftCards(c, 'Payload')[0] || null;
+
+export function craftMass(g, craft) {
+  let mass = 0;
+  for (const u of craft.cards) {
+    const c = cardOf(u);
+    if (c.mass == null || c.type === 'Engine') continue;
+    let m = c.mass;
+    if (c.type === 'Payload' && hasTech(g, craft.owner, 'C04')) m = Math.max(1, m - 1);
+    mass += m;
+  }
+  return mass;
+}
+export function craftThrust(g, craft) {
+  const eng = craftEngine(craft);
+  if (!eng) return 0;
+  let t = cardOf(eng).thrust || 0;
+  if (cidOf(eng) === 'E05' && craftCards(craft, null, 'Cryogenic').length) t += 1;
+  return t;
+}
+export function craftReliability(g, craft, useFc) {
+  const eng = craftEngine(craft);
+  if (!eng) return [0, ['no engine']];
+  const c = cardOf(eng);
+  let rel = c.reliability ?? 5;
+  const mods = [`base ${rel}`];
+  const seat = craft.owner;
+  if (hasTech(g, seat, 'C01') && c.tags.includes('Reusable')) { rel++; mods.push('Reusable Refurb +1'); }
+  if (hasTech(g, seat, 'C02') && craftCards(craft, null, 'Cryogenic').length) { rel++; mods.push('Cryo Handling +1'); }
+  if (hasTech(g, seat, 'C03')) { rel++; mods.push('Precision Guidance +1'); }
+  if (useFc) { rel++; mods.push('Flight Computer +1'); }
+  const ev = eventId(g);
+  if (ev === 'EV01') { rel -= 2; mods.push('Solar Storm -2'); }
+  if (ev === 'EV09') { rel -= 1; mods.push('Solar Flare Watch -1'); }
+  return [rel, mods];
+}
+export function craftPower(g, craft) {
+  let p = 0;
+  for (const u of craft.cards) {
+    const c = cardOf(u);
+    if (c.energyMode !== 'Gen') continue;
+    if (cidOf(u) === 'S07' && !inSpace(craft.node)) continue;
+    p += c.energy;
+  }
+  if (p > 0 && craft.deployed && beyondZoi(craft.node) && hasTech(g, craft.owner, 'C10')) p++;
+  return p;
+}
+export function tankRange(craft) {
+  return craftCards(craft, 'Tank').reduce((s, u) => s + (cardOf(u).range || 0), 0);
+}
+export function stageBonus(g, seat, uid) {
+  const bonus = { E07: 2, T03: 1, T04: 2 }[cidOf(uid)] ?? 0;
+  return bonus > 0 && hasTech(g, seat, 'C09') ? bonus + 1 : bonus;
+}
+
+// ---------------------------------------------------------------- plan simulation
+// Mirrors flight.php. Returns a rich result for the planner UI.
+export function simulatePlan(g, craftIn, plan) {
+  const craft = JSON.parse(JSON.stringify(craftIn));
+  const seat = craft.owner;
+  const res = { ok: true, error: null, steps: [], checks: [], deploys: [],
+                warnings: [], missions: [], energyUsed: 0, assets: [] };
+  const path = plan.path || [craft.node];
+
+  const spend = (n, why) => {
+    let avail = craft.energy;
+    const bats = craft.cards.filter(u => cardOf(u).energyMode === 'Burst');
+    for (const b of bats) avail += cardOf(b).energy;
+    if (avail < n) { throw new RuleFail(`Needs ${n} Energy for ${why} (batteries included, only ${avail} available)`); }
+    while (craft.energy < n && bats.length) {
+      const b = bats.shift();
+      craft.energy += cardOf(b).energy;
+      craft.cards = craft.cards.filter(u => u !== b);
+      res.warnings.push(`A Battery Pack will be expended for ${why}.`);
+    }
+    craft.energy -= n;
+    res.energyUsed += n;
+  };
+  const stage = (uid, when) => {
+    if (!craft.cards.includes(uid)) throw new RuleFail('Stage card not on craft');
+    if (!cardOf(uid).tags.includes('Stageable')) throw new RuleFail(`${cardOf(uid).name} is not Stageable`);
+    const bonus = stageBonus(g, seat, uid);
+    if (cardOf(uid).type === 'Engine') craft.stagedEngineFlight = true;
+    craft.cards = craft.cards.filter(u => u !== uid);
+    craft.range += bonus;
+    res.steps.push({ note: `Stage ${cardOf(uid).name} (${when}): +${bonus} Range` });
+  };
+
+  class RuleFail extends Error {}
+
+  try {
+    // step-0 extras
+    if (plan.tug) {
+      if (!craft.cards.some(u => cidOf(u) === 'S06')) throw new RuleFail('No Orbital Tug aboard');
+      if (!inSpace(craft.node)) throw new RuleFail('Orbital Tug works only in orbit');
+      spend(1, 'the Orbital Tug boost');
+      craft.range += 1;
+      res.steps.push({ note: 'Orbital Tug: +1 Range' });
+    }
+    if (plan.depot) {
+      const depot = g.crafts[plan.depot];
+      if (!depot || depot.node !== craft.node) throw new RuleFail('Fuel Depot is not at this node');
+      if (depot.energy < 1) throw new RuleFail('Fuel Depot has no Energy');
+      if (depot.depotUsedRound === g.round) throw new RuleFail('Fuel Depot already used this round');
+      craft.range += 2;
+      res.steps.push({ note: 'Fuel Depot: +2 Range' });
+    }
+    if (plan.preStage) stage(plan.preStage, 'pre-flight');
+    doDeploys(0);
+
+    for (let k = 1; k < path.length; k++) {
+      const from = craft.node, to = path[k];
+      const edge = edgeBetween(from, to);
+      if (!edge) throw new RuleFail(`${NODES[from].name} is not connected to ${NODES[to].name}`);
+
+      if (isSurface(from)) {
+        const thrust = craftThrust(g, craft), mass = craftMass(g, craft);
+        if (!craftEngine(craft)) throw new RuleFail(`No Engine — cannot launch from ${NODES[from].name}`);
+        if (cidOf(craftEngine(craft)) === 'E03' && !craftCards(craft, 'Tank', 'Cryogenic').length)
+          throw new RuleFail('The Hydrogen Core engine requires a Cryo Tank');
+        if (thrust < mass) throw new RuleFail(`Launch check fails: Thrust ${thrust} < Mass ${mass}`);
+        for (const u of craft.cards) if (cidOf(u) === 'P04') spend(1, 'the Crew Capsule launch');
+        let fc = false;
+        if (plan.flightComputer && craft.cards.some(u => cidOf(u) === 'S10')) {
+          try { spend(1, 'the Flight Computer'); fc = true; } catch { /* optional */ }
+        }
+        const [rel, mods] = craftReliability(g, craft, fc);
+        res.checks.push({ at: from, rel, mods, thrust, mass });
+      }
+      if (plan.midStages?.[k]) stage(plan.midStages[k], 'mid-flight');
+      if (plan.aerobrake?.[k]) {
+        const uid = plan.aerobrake[k];
+        if (!craft.cards.includes(uid) || !cardOf(uid).tags.includes('Reentry')) throw new RuleFail('Aerobrake needs a Reentry card on the craft');
+        const eChain = ['earthZoi','geo','leo','subEarth','earth'], mChain = MARS_BRANCH;
+        const desc = (ch) => ch.includes(to) && ch.includes(from) && ch.indexOf(to) > ch.indexOf(from);
+        const descE = eChain.includes(to) && (!eChain.includes(from) ? false : eChain.indexOf(to) > eChain.indexOf(from));
+        if (!descE && !desc(mChain)) throw new RuleFail('Aerobraking only while descending toward Earth or Mars');
+        const keep = cidOf(uid) === 'S03' && !craft.ceramicAeroUsed;
+        if (keep) craft.ceramicAeroUsed = true;
+        else craft.cards = craft.cards.filter(u => u !== uid);
+        craft.range += 2;
+        res.steps.push({ note: `Aerobrake with ${cardOf(uid).name}: +2 Range${keep ? ' (kept)' : ' (expended)'}` });
+      }
+
+      let cost = edge.tw ? twCost(g, seat) : 1;
+      let landNote = '';
+      if (isSurface(to)) {
+        const choice = plan.landing?.[k] || {};
+        const hasLegs = craft.cards.some(u => cidOf(u) === 'S14');
+        const engine = !!craftEngine(craft) || craft.stagedEngineFlight;
+        if (to === 'moon') {
+          if (!engine) throw new RuleFail('Moon landing is propulsive — needs an Engine');
+          landNote = 'propulsive Moon landing';
+        } else if (choice.method === 'reentry') {
+          const uid = choice.card;
+          if (!uid || !craft.cards.includes(uid) || !cardOf(uid).tags.includes('Reentry')) throw new RuleFail('Pick a Reentry card for the landing');
+          if (to === 'mars' && EARTH_ONLY_REENTRY.includes(cidOf(uid))) throw new RuleFail(`${cardOf(uid).name} only works on Earth`);
+          craft.usedReentry = true;
+          if (cardOf(uid).tags.includes('Reusable')) craft.usedReusableReentry = true;
+          else craft.cards = craft.cards.filter(u => u !== uid);
+          landNote = `land with ${cardOf(uid).name}`;
+        } else if (choice.method === 'propulsive') {
+          if (!engine) throw new RuleFail('Propulsive landing requires an Engine');
+          cost += hasLegs ? 0 : 1;
+          landNote = 'propulsive landing' + (hasLegs ? ' (Landing Legs: no extra Range)' : ' (+1 Range)');
+        } else {
+          throw new RuleFail(`Landing at ${NODES[to].name} needs a landing method`);
+        }
+      }
+      if (craft.range < cost) throw new RuleFail(`Not enough Range for ${NODES[to].name} (needs ${cost}, has ${craft.range})`);
+      craft.range -= cost;
+      craft.node = to;
+      craft.history.push(to);
+      if (isAtmo(to) && !isAtmo(from)) {
+        for (const u of [...craft.cards]) if (cidOf(u) === 'S07') {
+          craft.cards = craft.cards.filter(x => x !== u);
+          res.warnings.push('The Solar Panel will burn up entering the atmosphere.');
+        }
+      }
+      res.steps.push({ from, to, cost, note: landNote });
+      doDeploys(k);
+      if (plan.dock != null && +plan.dock === k) dock();
+    }
+    if (path.length === 1 && plan.dock != null && +plan.dock === 0) dock();
+
+    for (const op of plan.operate || []) {
+      const cid = cidOf(op.card);
+      if (cid === 'P03') {
+        if (!beyondZoi(craft.node)) throw new RuleFail('Science Module needs Moon Orbit or beyond');
+        spend(2, 'Science Module research');
+        res.steps.push({ note: `Science Module: +${stormActive(g) ? 2 : 1} VP` });
+      } else if (cid === 'S11') {
+        const deep = ['sunOrbit', ...MARS_BRANCH].includes(craft.node);
+        if (!stormActive(g) && !deep) throw new RuleFail('Sensor Array pays only during a storm or at Sun Orbit and beyond');
+        spend(1, 'the Sensor Array');
+        res.steps.push({ note: `Sensor Array: +${eventId(g) === 'EV09' ? 2 : 1} VP` });
+      }
+    }
+  } catch (e) {
+    res.ok = false;
+    res.error = e.message;
+  }
+
+  function dock() {
+    if (craft.node !== 'geo') throw new RuleFail('Docking happens at High Orbit (GEO)');
+    if (!craftCards(craft, null, 'Docking').length) throw new RuleFail('Docking needs a Docking support card');
+    const station = Object.values(g.crafts).find(c => c.isStation && c.node === 'geo' && c.id !== craft.id);
+    if (!station) throw new RuleFail('No On-Orbit Station is at High Orbit');
+    spend(1, 'the docking maneuver');
+    craft.docked = true;
+    craft.dockedHab = station.cards.some(u => cidOf(u) === 'S12');
+    res.steps.push({ note: `Dock with ${station.name}` + (eventId(g) === 'EV05' ? ' (+2 VP: Docking Opportunity)' : '') });
+  }
+  function doDeploys(k) {
+    for (const d of plan.deploys || []) {
+      if (+d.step !== k) continue;
+      if (!craft.cards.includes(d.payload)) throw new RuleFail('Deploy payload not aboard');
+      const card = cardOf(d.payload);
+      const rover = cidOf(d.payload) === 'P09';
+      if (rover) { if (!['moon','mars'].includes(craft.node)) throw new RuleFail('The Rover deploys on the Moon or Mars surface'); }
+      else if (!inSpace(craft.node)) throw new RuleFail(`${card.name} deploys at an orbital node`);
+      const assetCards = [d.payload, ...(d.supports || [])];
+      craft.cards = craft.cards.filter(u => !assetCards.includes(u));
+      res.assets.push({ node: craft.node, cards: assetCards, deployed: true, owner: seat,
+                        history: [craft.node], isStation: false });
+      res.steps.push({ note: `Deploy ${card.name} at ${NODES[craft.node].name}` });
+    }
+  }
+
+  res.finalCraft = craft;
+  if (res.ok) res.missions = missionPreview(g, craft, res.assets);
+  return res;
+}
+
+// Which display missions would this simulated flight/asset state complete?
+export function missionPreview(g, craft, assets = []) {
+  const out = [];
+  for (const muid of g.missions) {
+    if (!muid) continue;
+    const mid = cidOf(muid);
+    let ok = checkMission(g, mid, craft);
+    if (!ok) for (const a of assets) if (checkMission(g, mid, { ...emptyCraftDefaults(), ...a, owner: craft.owner })) ok = true;
+    if (ok) out.push(muid);
+  }
+  return out;
+}
+function emptyCraftDefaults() {
+  return { docked: false, usedReentry: false, usedReusableReentry: false, isStation: false, energy: 99, cards: [], history: [] };
+}
+
+function seqIn(hist, needle) {
+  let i = 0;
+  for (const n of hist) if (n === needle[i] && ++i === needle.length) return true;
+  return false;
+}
+
+export function checkMission(g, mid, craft) {
+  const pl = craftPayload(craft);
+  const plc = pl ? cardOf(pl) : null;
+  const pm = plc?.mass || 0;
+  const crewed = !!plc?.tags.includes('Crewed') && craftCards(craft, 'Tank', 'Pressurized').length > 0;
+  const node = craft.node, hist = craft.history || [], atEarth = node === 'earth';
+  const engineOr = !!craftEngine(craft) || !!craft.stagedEngineFlight;
+  const canPay = n => {
+    let e = craft.energy;
+    for (const u of craft.cards) if (cardOf(u).energyMode === 'Burst') e += cardOf(u).energy;
+    return e >= n;
+  };
+  const deployedSat = (inOrbit) => Object.values(g.crafts).some(c =>
+    c.owner === craft.owner && c.deployed && (!inOrbit || inSpace(c.node)) &&
+    c.cards.some(u => hasTag(u, 'Satellite')));
+  switch (mid) {
+    case 'M01': return node === 'leo' && pl && !crewed;
+    case 'M02': return atEarth && hist.includes('moonOrbit');
+    case 'M03': return node === 'moon' && (craftCards(craft, null, 'Lander').length > 0 || engineOr);
+    case 'M04': return node === 'marsHigh' && pm >= 2;
+    case 'M05': return hist.includes('marsZoi') && plc?.tags.includes('Scientific') && pm >= 2 &&
+      craft.cards.some(u => cidOf(u) === 'S11') && canPay(2);
+    case 'M06': return atEarth && craft.docked && crewed && craftCards(craft, null, 'Docking').length > 0 && engineOr;
+    case 'M07': return atEarth && hist.includes('leo') && pm >= 2;
+    case 'M08': return atEarth && hist.includes('geo') &&
+      (plc?.tags.includes('Scientific') || plc?.tags.includes('Electronics')) && canPay(1);
+    case 'M09': return node === 'leo' && seqIn(hist, ['leo','geo','leo']) && engineOr && deployedSat(true);
+    case 'M10': return atEarth && craft.usedReentry && pm >= 1;
+    case 'M11': return atEarth && seqIn(hist, ['earth','subEarth','earth']) &&
+      !!plc?.tags.includes('Reusable') && craft.usedReusableReentry;
+    case 'M12': return atEarth && hist.includes('moon') && craft.cards.some(u => cidOf(u) === 'P07') && craft.usedReentry;
+    case 'M13': return atEarth && seqIn(hist, ['earth','subEarth','earth']) && crewed && craft.usedReentry;
+    case 'M14': return craft.deployed && node === 'geo' && !!plc?.tags.includes('Satellite');
+    case 'M15': return atEarth && seqIn(hist, ['earth','subEarth','earth']) && !!plc?.tags.includes('Scientific') && canPay(1);
+    case 'M16': return craft.deployed && node === 'moonOrbit' && !!plc?.tags.includes('Satellite');
+    case 'M17': return atEarth && hist.includes('moonOrbit') && crewed && craft.usedReentry;
+    case 'M18': return craft.isStation && node === 'geo';
+    case 'M19': return node === 'mars' && (craftCards(craft, null, 'Lander').length > 0 || engineOr);
+    case 'M20': return hist.includes('sunOrbit') && plc?.tags.includes('Scientific') && pm >= 2 &&
+      craft.cards.some(u => cidOf(u) === 'S11') && canPay(2);
+  }
+  return false;
+}

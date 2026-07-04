@@ -4,3 +4,5 @@ cards/art/generated/
 
 # Rendered output (nanDECK export)
 cards/output/print/
+webGame/api/data/*
+!webGame/api/data/.htaccess
