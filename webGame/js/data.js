@@ -264,7 +264,7 @@ export function simulatePlan(g, craftIn, plan) {
       craft.range -= cost;
       craft.node = to;
       craft.history.push(to);
-      if (isAtmo(to)) {
+      if (isAtmo(to) && !isAtmo(from)) {
         for (const u of [...craft.cards]) if (cidOf(u) === 'S07') {
           craft.cards = craft.cards.filter(x => x !== u);
           res.warnings.push('The Solar Panel will burn up entering the atmosphere.');

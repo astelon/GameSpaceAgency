@@ -531,9 +531,11 @@ function sar_operate_abilities(array &$g, string $craftId, array $plan, bool $dr
 function sar_on_arrival(array &$g, string $craftId, string $node): void {
     $craft = $g['crafts'][$craftId];
     $seat = $craft['owner'];
+    $n = count($craft['history']);
+    $from = $n >= 2 ? $craft['history'][$n - 2] : $node;
 
-    // Solar panels burn up when entering atmosphere.
-    if (sar_is_atmo($node)) {
+    // Solar panels burn up when entering atmosphere from space (not on ascent).
+    if (sar_is_atmo($node) && !sar_is_atmo($from)) {
         foreach (sar_craft_cards($craft, 'Support', 'Power') as $uid) {
             if (explode('#', $uid)[0] === 'S07') {
                 $g['crafts'][$craftId]['cards'] = array_values(array_diff($g['crafts'][$craftId]['cards'], [$uid]));
