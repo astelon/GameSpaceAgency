@@ -1,0 +1,4 @@
+# Protect the SQLite database and JSON saves
+<FilesMatch "\.(db|json|lock)$">
+  Require all denied
+</FilesMatch>
