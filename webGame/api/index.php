@@ -36,6 +36,14 @@ function room_code(): string {
 
 function make_token(): string { return bin2hex(random_bytes(16)); }
 
+// UTF-8-safe name truncation that works without the mbstring extension.
+function clip_name($raw, int $max = 20): string {
+    $name = trim((string)$raw);
+    if (function_exists('mb_substr')) return mb_substr($name, 0, $max);
+    if (preg_match('/^.{0,' . $max . '}/us', $name, $m)) return $m[0]; // PCRE UTF-8 mode
+    return substr($name, 0, $max);
+}
+
 // Room codes are used as storage keys/file names — validate strictly.
 function clean_room($raw): string {
     $room = strtoupper(trim((string)$raw));
@@ -83,9 +91,9 @@ function filter_state(array $g, array $mySeats): array {
 try {
     switch ($op) {
         case 'create': {
-            $name = trim((string)($req['name'] ?? ''));
+            $name = clip_name($req['name'] ?? '');
             $mode = ($req['mode'] ?? 'online') === 'hotseat' ? 'hotseat' : 'online';
-            if ($mode === 'online' && ($name === '' || mb_strlen($name) > 20)) fail('Enter a name (max 20 chars)');
+            if ($mode === 'online' && $name === '') fail('Enter a name');
             $token = make_token();
             $room = room_code();
             $store->lock($room);
@@ -93,7 +101,7 @@ try {
             if ($mode === 'hotseat') {
                 $names = array_values(array_filter(array_map('trim', (array)($req['names'] ?? []))));
                 if (count($names) < 2 || count($names) > 4) fail('Hot-seat needs 2-4 player names');
-                foreach ($names as $n) sar_add_player($g, mb_substr($n, 0, 20), $token);
+                foreach ($names as $n) sar_add_player($g, clip_name($n), $token);
             } else {
                 sar_add_player($g, $name, $token);
             }
@@ -105,8 +113,8 @@ try {
         }
         case 'join': {
             $room = clean_room($req['room'] ?? '');
-            $name = trim((string)($req['name'] ?? ''));
-            if ($name === '' || mb_strlen($name) > 20) fail('Enter a name (max 20 chars)');
+            $name = clip_name($req['name'] ?? '');
+            if ($name === '') fail('Enter a name');
             $store->lock($room);
             $g = $store->load($room);
             if (!$g) { $store->unlock(); fail('Room not found', 404); }
