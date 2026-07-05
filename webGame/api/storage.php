@@ -11,12 +11,23 @@ class SarStorage {
     public function __construct() {
         $this->dir = __DIR__ . '/data';
         if (!is_dir($this->dir)) @mkdir($this->dir, 0775, true);
-        if (in_array('sqlite', PDO::getAvailableDrivers(), true)) {
-            $this->db = new PDO('sqlite:' . $this->dir . '/games.db');
-            $this->db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-            $this->db->exec('PRAGMA journal_mode=WAL');
-            $this->db->exec('CREATE TABLE IF NOT EXISTS games (
-                room TEXT PRIMARY KEY, state TEXT NOT NULL, version INTEGER NOT NULL, updated INTEGER NOT NULL)');
+        if (!is_dir($this->dir) || !is_writable($this->dir)) {
+            throw new RuntimeException(
+                'The storage folder api/data does not exist or PHP cannot write to it. ' .
+                'Create the folder "data" inside "api" on the server and set its permissions to 755 (or 775).');
+        }
+        // Set SAR_FORCE_JSON=1 (env or constant) to skip SQLite on hosts where it misbehaves.
+        $forceJson = getenv('SAR_FORCE_JSON') || (defined('SAR_FORCE_JSON') && SAR_FORCE_JSON);
+        if (!$forceJson && class_exists('PDO') && in_array('sqlite', PDO::getAvailableDrivers(), true)) {
+            try {
+                $this->db = new PDO('sqlite:' . $this->dir . '/games.db');
+                $this->db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+                $this->db->exec('PRAGMA journal_mode=WAL');
+                $this->db->exec('CREATE TABLE IF NOT EXISTS games (
+                    room TEXT PRIMARY KEY, state TEXT NOT NULL, version INTEGER NOT NULL, updated INTEGER NOT NULL)');
+            } catch (Throwable $e) {
+                $this->db = null; // fall back to JSON files
+            }
         }
     }
 
@@ -25,7 +36,16 @@ class SarStorage {
         if ($this->db) {
             $this->db->beginTransaction();
         } else {
-            $this->lockHandle = fopen($this->dir . '/' . $room . '.lock', 'c');
+            if (!preg_match('/^[A-Z0-9]{1,10}$/', $room)) {
+                throw new RuntimeException('Invalid room code');
+            }
+            $h = fopen($this->dir . '/' . $room . '.lock', 'c');
+            if ($h === false) {
+                throw new RuntimeException(
+                    'Cannot create files in api/data — check that the folder exists on the server ' .
+                    'and that its permissions allow PHP to write (chmod 755 or 775).');
+            }
+            $this->lockHandle = $h;
             flock($this->lockHandle, LOCK_EX);
         }
     }
