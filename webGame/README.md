@@ -137,3 +137,17 @@ webGame/
     ├── test_engine.php   bot-driven full-game fuzz tests
     └── test_scenarios.php deterministic rules tests
 ```
+
+## Deploying to your own server (SSH/rsync)
+
+For a LAMP box (e.g. Docker on a Raspberry Pi) or any host with SSH:
+
+```bash
+webGame/tools/deploy.sh user@192.168.100.100:/var/www/html/spacerace [ssh_port]
+```
+
+It rsyncs the game (excluding runtime saves and tools), then creates
+`api/data/` with the right permissions on the server. Authentication uses
+your own SSH keys — no credentials are stored in the repo. If your Docker
+container maps the webroot to a host folder, target that folder; the docroot
+must end up serving `index.html` and allow PHP execution in `api/`.
