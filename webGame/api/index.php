@@ -25,7 +25,39 @@ $req = $raw ? json_decode($raw, true) : null;
 if (!is_array($req)) $req = $_POST ?: $_GET;
 $op = $req['op'] ?? '';
 
-$store = new SarStorage();
+// Deployment self-check: open api/index.php?op=health in a browser.
+if ($op === 'health') {
+    $dir = __DIR__ . '/data';
+    if (!is_dir($dir)) @mkdir($dir, 0775, true);
+    $checks = [
+        'php' => PHP_VERSION,
+        'phpOk' => version_compare(PHP_VERSION, '7.4.0', '>='),
+        'dataDirExists' => is_dir($dir),
+        'dataDirWritable' => is_dir($dir) && is_writable($dir),
+        'pdoSqlite' => class_exists('PDO') && in_array('sqlite', PDO::getAvailableDrivers(), true),
+        'mbstring' => function_exists('mb_substr'),
+        'json' => function_exists('json_encode'),
+    ];
+    $checks['storage'] = $checks['pdoSqlite'] && !getenv('SAR_FORCE_JSON') ? 'sqlite' : 'json-files';
+    // Is the saves folder protected from direct download? (Apache honors the
+    // shipped .htaccess; on nginx/other servers a deny rule must be added.)
+    $checks['htaccessPresent'] = file_exists($dir . '/.htaccess');
+    $problems = [];
+    if (!$checks['phpOk']) $problems[] = 'PHP 7.4+ required (found ' . PHP_VERSION . ').';
+    if (!$checks['dataDirWritable']) $problems[] = 'api/data is missing or not writable by the web server user — create it and chmod 775 (or 777 on a private test box).';
+    if (!$checks['pdoSqlite']) $problems[] = 'pdo_sqlite not available — the game will use JSON-file storage (works fine).';
+    if (!$checks['mbstring']) $problems[] = 'mbstring not enabled — not required, a fallback is used.';
+    $checks['ok'] = $checks['phpOk'] && $checks['dataDirWritable'];
+    $checks['notes'] = $problems;
+    $checks['game'] = 'Space Agency Race';
+    out($checks, $checks['ok'] ? 200 : 500);
+}
+
+try {
+    $store = new SarStorage();
+} catch (Throwable $e) {
+    fail('Server error: ' . $e->getMessage() . ' (open api/index.php?op=health for a full diagnosis)', 500);
+}
 
 function room_code(): string {
     $chars = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789'; // no easily-confused glyphs

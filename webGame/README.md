@@ -137,3 +137,61 @@ webGame/
     ├── test_engine.php   bot-driven full-game fuzz tests
     └── test_scenarios.php deterministic rules tests
 ```
+
+## Deploying to your own server (SSH/rsync)
+
+For a LAMP box (e.g. Docker on a Raspberry Pi) or any host with SSH:
+
+```bash
+webGame/tools/deploy.sh user@192.168.100.100:/var/www/html/spacerace [ssh_port]
+```
+
+It rsyncs the game (excluding runtime saves and tools), then creates
+`api/data/` with permissions the web-server user can write to (it tries
+`www-data` group ownership first, falling back to 777 for private test
+boxes). Authentication uses your own SSH keys — no credentials are stored in
+the repo. If your Docker container maps the webroot to a host folder, target
+that folder; the docroot must end up serving `index.html` and allow PHP
+execution in `api/`.
+
+### Health check
+
+After any deployment, open:
+
+```
+http://<host>:<port>/<path>/api/index.php?op=health
+```
+
+It reports the PHP version, whether `api/data` is writable by the web
+server, which storage backend will be used (SQLite or JSON files), and any
+problems in plain language. `"ok": true` means the game is ready to play.
+
+### Server requirements (any host)
+
+* PHP **7.4+** with the core `json` extension — nothing else is mandatory.
+  `pdo_sqlite` is used when present; `mbstring` is optional (fallbacks ship
+  for both).
+* A writable `api/data/` folder (created automatically when possible).
+* **Apache** (LAMP/XAMPP/shared hosting): works out of the box; the shipped
+  `.htaccess` files protect the saves folder (needs `AllowOverride`, which
+  Docker LAMP images and shared hosts enable by default).
+* **nginx**: `.htaccess` does not apply — add a deny rule for the saves
+  folder:
+
+  ```nginx
+  location ~ /api/data/ { deny all; }
+  ```
+
+## Playing on phones (iPhone / Android)
+
+The layout switches to a tabbed mobile UI (Map · Contracts · Agencies · Log)
+with a horizontally scrolling hand and full-screen dialogs. For a true
+fullscreen experience:
+
+* **iPhone:** open the game in Safari → Share → **Add to Home Screen** → launch
+  from the new icon (runs standalone, no browser chrome).
+* **Android:** tap the **⛶** button in the top bar, or install via Chrome's
+  "Add to Home screen" prompt.
+
+The screen is kept awake during a game where the Wake Lock API is available,
+and the app rechecks the game state whenever it returns to the foreground.
