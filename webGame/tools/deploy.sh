@@ -22,9 +22,20 @@ rsync -avz --delete \
   --exclude '*.log' \
   "$SRC/" "$TARGET/"
 
-# Make sure the runtime storage folder exists and is writable on the server.
+# Make sure the runtime storage folder exists and is writable by the WEB
+# SERVER user (often www-data inside a Docker LAMP container, while rsync
+# writes as your ssh user). chgrp to www-data when possible; otherwise fall
+# back to 777 — acceptable for a private test box, and the folder is blocked
+# from direct download by its .htaccess.
 HOSTPART="${TARGET%%:*}"
 PATHPART="${TARGET#*:}"
-ssh -p "$PORT" "$HOSTPART" "mkdir -p '$PATHPART/api/data' && chmod 775 '$PATHPART/api/data' && printf 'Require all denied\n' > '$PATHPART/api/data/.htaccess'"
+ssh -p "$PORT" "$HOSTPART" "
+  mkdir -p '$PATHPART/api/data' &&
+  printf 'Require all denied\n' > '$PATHPART/api/data/.htaccess' &&
+  { chgrp www-data '$PATHPART/api/data' 2>/dev/null && chmod 2775 '$PATHPART/api/data' \
+    || chmod 777 '$PATHPART/api/data'; }
+"
 
-echo "Done. Open the site and create a room to verify."
+echo "Done."
+echo "Verify the server:  http://<host>/<path>/api/index.php?op=health"
+echo "Then open the game: http://<host>/<path>/"
