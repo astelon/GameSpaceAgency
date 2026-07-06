@@ -164,7 +164,7 @@ export function simulatePlan(g, craftIn, plan) {
       const b = bats.shift();
       craft.energy += cardOf(b).energy;
       craft.cards = craft.cards.filter(u => u !== b);
-      res.warnings.push(`A Battery Pack will be expended for ${why}.`);
+      res.warnings.push(`A ${cardOf(b).name} will be expended for ${why}.`);
     }
     craft.energy -= n;
     res.energyUsed += n;

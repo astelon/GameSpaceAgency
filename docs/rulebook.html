@@ -957,7 +957,7 @@
 
   <h2>Shared Areas</h2>
   <ul>
-    <li><strong>Card Market</strong> — 5 face-up component cards available for purchase. Refilled immediately when a card is bought and topped up during Maintenance.</li>
+    <li><strong>Card Market</strong> — 5 face-up component cards available for purchase. Refilled immediately when a card is bought and topped up during Maintenance. Any player may <strong>flush</strong> it on their Command Turn for 2 Credits (see Actions).</li>
     <li><strong>Component Deck</strong> — All Engines, Tanks, Payloads, Support, and Technology cards shuffled together into one draw pile.</li>
     <li><strong>Event Deck</strong> — Shuffled separately. One card flipped per round.</li>
     <li><strong>Mission Deck &amp; Display</strong> — 3 face-up missions. Refilled during Maintenance.</li>
@@ -988,7 +988,7 @@
 
   <div class="box cyan">
     <div class="box-title">&#x1F4A1; Basic Cards</div>
-    <p>Cards tagged <span class="tag" style="font-size:.7rem">Basic</span> (Sterling Booster, Standard Tank, Heat Shield) are <strong>always available</strong> for purchase at their printed cost — even if none appear in the Card Market. Any player may buy a Basic card as an Acquire Card action at any time.</p>
+    <p>Cards tagged <span class="tag" style="font-size:.7rem">Basic</span> (Sterling Booster, Standard Tank, Heat Shield, Basic Battery) are <strong>always available</strong> for purchase at their printed cost — even if none appear in the Card Market. Any player may buy a Basic card as an Acquire Card action at any time. The <strong>Basic Battery</strong> (S15) is the budget power option: a single-use 1-Energy burst that works anywhere, but its Mass 1 counts toward launch Thrust checks.</p>
   </div>
 
   <div class="example-scene">
@@ -1057,12 +1057,16 @@
   <div class="section-divider"><span class="num">05</span><span class="line"></span></div>
   <h1>Actions</h1>
 
-  <p>On your Command Turn, choose one action:</p>
+  <p>On your Command Turn, choose one action (free actions don't count toward this choice):</p>
 
   <div class="actions-grid">
     <div class="action-item">
       <div class="action-name">&#9670; Acquire Card</div>
       <p>Buy one face-up card from the <strong>Card Market</strong> (or any <span class="tag" style="font-size:.7rem">Basic</span> card) by paying its Credit cost. Add it to your hand. Immediately refill the empty market slot.</p>
+    </div>
+    <div class="action-item">
+      <div class="action-name">&#9851; Flush the Market <em style="font-size:.75rem;opacity:.8">(free action)</em></div>
+      <p>Once per Command Turn, you may pay <strong>2 Credits</strong> to flush the Card Market: discard all five face-up cards and reveal five new ones from the Component Deck. This does <strong>not</strong> use your Command Turn — you may flush and then take your action (for example, Acquire one of the new cards) in the same turn.</p>
     </div>
     <div class="action-item">
       <div class="action-name">&#9670; Engineering</div>
@@ -1626,8 +1630,8 @@
       <tr><td>Agency Level</td><td>Your operation scale (1–3). Command Turns per Action Phase = Level + 1 (2/3/4).</td></tr>
       <tr><td>Agency Tableau</td><td>Your personal area of face-up Technology cards. Their effects apply to all your craft permanently.</td></tr>
       <tr><td>Atmosphere</td><td>The nodes Earth, Sub-Orbital Earth, Sub-Orbital Mars, and Mars Surface. The Moon branch has none.</td></tr>
-      <tr><td>Basic Card</td><td>A card tagged Basic (E02, T01, S01) that can always be purchased at printed cost, even if not in the Card Market.</td></tr>
-      <tr><td>Card Market</td><td>5 face-up component cards. Refilled immediately when a card is bought and during Maintenance.</td></tr>
+      <tr><td>Basic Card</td><td>A card tagged Basic (E02, T01, S01, S15) that can always be purchased at printed cost, even if not in the Card Market.</td></tr>
+      <tr><td>Card Market</td><td>5 face-up component cards. Refilled immediately when a card is bought and during Maintenance. May be flushed for 2 Credits as a free action (once per Command Turn).</td></tr>
       <tr><td>Command Turn</td><td>One action taken during the Action Phase. You take one at a time, alternating with other players.</td></tr>
       <tr><td>Component Deck</td><td>All Engines, Tanks, Payloads, Support, and Technology cards shuffled into one draw pile.</td></tr>
       <tr><td>Craft</td><td>Any assembled rocket, satellite, or station on the orbital board. Each may be activated once per Action Phase.</td></tr>

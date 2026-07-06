@@ -231,7 +231,7 @@ function sar_launch_checks(array &$g, string $craftId, array $plan, int $step, b
     foreach (sar_craft_cards($craft, 'Payload', 'Crewed') as $uid) {
         if (explode('#', $uid)[0] === 'P04') {
             if (!sar_spend_energy($g, $craftId, 1, 'Crew Capsule launch systems')) {
-                throw new SarError('The Crew Capsule needs 1 Energy to launch (attach a Battery Pack or RTG)');
+                throw new SarError('The Crew Capsule needs 1 Energy to launch (attach a Battery or RTG)');
             }
         }
     }

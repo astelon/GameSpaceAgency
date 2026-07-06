@@ -1763,5 +1763,28 @@
   "rewardCredits": 0,
   "copies": 3,
   "art": null
+ },
+ "S15": {
+  "id": "S15",
+  "type": "Support",
+  "name": "Basic Battery",
+  "cost": 1,
+  "thrust": null,
+  "range": null,
+  "mass": 1,
+  "energy": 1,
+  "energyMode": "Burst",
+  "reliability": null,
+  "vp": 0,
+  "tags": [
+   "Power",
+   "Basic"
+  ],
+  "text": "Single-use power cell. Discard at any time to add 1 Energy to its craft, anywhere (even in atmosphere or at launch). Its Mass counts toward launch Thrust checks. Always available for purchase.",
+  "flavor": "Heavy, cheap, and it always works.",
+  "tier": "",
+  "rewardCredits": 0,
+  "copies": 6,
+  "art": null
  }
 }

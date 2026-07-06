@@ -26,6 +26,7 @@ const SAR_LEVEL_TURNS = [1 => 2, 2 => 3, 3 => 4];
 const SAR_LEVEL_COST = [2 => 6, 3 => 14];
 const SAR_HAND_LIMIT = 5;
 const SAR_MAX_CRAFT = 6;
+const SAR_FLUSH_COST = 2;
 const SAR_ROUNDS = 8;
 const SAR_STORM_EVENTS = ['EV01', 'EV06', 'EV09'];
 
@@ -74,7 +75,7 @@ function sar_add_player(array &$g, string $name, string $token): int {
         'seat' => $seat, 'name' => $name, 'color' => SAR_COLORS[$seat], 'token' => $token,
         'credits' => 0, 'vp' => 0, 'level' => 1, 'pendingLevel' => null,
         'hand' => [], 'tableau' => [],
-        'planningDone' => false, 'turnsUsed' => 0, 'passed' => false,
+        'planningDone' => false, 'turnsUsed' => 0, 'passed' => false, 'flushedTurn' => null,
         'missionsCompleted' => 0, 'techOrbVpRound' => 0,
         'connected' => true,
     ];
@@ -268,7 +269,8 @@ function sar_spend_energy(array &$g, string $craftId, int $n, string $why): bool
         $craft['energy'] += sar_card($b)['energy'];
         $craft['cards'] = array_values(array_diff($craft['cards'], [$b]));
         $g['decks']['componentDiscard'][] = $b;
-        sar_log($g, 'battery', sar_pname($g, $craft['owner']) . " discharges a Battery Pack (+2 Energy) on {$craft['name']}.",
+        $bc = sar_card($b);
+        sar_log($g, 'battery', sar_pname($g, $craft['owner']) . " discharges a {$bc['name']} (+{$bc['energy']} Energy) on {$craft['name']}.",
             ['craft' => $craftId]);
     }
     $craft['energy'] -= $n;
@@ -327,6 +329,7 @@ function sar_begin_planning(array &$g): void {
         $p['planningDone'] = false;
         $p['turnsUsed'] = 0;
         $p['passed'] = false;
+        $p['flushedTurn'] = null;
         $p['techOrbVpRound'] = 0;
         if ($p['pendingLevel'] !== null) { // new agency level takes effect now
             $p['level'] = $p['pendingLevel'];
@@ -513,12 +516,32 @@ function sar_action_acquire(array &$g, int $seat, array $a): void {
         $p['credits'] -= $cost;
         $uid = $cid . '#b' . $g['version']; // basic supply is unlimited
         $p['hand'][] = $uid;
-        sar_log($g, 'acquire', $p['name'] . " buys a Basic {$card['name']} for $cost Credits.", ['card' => $uid, 'seat' => $seat]);
+        sar_log($g, 'acquire', $p['name'] . " buys a {$card['name']} from the Basic supply for $cost Credits.", ['card' => $uid, 'seat' => $seat]);
     } else {
         throw new SarError('Choose a market slot or a Basic card');
     }
     unset($p);
     sar_end_command_turn($g, $seat);
+}
+
+// Flush the Market: free action (does not consume the command turn), once per
+// command turn. Pay Credits to discard the whole market and reveal 5 new cards.
+function sar_action_flush_market(array &$g, int $seat): void {
+    sar_require_turn($g, $seat);
+    $p = &$g['players'][$seat];
+    if (($p['flushedTurn'] ?? null) === $p['turnsUsed']) {
+        throw new SarError('You may flush the market only once per command turn');
+    }
+    if ($p['credits'] < SAR_FLUSH_COST) throw new SarError('Not enough Credits (need ' . SAR_FLUSH_COST . ')');
+    $p['credits'] -= SAR_FLUSH_COST;
+    $p['flushedTurn'] = $p['turnsUsed'];
+    foreach ($g['market'] as $uid) {
+        if ($uid !== null) $g['decks']['componentDiscard'][] = $uid;
+    }
+    $g['market'] = array_pad(sar_draw_component($g, 5), 5, null);
+    sar_log($g, 'flush', $p['name'] . ' pays ' . SAR_FLUSH_COST .
+        ' Credits to flush the Card Market — 5 new cards are revealed.', ['seat' => $seat]);
+    unset($p);
 }
 
 function sar_action_develop(array &$g, int $seat, array $a): void {
@@ -850,6 +873,7 @@ function sar_apply(array &$g, int $seat, array $action): void {
     switch ($type) {
         case 'planning_done': sar_action_planning_done($g, $seat, $action); break;
         case 'acquire':       sar_action_acquire($g, $seat, $action); break;
+        case 'flush_market':  sar_action_flush_market($g, $seat); break;
         case 'develop':       sar_action_develop($g, $seat, $action); break;
         case 'engineering':   sar_action_engineering($g, $seat, $action); break;
         case 'launch':        sar_action_launch($g, $seat, $action); break;

@@ -73,6 +73,14 @@ function hand_pick(array $g, int $seat, string $type, ?string $tag = null): ?str
 
 function bot_action(array &$g, int $seat): void {
     $p = $g['players'][$seat];
+    // occasionally flush the market first (free action — should not end the turn)
+    if ($p['credits'] >= 4 && random_int(0, 5) === 0) {
+        $turn = $g['turnSeat'];
+        if (try_apply($g, $seat, ['type' => 'flush_market'])) {
+            if ($g['turnSeat'] !== $turn) throw new Exception('flush_market consumed the command turn');
+            $p = $g['players'][$seat];
+        }
+    }
     $choices = ['launch', 'acquire', 'develop', 'expand', 'activate', 'launch', 'acquire', 'activate'];
     shuffle($choices);
     foreach ($choices as $choice) {
