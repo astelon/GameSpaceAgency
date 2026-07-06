@@ -360,8 +360,20 @@ function renderRight() {
   col.append(mp);
 
   const mk = el('div', { class: 'stack-panel' });
-  mk.append(el('div', { class: 'side-label' }, 'Card market',
-    el('span', { class: 'tip', title: 'Acquire Card action: pay the cost, take the card to hand. The slot refills immediately. Basic cards (Sterling Booster, Standard Tank, Heat Shield) are always available via the Basic shop.' }, '?')));
+  const mkLabel = el('div', { class: 'side-label' },
+    el('span', {}, 'Card market ',
+      el('span', { class: 'tip', title: 'Acquire Card action: pay the cost, take the card to hand. The slot refills immediately. Basic cards (Sterling Booster, Standard Tank, Heat Shield, Basic Battery) are always available via the Basic shop.' }, '?')));
+  if (canAct()) {
+    const p = g.players[seat];
+    const flushed = p.flushedTurn === p.turnsUsed;
+    mkLabel.append(el('button', {
+      class: 'btn small ghost',
+      title: 'Free action: pay 2 Credits to discard all 5 market cards and reveal 5 new ones. Once per command turn — does not use the turn.',
+      disabled: flushed || p.credits < 2 ? '' : null,
+      onclick: () => doAction({ type: 'flush_market' }),
+    }, flushed ? '♻ Flushed' : '♻ Flush 2 Cr'));
+  }
+  mk.append(mkLabel);
   const row = el('div', { class: 'cards' });
   g.market.forEach((uid, i) => {
     if (!uid) return;

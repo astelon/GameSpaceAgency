@@ -185,5 +185,54 @@ ok($geoCraft && $geoCraft['range'] === 8 + 1 - 9, 'range math: 8 + 1 stage - 9 h
 ok($g['milestones']['moon'] === 0, 'Moon branch milestone awarded');
 ok($g['players'][0]['vp'] >= 2, 'milestone +2 VP paid');
 
+echo "— Scenario 7: Flush the Market (free action, 2 Cr, once per command turn)\n";
+$g = fresh();
+$g['players'][0]['credits'] = 10;
+$before = $g['market'];
+$deckBefore = count($g['decks']['component']);
+sar_apply($g, 0, ['type' => 'flush_market']);
+ok($g['players'][0]['credits'] === 8, 'flush costs 2 Credits');
+ok($g['turnSeat'] === 0 && $g['players'][0]['turnsUsed'] === 0, 'flush is a free action — turn not consumed');
+ok(count(array_filter($g['market'])) === 5, 'market refilled to 5 cards');
+ok(!array_intersect($g['market'], $before), 'all 5 market cards replaced');
+ok(count($g['decks']['componentDiscard']) >= 5, 'old market cards went to the component discard');
+ok(count($g['decks']['component']) === $deckBefore - 5, '5 new cards drawn from the component deck');
+$err = null;
+try { sar_apply($g, 0, ['type' => 'flush_market']); } catch (SarError $e) { $err = $e->getMessage(); }
+ok($err !== null, 'second flush in the same command turn is rejected');
+$g['players'][0]['hand'] = []; // make room, then spend the turn
+sar_apply($g, 0, ['type' => 'acquire', 'basic' => 'S01']);
+$g['turnSeat'] = 0; // force seat 0 to act again regardless of player count
+sar_apply($g, 0, ['type' => 'flush_market']);
+ok(true, 'flush allowed again on the next command turn');
+
+echo "— Scenario 8: Basic Battery (S15) — always available, Mass 1, 1-Energy burst\n";
+$g = fresh();
+$g['players'][0]['credits'] = 10;
+$g['players'][0]['hand'] = [];
+sar_apply($g, 0, ['type' => 'acquire', 'basic' => 'S15']);
+$bat = $g['players'][0]['hand'][0] ?? null;
+ok($bat && explode('#', $bat)[0] === 'S15', 'Basic Battery purchasable from the Basic supply');
+ok($g['players'][0]['credits'] === 9, 'Basic Battery costs 1 Credit');
+$g['turnSeat'] = 0;
+[$eng, $tank, $caps, $ptank] = give($g, 0, ['E02', 'T05', 'P04', 'T01']);
+$g['players'][0]['hand'] = [$eng, $ptank, $caps, $bat];
+// Crew Capsule launch needs 1 Energy — no generator aboard, so the battery must burst.
+do {
+    $snap = $g;
+    sar_apply($g, 0, ['type' => 'launch', 'components' => [$eng, $ptank, $caps, $bat],
+        'plan' => ['path' => ['earth', 'subEarth', 'leo']]]);
+    $flew = false;
+    foreach ($g['crafts'] as $c) if ($c['node'] === 'leo') $flew = true;
+    if (!$flew) $g = $snap;
+} while (!$flew);
+$craft = null;
+foreach ($g['crafts'] as $c) if ($c['node'] === 'leo') $craft = $c;
+ok($craft !== null, 'launch with Basic Battery powering the Crew Capsule succeeded');
+ok($craft && !in_array($bat, $craft['cards'], true), 'Basic Battery expended by the 1-Energy burst');
+ok(in_array($bat, $g['decks']['componentDiscard'], true), 'expended battery went to the discard pile');
+$mass = sar_craft_mass($g, ['owner' => 0, 'cards' => [$eng, $ptank, $caps, $bat]]);
+ok($mass === 2 + 2 + 1, 'Basic Battery Mass 1 counts toward launch mass (2+2+1)');
+
 echo "\n$pass passed, $fail failed\n";
 exit($fail ? 1 : 0);

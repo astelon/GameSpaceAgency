@@ -49,6 +49,7 @@ const HINTS = {
   S12: 'Station module (LifeSupport). On your GEO station it also gives +1 VP to crewed missions that dock there.',
   S13: 'Station module (Scientific). On a GEO station it automatically pays 1 VP every Maintenance for 1 Energy.',
   S14: 'Propulsive landings cost no extra Range (still need an Engine). Counts as a Lander for mission requirements.',
+  S15: 'One-shot +1 Energy, usable anywhere and any time — spent automatically when the craft is short on Energy. Mass 1 counts toward launch checks. Basic — always purchasable.',
   C01: 'Your Reusable engines get +1 Reliability, and every Reusable card you recover during Maintenance pays 1 Credit.',
   C02: 'Rockets with a Cryo Tank get +1 Reliability at launch.',
   C03: '+1 Reliability on every launch check. The simplest safety upgrade.',
@@ -56,7 +57,7 @@ const HINTS = {
   C05: 'Transfer Window crossings cost you 1 less Range (min 0). Mars becomes much cheaper.',
   C06: 'When a launch roll fails you may pay 2 Credits to reroll it once. The game will ask you.',
   C07: '+1 Credit every time you complete a Commercial mission.',
-  C08: 'Basic cards (Sterling Booster, Standard Tank, Heat Shield) cost you 1 Credit less.',
+  C08: 'Basic cards (Sterling Booster, Standard Tank, Heat Shield, Basic Battery) cost you 1 Credit less (minimum 1).',
   C09: 'All your Stage bonuses give +1 extra Range.',
   C10: 'Your deployed assets beyond Earth ZOI get +1 Power — deep-space probes work every round.',
 };

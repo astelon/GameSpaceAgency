@@ -164,7 +164,7 @@ Tracking note:
    * 1 Agency Level marker set to **Level 1**
    * 6 craft markers for rockets and in-space assets
 
-   Cards with the `Basic` tag are always available to any player at their printed cost, even if none are in the market. A player may buy a Basic card as an Acquire Card action at any time.
+   Cards with the `Basic` tag are always available to any player at their printed cost, even if none are in the market. A player may buy a Basic card as an Acquire Card action at any time. Besides the three starting components, the **Basic Battery** (S15) is also `Basic`: a single-use power cell that bursts **1 Energy** anywhere (even in atmosphere or at launch) but carries **Mass 1**, which counts toward launch Thrust checks — the always-available budget alternative to the lighter, stronger Battery Pack.
 
 2. Shuffle each deck separately.
 
@@ -228,6 +228,7 @@ At the **start of the Action Phase**, refill each in-flight craft's Energy to it
 #### Available Actions
 
 * **Acquire Card** – Buy one face-up card from the **Card Market** (or any `Basic` card) by paying its Credit cost; add it to your hand. Immediately refill the empty market slot from the Component Deck.
+* **Flush the Market** *(free action)* – Once per Command Turn, before or instead of browsing a stale market, pay **2 Credits** to discard all five face-up Card Market cards and reveal five new ones from the Component Deck. This does **not** consume the Command Turn, so you may flush and then Acquire one of the new cards in the same turn.
 * **Develop Technology** – Pay the Technology card's Credit cost and place it face-up in your **Agency Tableau**. It applies to **all your craft** from now on. Technology cards remain in your tableau permanently unless another card effect removes them. A player may not have two developed Technology cards with the same **Name**.
 * **Engineering** – Attach Engine, Fuel, Payload, and optional Support cards to a rocket in your Launch Area, and/or replace components on it
 * **Launch New Craft** – Place an assembled rocket at `Earth`, perform the launch capability check, optionally Stage, then fly it along the orbital map spending Range. Resolve the mission immediately if the craft reaches its destination. May be combined with Engineering into a single Command Turn if all components are in hand. (See §7.3 Launch Resolution.)
