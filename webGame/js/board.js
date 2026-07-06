@@ -80,6 +80,11 @@ export function renderBoard(container, { onNodeClick = null, onCraftClick = null
   for (const [id, [x, y]] of Object.entries(POS)) {
     const g = svgEl('g');
     const r = NODES[id].surface ? 15 : 11;
+    // invisible oversized hit area for touch screens
+    g.append(svgEl('circle', {
+      cx: x, cy: y, r: r + 13, fill: 'transparent',
+      onclick: () => onNodeClick && onNodeClick(id),
+    }));
     const circ = svgEl('circle', {
       class: 'node-circle' + (NODES[id].surface ? ' surface' : ''),
       cx: x, cy: y, r,

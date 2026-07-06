@@ -151,3 +151,17 @@ It rsyncs the game (excluding runtime saves and tools), then creates
 your own SSH keys — no credentials are stored in the repo. If your Docker
 container maps the webroot to a host folder, target that folder; the docroot
 must end up serving `index.html` and allow PHP execution in `api/`.
+
+## Playing on phones (iPhone / Android)
+
+The layout switches to a tabbed mobile UI (Map · Contracts · Agencies · Log)
+with a horizontally scrolling hand and full-screen dialogs. For a true
+fullscreen experience:
+
+* **iPhone:** open the game in Safari → Share → **Add to Home Screen** → launch
+  from the new icon (runs standalone, no browser chrome).
+* **Android:** tap the **⛶** button in the top bar, or install via Chrome's
+  "Add to Home screen" prompt.
+
+The screen is kept awake during a game where the Wake Lock API is available,
+and the app rechecks the game state whenever it returns to the foreground.

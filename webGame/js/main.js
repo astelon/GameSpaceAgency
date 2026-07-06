@@ -18,7 +18,21 @@ const st = {
   planningSel: new Set(),
   busy: false,
   gameOverShown: false,
+  wakeLock: null,
 };
+
+const isMobile = () => matchMedia('(max-width: 860px)').matches;
+
+// Keep the screen awake during a game (supported on Android + iOS 16.4+).
+async function keepAwake() {
+  try { st.wakeLock = await navigator.wakeLock?.request('screen'); } catch { /* not critical */ }
+}
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') {
+    if (st.g) keepAwake();
+    if (st.g) poll(true).catch(() => {});
+  }
+});
 
 // ---------------------------------------------------------------- lobby
 
@@ -82,6 +96,15 @@ function showLobby() {
       el('button', { class: 'btn gold', onclick: enterGame }, `Rejoin ${session.room}`),
       el('button', { class: 'btn ghost', onclick: () => { session.clear(); showLobby(); } }, 'Forget')));
   }
+
+  // Fullscreen tips for phones
+  const standalone = matchMedia('(display-mode: standalone)').matches || navigator.standalone;
+  const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
+  if (!standalone && isMobile()) {
+    box.append(el('p', { class: 'help-note', style: 'margin-top:14px;' }, isIOS
+      ? '📱 For fullscreen play: tap the Share button in Safari and choose "Add to Home Screen", then launch the game from that icon.'
+      : '📱 Tip: use the ⛶ button in-game (or install the app from the browser menu) for fullscreen play.'));
+  }
 }
 
 function showWaitingRoom() {
@@ -115,6 +138,7 @@ function showWaitingRoom() {
 
 async function enterGame() {
   stopPolling();
+  keepAwake();
   st.version = 0; st.lastLogSeq = 0; st.gameOverShown = false;
   try { await poll(true); } catch (e) {
     toast(e.message, 'bad');
@@ -194,11 +218,13 @@ function animateNewLog(prev) {
 
 function renderGame() {
   const g = st.g;
+  if (!document.body.dataset.mtab) document.body.dataset.mtab = 'map';
   renderTopbar();
   renderLeft();
   renderRight();
   renderBottom();
   renderLog();
+  renderMobileTabs();
   if (!st.board) {
     st.board = renderBoard($('board-wrap'), {
       onCraftClick: id => craftMenu(id),
@@ -227,11 +253,42 @@ function renderTopbar() {
     bar.append(el('div', { class: 'event-chip', title: c.text, onclick: () => zoomCard(g.event) },
       '⚡ ', el('b', {}, c.name), ` — ${c.text}`));
   }
-  bar.append(el('div', { class: 'tb-item', style: 'margin-left:auto' },
-    `Deck ${g.decks.component} · Room `, el('b', {}, g.room),
-    el('button', { class: 'btn small ghost', style: 'margin-left:8px', onclick: () => {
-      if (confirm('Leave this game on this device? (The room keeps running.)')) { session.clear(); stopPolling(); showLobby(); }
-    } }, 'Exit')));
+  const right = el('div', { class: 'tb-item', style: 'margin-left:auto' },
+    `Deck ${g.decks.component} · Room `, el('b', {}, g.room));
+  // Fullscreen toggle (Android/desktop; iPhone uses Add-to-Home-Screen instead)
+  if (document.fullscreenEnabled && matchMedia('(pointer: coarse)').matches
+      && !matchMedia('(display-mode: standalone)').matches) {
+    right.append(el('button', { class: 'btn small ghost', style: 'margin-left:8px', title: 'Fullscreen',
+      onclick: () => {
+        if (document.fullscreenElement) document.exitFullscreen();
+        else document.documentElement.requestFullscreen().catch(() => {});
+      } }, '⛶'));
+  }
+  right.append(el('button', { class: 'btn small ghost', style: 'margin-left:8px', onclick: () => {
+    if (confirm('Leave this game on this device? (The room keeps running.)')) { session.clear(); stopPolling(); showLobby(); }
+  } }, 'Exit'));
+  bar.append(right);
+}
+
+function renderMobileTabs() {
+  const g = st.g;
+  const tabs = clear($('mobile-tabs'));
+  const needsMe = activeSeat() !== null && g.status === 'playing';
+  const cur = document.body.dataset.mtab || 'map';
+  const defs = [
+    ['map', '🗺', 'Map'],
+    ['deals', '📋', 'Contracts'],
+    ['crew', '🏢', 'Agencies'],
+    ['log', '📡', 'Log'],
+  ];
+  for (const [id, ico, label] of defs) {
+    const b = el('button', { class: id === cur ? 'active' : '', onclick: () => {
+      document.body.dataset.mtab = id;
+      renderMobileTabs();
+    } }, el('span', { class: 'ico' }, ico), label);
+    if (id === 'map' && needsMe && cur !== 'map') b.append(el('span', { class: 'dot-alert' }));
+    tabs.append(b);
+  }
 }
 
 function renderLeft() {

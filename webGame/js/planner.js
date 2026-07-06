@@ -142,8 +142,8 @@ export function openPlanner(g, seat, { mode, cards = null, engDiff = null, craft
   wrap.append(el('h2', {}, mode === 'launch' ? '🚀 Flight Plan — Launch' : '🛰 Flight Plan — Activate'),
     el('div', { class: 'm-sub' }, 'Click connected nodes on the map to extend the route; click an earlier node to back up. You may stop anywhere — unspent Range stays with the craft for later rounds.'));
   const cols = el('div', { style: 'display:flex; gap:14px; flex-wrap:wrap;' });
-  const boardBox = el('div', { style: 'flex: 1 1 520px; min-width: 480px; background:#0a1122; border:1px solid var(--line); border-radius:10px;' });
-  const side = el('div', { class: 'planner-side', style: 'flex: 1 1 300px; min-width: 300px; max-height: 62vh; overflow-y:auto;' });
+  const boardBox = el('div', { class: 'planner-board', style: 'flex: 1 1 520px; min-width: min(480px, 100%); background:#0a1122; border:1px solid var(--line); border-radius:10px;' });
+  const side = el('div', { class: 'planner-side', style: 'flex: 1 1 300px; min-width: min(300px, 100%); max-height: 62vh; overflow-y:auto;' });
   cols.append(boardBox, side);
   wrap.append(cols);
 
