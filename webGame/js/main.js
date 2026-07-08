@@ -19,20 +19,53 @@ const st = {
   busy: false,
   gameOverShown: false,
   wakeLock: null,
+  autoFsDone: false,
 };
 
 const isMobile = () => matchMedia('(max-width: 860px)').matches;
+const wantsFullscreen = () =>
+  !matchMedia('(display-mode: standalone)').matches && matchMedia('(pointer: coarse)').matches;
 
 // Keep the screen awake during a game (supported on Android + iOS 16.4+).
+// The OS can release the lock at any time (screen off, tab hidden, fullscreen
+// change), so we re-acquire it on visibility, on release, and on every tap.
 async function keepAwake() {
-  try { st.wakeLock = await navigator.wakeLock?.request('screen'); } catch { /* not critical */ }
+  try {
+    if (!navigator.wakeLock || st.wakeLock) return;
+    st.wakeLock = await navigator.wakeLock.request('screen');
+    st.wakeLock.addEventListener('release', () => { st.wakeLock = null; });
+  } catch { st.wakeLock = null; /* not critical */ }
 }
+
+// Enter device fullscreen. MUST be called from within a user gesture, so we
+// invoke it synchronously from tap handlers (before any await) rather than
+// automatically at load, which browsers reject.
+function goFullscreen() {
+  const root = document.documentElement;
+  const req = root.requestFullscreen || root.webkitRequestFullscreen
+    || root.mozRequestFullScreen || root.msRequestFullscreen;
+  if (!req || document.fullscreenElement || document.webkitFullscreenElement) return;
+  try { Promise.resolve(req.call(root)).catch(() => {}); } catch { /* unsupported */ }
+}
+// On a phone, take fullscreen when the user starts/enters a game.
+function wantFullscreen() { if (wantsFullscreen()) goFullscreen(); }
+
 document.addEventListener('visibilitychange', () => {
   if (document.visibilityState === 'visible') {
     if (st.g) keepAwake();
     if (st.g) poll(true).catch(() => {});
   }
 });
+// Some devices drop the wake lock across a fullscreen transition — re-grab it.
+document.addEventListener('fullscreenchange', () => { if (st.g) keepAwake(); });
+// Any in-game tap re-establishes the wake lock (and, once, fullscreen). This is
+// the reliable path on Android: the first tap after entering a game promotes it
+// to fullscreen even though auto-fullscreen at load is not permitted.
+document.addEventListener('pointerdown', () => {
+  if (!st.g) return;
+  keepAwake();
+  if (!st.autoFsDone && wantsFullscreen()) { st.autoFsDone = true; goFullscreen(); }
+}, true);
 
 // ---------------------------------------------------------------- lobby
 
@@ -55,6 +88,7 @@ function showLobby() {
       const name = el('input', { placeholder: 'Your agency director name', maxlength: 20 });
       form.append(el('label', {}, 'Name'), name,
         el('button', { class: 'btn', onclick: async () => {
+          wantFullscreen();
           try {
             const r = await api('create', { name: name.value.trim(), mode: 'online' });
             session.save(r.room, r.token, 'online');
@@ -67,6 +101,7 @@ function showLobby() {
       const name = el('input', { placeholder: 'Your name', maxlength: 20 });
       form.append(el('label', {}, 'Room code'), code, el('label', {}, 'Name'), name,
         el('button', { class: 'btn', onclick: async () => {
+          wantFullscreen();
           try {
             const r = await api('join', { room: code.value.trim().toUpperCase(), name: name.value.trim() });
             session.save(r.room, r.token, 'online');
@@ -79,6 +114,7 @@ function showLobby() {
         el('button', { class: 'btn', onclick: async () => {
           const names = inputs.map(i => i.value.trim()).filter(Boolean);
           if (names.length < 2) return toast('Enter at least 2 player names', 'bad');
+          wantFullscreen();
           try {
             const r = await api('create', { mode: 'hotseat', names });
             session.save(r.room, r.token, 'hotseat');
@@ -93,7 +129,7 @@ function showLobby() {
 
   if (session.room) {
     box.append(el('div', { style: 'margin-top:16px; display:flex; gap:8px; align-items:center;' },
-      el('button', { class: 'btn gold', onclick: enterGame }, `Rejoin ${session.room}`),
+      el('button', { class: 'btn gold', onclick: () => { wantFullscreen(); enterGame(); } }, `Rejoin ${session.room}`),
       el('button', { class: 'btn ghost', onclick: () => { session.clear(); showLobby(); } }, 'Forget')));
   }
 
@@ -125,6 +161,7 @@ function showWaitingRoom() {
   if (isHost) {
     box.append(el('button', { class: 'btn gold', disabled: g.players.length < 2 ? '' : null,
       onclick: async () => {
+        wantFullscreen();
         try { await gameCall('start'); poll(true); } catch (e) { toast(e.message, 'bad'); }
       } }, g.players.length < 2 ? 'Waiting for players…' : `Start game (${g.players.length} players)`));
   } else {
@@ -139,7 +176,7 @@ function showWaitingRoom() {
 async function enterGame() {
   stopPolling();
   keepAwake();
-  st.version = 0; st.lastLogSeq = 0; st.gameOverShown = false;
+  st.version = 0; st.lastLogSeq = 0; st.gameOverShown = false; st.autoFsDone = false;
   try { await poll(true); } catch (e) {
     toast(e.message, 'bad');
     if (e instanceof ApiError) { session.clear(); showLobby(); return; }
@@ -260,8 +297,9 @@ function renderTopbar() {
       && !matchMedia('(display-mode: standalone)').matches) {
     right.append(el('button', { class: 'btn small ghost', style: 'margin-left:8px', title: 'Fullscreen',
       onclick: () => {
-        if (document.fullscreenElement) document.exitFullscreen();
-        else document.documentElement.requestFullscreen().catch(() => {});
+        if (document.fullscreenElement || document.webkitFullscreenElement) {
+          (document.exitFullscreen || document.webkitExitFullscreen)?.call(document);
+        } else goFullscreen();
       } }, '⛶'));
   }
   right.append(el('button', { class: 'btn small ghost', style: 'margin-left:8px', onclick: () => {
