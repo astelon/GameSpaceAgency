@@ -1,6 +1,6 @@
 # 🚀 SPACE AGENCY RACE
 
-**Official Design & Ruleset Draft (v0.2)**
+**Official Design & Ruleset Draft (v0.4)**
 
 > *This document defines the current state of the game design. It is intended as the **first official draft** to be reviewed by designers, developers, and playtesters. The goal is to present a **complete, playable ruleset** while clearly documenting design intent, assumptions, and future iteration points.*
 
@@ -164,7 +164,10 @@ Tracking note:
    * 1 Agency Level marker set to **Level 1**
    * 6 craft markers for rockets and in-space assets
 
-   Cards with the `Basic` tag are always available to any player at their printed cost, even if none are in the market. A player may buy a Basic card as an Acquire Card action at any time. Besides the three starting components, the **Basic Battery** (S15) is also `Basic`: a single-use power cell that bursts **1 Energy** anywhere (even in atmosphere or at launch) but carries **Mass 1**, which counts toward launch Thrust checks — the always-available budget alternative to the lighter, stronger Battery Pack.
+   Cards with the `Basic` tag are always available to any player at their printed cost, even if none are in the market. A player may buy a Basic card as an Acquire Card action at any time. Besides the three starting components, the following are also `Basic` and always purchasable:
+
+   * **Basic Battery** (S15) — a single-use power cell that bursts **1 Energy** anywhere (even in atmosphere or at launch) but carries **Mass 1**, the budget alternative to the lighter Battery Pack.
+   * **Light / Standard / Heavy Payload** (P12 / P13 / P14) — plain payloads with no special ability, **Mass 1 / 2 / 3** and cost **1 / 1 / 2 Credits**. They exist so a payload is *always* available: even with a bad market and no payload drawn, any agency can buy one and fly a real payload mission. The light/heavy split is a small Mass-vs-cost choice (a heavier payload satisfies "Mass 2+"/"Mass 3" missions but eats more Thrust budget). They carry no `Satellite` tag, so they cannot be deployed as assets — they are cargo, not instruments.
 
 2. Shuffle each deck separately.
 
@@ -177,8 +180,11 @@ Tracking note:
 
 3. Reveal:
 
-   * 3 Tier 1 Mission cards in the Mission display
-   * 5 Component cards in the **Card Market**
+   * 3 Tier 1 Mission cards in the Mission display. Ensure at least one **easy** Tier 1 mission
+     (a payload-only or deploy mission such as *LEO Deployment*) is among the three, so round 1
+     is never a dead hand — if none appears, swap the oldest for one drawn from the deck.
+   * 7 Component cards in the **Card Market** (a wider offer means a useful part is reliably on
+     display).
 
 4. **Hand size limit:** Each player may hold at most **5 cards** in hand. If you ever exceed 5, immediately discard down to 5.
 
@@ -261,11 +267,31 @@ New Agency Levels take effect at the start of your next round.
 * If multiple players are tied for lowest VP, the tied player with the **fewest Credits** gains the grant.
 * If there is still a tie, each tied player gains **2 Credits** instead.
 
-#### Exploration Milestone Bonuses
+#### Exploration Bonuses
 
-* The first player to reach the **Moon branch** (`Moon Orbit` or farther) gains **+2 VP**.
-* The first player to reach the **Mars branch** (`Mars ZOI` or farther) gains **+4 VP**.
-* Each exploration milestone is awarded once per game.
+Exploring is rewarding on its own, so early flights feel like progress even before a
+mission pays out. Two layers stack:
+
+**Personal orbit floor (always, once per agency):**
+
+* The **first time your agency reaches `LEO`**, gain **+1 Credit**. Getting to orbit at all
+  always pays a little — a reliable early funding source independent of missions.
+
+**Exploration Race ladder (global, diminishing by arrival order):** the **1st / 2nd / 3rd / 4th**
+agency to *first* reach each frontier earns a scaled reward. Near-Earth frontiers pay Credits
+(funding); deep-space frontiers pay Victory Points (glory).
+
+| Frontier reached           | 1st           | 2nd    | 3rd    | 4th |
+| -------------------------- | ------------- | ------ | ------ | --- |
+| `High Orbit (GEO)`         | +2 Credits    | +1 Cr  | +1 Cr  | —   |
+| `Earth ZOI`                | +1 VP +1 Cr   | +1 Cr  | —      | —   |
+| Moon branch (`Moon Orbit`+)| +2 VP         | +1 VP  | —      | —   |
+| Mars branch (`Mars ZOI`+)  | +4 VP         | +2 VP  | +1 VP  | —   |
+
+* Each rung is awarded once. An agency scores a given frontier only the first time it arrives.
+* The **first-to-Moon (+2 VP)** and **first-to-Mars (+4 VP)** milestones are simply the top rung
+  of this ladder; trailing agencies now get a consolation instead of nothing, which keeps the
+  space race tense for everyone.
 
 #### Technology Milestone Bonuses
 
@@ -338,7 +364,7 @@ If requirements are not met:
 * Discard the current round's Event card
 * **Mission Sweep:** if no mission was completed this round, discard the mission that has been in the display longest
 * Refill the Mission display to 3 cards if needed (place new missions to the right, so the oldest is always leftmost)
-* Refill the **Card Market** to 5 cards from the Component Deck
+* Refill the **Card Market** to 7 cards from the Component Deck
 
 ---
 
@@ -382,6 +408,20 @@ Mission economy note:
 * Mission cards should display their Mission Type, Tier, and contract-class tags clearly on the card face.
 * Mission cards should show a short **Conditions list** (route + requirements) in rules text.
 * Mission reward badges should show **VP** and **Credits** only; route Range remains a requirement, not a reward stat.
+
+#### Standing Contracts
+
+* Some missions are `Basic` **standing contracts**: like Basic components, they are **always
+  available** and never sit in the Mission display or deck. Each agency may complete each
+  standing contract **once per game**.
+* **Suborbital Test Flight** (M21) is the first standing contract: fly `Earth → Sub-Orbital
+  Earth → Earth` and land safely (parachute or propulsive) — **no payload required** — for
+  **2 Credits + 1 VP**. It guarantees every agency a productive first turn using only the
+  starting kit, and teaches the launch-and-land loop.
+* **Reward hierarchy:** simply lifting off (a no-payload standing contract) is the *floor* and
+  pays the least. Carrying a payload is the real job and always pays more — e.g. *LEO
+  Deployment* (payload → LEO) pays 5 Credits + 2 VP versus the test flight's 2 + 1. Longer and
+  harder missions pay more still.
 
 ### Mission Design Philosophy
 
@@ -446,12 +486,18 @@ An Engine-free craft is only legal if it is already **in flight** or **in orbit*
 
 ### Landing Rules
 
-* To land on a body, a craft must be at the adjacent **Sub-Orbital** node and spend **1 Range** to cross to the surface.
-* **Earth reentry** (Sub-Orbital Earth → Earth): use a `Reentry` card — Heat Shield or Parachute — (discard after use unless Reusable), or perform a **propulsive landing** by spending **1 extra Range** with an Engine.
-* **Moon landing** (Sub-Orbital Moon → Moon): spend 1 Range. The Moon has no atmosphere, so landing always requires an Engine (propulsive). A dedicated Landing Lander payload **or** the rocket itself may serve as the lander (see Rocket-as-Lander below).
-* **Mars landing** (Sub-Orbital Mars → Mars Surface): spend 1 Range. Mars has a thin atmosphere: use a heat-shield-type `Reentry` card to assist (parachute-type Reentry cards are **Earth only**, as printed on the card — Mars air is too thin for them), or perform a fully propulsive landing (1 extra Range + Engine). A dedicated Landing Lander **or** the rocket itself may serve as the lander.
-* Each landing uses its own support. A Moon return trip needs propulsive lunar landing plus Earth-reentry support for the trip home.
-* **Aerobraking:** while moving *toward* a body with atmosphere (descending on the Earth or Mars branch), a craft may discard a `Reentry` card to immediately gain **+2 Range**. The card is spent and cannot also be used for the landing itself.
+* To land on a body, a craft must be at the adjacent **Sub-Orbital** node and spend **1 Range** to cross to the surface, **using a landing method**.
+* **A heat shield does not land you.** A `Reentry` heat shield (Heat Shield, Ceramic Tile Shield) protects the craft through reentry *heat* and can aerobrake, but it does **not** slow the craft for touchdown. To land you need one of the **landing methods** below.
+* **Landing methods:**
+  * **Parachute** (`Parachute` cards — Recovery Chutes, Guided Parafoil, Splashdown Kit): **Earth only** (needs thick atmosphere). Discard after use unless Reusable; some pay a +1 Credit recovery bonus.
+  * **Airbags** (`Airbag` card — Airbag Shell): a cushioned bounce landing on **Earth or Mars**, **Uncrewed craft only** (a crew cannot survive the impact). Single-use.
+  * **Lander** (a `Lander` payload such as the Landing Lander): sets the craft down on any surface it can reach.
+  * **Propulsive** (Engine + **1 extra Range**; Landing Legs waive the extra Range): available on any body.
+* **Earth landing** (Sub-Orbital Earth → Earth): parachute, airbags (uncrewed), a Lander, or propulsive. Crews must use a parachute or a propulsive landing.
+* **Moon landing** (Sub-Orbital Moon → Moon): the Moon has no atmosphere, so landing is always **propulsive** — an Engine is required. A dedicated Landing Lander **or** the rocket itself may serve as the lander (see Rocket-as-Lander below).
+* **Mars landing** (Sub-Orbital Mars → Mars Surface): Mars air is too thin for parachutes. Use **airbags** (uncrewed), a **Lander**, or a **propulsive** landing. A heat shield may still be used to aerobrake on the way down.
+* Each landing uses its own method. A Moon return trip needs a propulsive lunar landing plus an Earth landing method (parachute/propulsive) for the trip home.
+* **Aerobraking:** while moving *toward* a body with atmosphere (descending on the Earth or Mars branch), a craft may discard a `Reentry` heat-shield card to immediately gain **+2 Range**. The card is spent and, being a heat shield, was never a landing method anyway.
 * **Atmosphere nodes:** `Earth`, `Sub-Orbital Earth`, `Sub-Orbital Mars`, and `Mars Surface`. The Moon branch has no atmosphere. Cards that react to "entering atmosphere" (e.g., Solar Panel) trigger when a craft moves onto any atmosphere node.
 
 ### Rocket-as-Lander
@@ -518,7 +564,9 @@ Component tags:
 * `Electronics` — electronics requirements + station qualification
 * `Scientific` — science requirements + station qualification
 * `Power` — generates Energy
-* `Reentry` — heat shields and parachutes; atmospheric landing
+* `Reentry` — heat shield: survives reentry heat and can aerobrake, but is **not** a landing method
+* `Parachute` — Earth-only landing device (parachutes, splashdown)
+* `Airbag` — cushioned landing for Uncrewed craft on Earth or Mars
 * `Lander` — enables surface landing
 * `Docking` — docking hardware
 * `Satellite` — persistent asset when deployed
@@ -534,9 +582,9 @@ Mission tags: `Commercial`, `Prestige`, `Infrastructure` (contract class), `Surf
 
 VP sources:
 
-* Missions
+* Missions (including the always-available Suborbital Test Flight standing contract)
 * Technologies
-* Exploration milestones (first to Moon / first to Mars)
+* **Exploration Race ladder** — the 1st–4th agency to reach `Earth ZOI`, the Moon branch, or the Mars branch earns scaled VP (the old first-to-Moon/Mars milestones are its top rung)
 * Agency milestones (first to Level 3)
 * End‑game infrastructure bonus: **+1 VP per deployed persistent asset** (Satellite or Station) still on the board
 
@@ -638,6 +686,8 @@ Technologies should:
 * Transfer Window mechanic for Mars timing
 * Launch Capability Check terminology (Thrust ≥ Mass gate; Range is delta-v budget)
 * Assemble and Launch may be combined into one Command Turn if all components are in hand
+* **Early-game dynamics (v0.4):** always-buyable Basic payloads (Light/Standard/Heavy) so a payload is never unavailable; a 7-card market; the Suborbital Test Flight standing contract; and the two-layer Exploration Bonuses (personal LEO Credit floor + the diminishing Exploration Race ladder)
+* **Landing model:** a heat shield is heat/aerobrake only — landing requires a parachute (Earth), airbags (uncrewed, Earth/Mars), a Lander, or a propulsive burn
 
 ### Under Evaluation
 
@@ -646,7 +696,7 @@ Technologies should:
 
 ### Playtest Readiness
 
-* Card list v0.3 complete (176 cards, 20 missions — 7 Tier 1 / 8 Tier 2 / 5 Tier 3 — 13 events, full component set)
+* Card list v0.4 (88 unique / 189 with copies): 21 missions — 8 Tier 1 (incl. the Suborbital Test Flight standing contract) / 8 Tier 2 / 5 Tier 3 — 13 events, plus the Basic payload set (P12–P14) and the new landing devices (Airbag Shell, Splashdown Kit)
 * Economy rebalanced — see `docs/playtest_notes.md` for balance targets
 * First blind playtest scheduled
 
