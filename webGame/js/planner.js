@@ -232,15 +232,28 @@ export function openPlanner(g, seat, { mode, cards = null, engDiff = null, craft
             const v = e.target.value;
             if (!v) delete landingChoice[k];
             else if (v === 'prop') landingChoice[k] = { method: 'propulsive' };
+            else if (v === 'lander') landingChoice[k] = { method: 'lander' };
             else landingChoice[k] = { method: 'reentry', card: v };
             refresh();
           },
         });
         sel.append(el('option', { value: '' }, '— landing method —'));
-        for (const uid of craftCards(craft, null, 'Reentry')) {
-          if (node === 'mars' && ['S02','S04'].includes(cidOf(uid))) continue;
+        // Landing devices: parachutes (Earth only), airbags (uncrewed, Earth/Mars).
+        // Heat shields (Reentry) survive the heat but cannot land the craft.
+        const crewed = craftCards(craft, 'Payload', 'Crewed').length > 0;
+        for (const uid of craftCards(craft, null, 'Parachute')) {
+          if (node !== 'earth') continue;
           sel.append(el('option', { value: uid, selected: landingChoice[k]?.card === uid ? '' : null },
-            `Use ${cardOf(uid).name}`));
+            `Use ${cardOf(uid).name} (parachute)`));
+        }
+        for (const uid of craftCards(craft, null, 'Airbag')) {
+          if (crewed) continue;
+          sel.append(el('option', { value: uid, selected: landingChoice[k]?.card === uid ? '' : null },
+            `Use ${cardOf(uid).name} (airbags)`));
+        }
+        if (craftCards(craft, 'Payload', 'Lander').length) {
+          sel.append(el('option', { value: 'lander', selected: landingChoice[k]?.method === 'lander' ? '' : null },
+            'Set down with Lander'));
         }
         if (craftEngine(craft)) {
           const legs = craft.cards.some(u => cidOf(u) === 'S14');

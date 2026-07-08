@@ -246,18 +246,29 @@ export function simulatePlan(g, craftIn, plan) {
           landNote = 'propulsive Moon landing';
         } else if (choice.method === 'reentry') {
           const uid = choice.card;
-          if (!uid || !craft.cards.includes(uid) || !cardOf(uid).tags.includes('Reentry')) throw new RuleFail('Pick a Reentry card for the landing');
-          if (to === 'mars' && EARTH_ONLY_REENTRY.includes(cidOf(uid))) throw new RuleFail(`${cardOf(uid).name} only works on Earth`);
+          if (!uid || !craft.cards.includes(uid)) throw new RuleFail('Pick a landing device (parachute or airbags)');
+          const t = cardOf(uid).tags;
+          const isChute = t.includes('Parachute'), isAirbag = t.includes('Airbag');
+          if (!isChute && !isAirbag) {
+            throw new RuleFail(t.includes('Reentry')
+              ? `${cardOf(uid).name} shields against reentry heat but cannot land the craft`
+              : `${cardOf(uid).name} is not a landing device`);
+          }
+          if (isChute && to !== 'earth') throw new RuleFail(`${cardOf(uid).name} only works in Earth's atmosphere`);
+          if (isAirbag && craftCards(craft, 'Payload', 'Crewed').length) throw new RuleFail('Airbags are uncrewed-only');
           craft.usedReentry = true;
-          if (cardOf(uid).tags.includes('Reusable')) craft.usedReusableReentry = true;
+          if (t.includes('Reusable')) craft.usedReusableReentry = true;
           else craft.cards = craft.cards.filter(u => u !== uid);
           landNote = `land with ${cardOf(uid).name}`;
+        } else if (choice.method === 'lander') {
+          if (!craftCards(craft, null, 'Lander').length) throw new RuleFail('No Lander on this craft');
+          landNote = 'set down with Lander';
         } else if (choice.method === 'propulsive') {
           if (!engine) throw new RuleFail('Propulsive landing requires an Engine');
           cost += hasLegs ? 0 : 1;
           landNote = 'propulsive landing' + (hasLegs ? ' (Landing Legs: no extra Range)' : ' (+1 Range)');
         } else {
-          throw new RuleFail(`Landing at ${NODES[to].name} needs a landing method`);
+          throw new RuleFail(`Landing at ${NODES[to].name} needs a landing method (parachute, airbags, a Lander, or propulsive)`);
         }
       }
       if (craft.range < cost) throw new RuleFail(`Not enough Range for ${NODES[to].name} (needs ${cost}, has ${craft.range})`);

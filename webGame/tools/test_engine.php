@@ -107,16 +107,21 @@ function bot_action(array &$g, int $seat): void {
                 $components = [$eng, $tank];
                 $pl = hand_pick($g, $seat, 'Payload');
                 if ($pl) $components[] = $pl;
-                $reentry = hand_pick($g, $seat, 'Support', 'Reentry');
-                if ($reentry) $components[] = $reentry;
+                $chute = hand_pick($g, $seat, 'Support', 'Parachute');
+                if ($chute) $components[] = $chute;
                 $power = hand_pick($g, $seat, 'Support', 'Power');
-                if ($power && $power !== $reentry) $components[] = $power;
+                if ($power && $power !== $chute) $components[] = $power;
                 $range = sar_card($tank)['range'];
 
                 $plans = [];
-                if ($reentry) {
+                if ($chute) {
+                    // suborbital return, land under parachute
                     $plans[] = ['path' => ['earth', 'subEarth', 'earth'],
-                        'landing' => [2 => ['method' => 'reentry', 'card' => $reentry]]];
+                        'landing' => [2 => ['method' => 'reentry', 'card' => $chute]]];
+                } else {
+                    // propulsive suborbital return (Engine + spare Range)
+                    $plans[] = ['path' => ['earth', 'subEarth', 'earth'],
+                        'landing' => [2 => ['method' => 'propulsive']]];
                 }
                 $far = ['earth', 'subEarth', 'leo'];
                 if ($range >= 3) $far[] = 'geo';
