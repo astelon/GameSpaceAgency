@@ -481,7 +481,7 @@
    "Stageable",
    "Basic"
   ],
-  "text": "Landing support. Use from a Sub-Orbital node to land safely. Discard after use. Always available for purchase.",
+  "text": "Reentry heat protection. Survives atmospheric entry and can be jettisoned while descending to aerobrake (+2 Range). It does NOT land the craft on its own — pair it with a parachute, airbags, a lander, or a propulsive landing. Always available for purchase.",
   "flavor": "Burn bright, come home safe.",
   "tier": "",
   "rewardCredits": 0,
@@ -501,10 +501,10 @@
   "reliability": null,
   "vp": 0,
   "tags": [
-   "Reentry",
+   "Parachute",
    "Stageable"
   ],
-  "text": "Landing support, Earth only (needs thick atmosphere). Use from Sub-Orbital Earth to land safely; after landing, gain 1 Credit from clean hardware recovery. Discard after use.",
+  "text": "Parachute landing, Earth only (needs thick atmosphere). Use from Sub-Orbital Earth to land safely; after landing, gain 1 Credit from clean hardware recovery. Discard after use.",
   "flavor": "Open wide and drift down.",
   "tier": "",
   "rewardCredits": 0,
@@ -527,7 +527,7 @@
    "Reentry",
    "Reusable"
   ],
-  "text": "Landing support (Earth or Mars). Use from a Sub-Orbital node to land safely. When aerobraking with this card, it is not discarded (once per flight). If this craft returns to Earth, return this card to hand.",
+  "text": "Reusable reentry heat protection (Earth or Mars). When aerobraking with this card, it is not discarded (once per flight). It does NOT land the craft on its own. If this craft returns to Earth, return this card to hand.",
   "flavor": "A tougher shield for repeat flights.",
   "tier": "",
   "rewardCredits": 0,
@@ -547,10 +547,10 @@
   "reliability": null,
   "vp": 0,
   "tags": [
-   "Reentry",
+   "Parachute",
    "Reusable"
   ],
-  "text": "Landing support, Earth only. Use from Sub-Orbital Earth to land safely; after landing, gain 1 Credit from precision recovery. If this craft returns to Earth, return this card to hand.",
+  "text": "Guided parachute landing, Earth only. Use from Sub-Orbital Earth to land safely; after landing, gain 1 Credit from precision recovery. If this craft returns to Earth, return this card to hand.",
   "flavor": "Steer it back for another launch.",
   "tier": "",
   "rewardCredits": 0,
@@ -777,7 +777,7 @@
    "In-Space",
    "Infrastructure"
   ],
-  "text": "From Sub-Orbital Earth, land at Earth.<br>Carry a payload (Mass 1+) and a Reentry support.",
+  "text": "From Sub-Orbital Earth, land at Earth.<br>Carry a payload (Mass 1+) and land with a parachute or airbags.",
   "flavor": "Bring the capsule home intact.",
   "tier": "Tier 1",
   "rewardCredits": 2,
@@ -799,7 +799,7 @@
   "tags": [
    "Infrastructure"
   ],
-  "text": "Fly Earth → Sub-Orbital Earth → Earth.<br>Use a Reusable Payload and a Reusable Reentry support.",
+  "text": "Fly Earth &rarr; Sub-Orbital Earth &rarr; Earth.<br>Use a Reusable payload and a Reusable parachute (Guided Parafoil or Splashdown Kit).",
   "flavor": "Prove it can fly again.",
   "tier": "Tier 1",
   "rewardCredits": 3,
@@ -822,7 +822,7 @@
    "Surface",
    "Prestige"
   ],
-  "text": "Reach Moon surface, collect samples, and return to Earth.<br>Have Lander (or Rocket-as-Lander) + Cargo Return Capsule + a Reentry support for Earth landing.",
+  "text": "Reach Moon surface, collect samples, and return to Earth.<br>Have a Lander (or Rocket-as-Lander) + Cargo Return Capsule + a parachute for the Earth landing.",
   "flavor": "Bring moon dust back home.",
   "tier": "Tier 3",
   "rewardCredits": 3,
@@ -1288,7 +1288,7 @@
    "Crewed",
    "Commercial"
   ],
-  "text": "Fly Earth → Sub-Orbital Earth → Earth.<br>Carry a Crewed payload and a Reentry support.",
+  "text": "Fly Earth &rarr; Sub-Orbital Earth &rarr; Earth.<br>Carry a Crewed payload and a parachute (crews cannot use airbags).",
   "flavor": "Ten minutes of weightlessness, a lifetime of bragging.",
   "tier": "Tier 1",
   "rewardCredits": 4,
@@ -1378,7 +1378,7 @@
    "Crewed",
    "Prestige"
   ],
-  "text": "Reach Moon Orbit and return to Earth.<br>Carry a Crewed payload and a Reentry support.",
+  "text": "Reach Moon Orbit and return to Earth.<br>Carry a Crewed payload and a parachute for the Earth landing.",
   "flavor": "The far side, with your own eyes.",
   "tier": "Tier 2",
   "rewardCredits": 2,
@@ -1785,6 +1785,141 @@
   "tier": "",
   "rewardCredits": 0,
   "copies": 6,
+  "art": null
+ },
+ "P12": {
+  "id": "P12",
+  "type": "Payload",
+  "name": "Light Payload",
+  "cost": 1,
+  "thrust": null,
+  "range": null,
+  "mass": 1,
+  "energy": null,
+  "energyMode": "",
+  "reliability": null,
+  "vp": 0,
+  "tags": [
+   "Basic"
+  ],
+  "text": "A plain payload with no special ability. Satisfies missions that require carrying an (uncrewed) payload. Always available for purchase.",
+  "flavor": "Cheap mass with a mission patch.",
+  "tier": "",
+  "rewardCredits": 0,
+  "copies": 0,
+  "art": null
+ },
+ "P13": {
+  "id": "P13",
+  "type": "Payload",
+  "name": "Standard Payload",
+  "cost": 1,
+  "thrust": null,
+  "range": null,
+  "mass": 2,
+  "energy": null,
+  "energyMode": "",
+  "reliability": null,
+  "vp": 0,
+  "tags": [
+   "Basic"
+  ],
+  "text": "A plain payload. Its heavier build satisfies missions that require payload Mass 2+. Always available for purchase.",
+  "flavor": "A little more heft for the manifest.",
+  "tier": "",
+  "rewardCredits": 0,
+  "copies": 0,
+  "art": null
+ },
+ "P14": {
+  "id": "P14",
+  "type": "Payload",
+  "name": "Heavy Payload",
+  "cost": 2,
+  "thrust": null,
+  "range": null,
+  "mass": 3,
+  "energy": null,
+  "energyMode": "",
+  "reliability": null,
+  "vp": 0,
+  "tags": [
+   "Basic"
+  ],
+  "text": "A plain heavy payload. Satisfies payload Mass 3 requirements and stresses your Thrust budget. Always available for purchase.",
+  "flavor": "Somebody has to lift the big one.",
+  "tier": "",
+  "rewardCredits": 0,
+  "copies": 0,
+  "art": null
+ },
+ "M21": {
+  "id": "M21",
+  "type": "Mission",
+  "name": "Suborbital Test Flight",
+  "cost": 0,
+  "thrust": null,
+  "range": 2,
+  "mass": null,
+  "energy": null,
+  "energyMode": "",
+  "reliability": null,
+  "vp": 1,
+  "tags": [
+   "Commercial",
+   "Basic"
+  ],
+  "text": "Fly Earth &rarr; Sub-Orbital Earth &rarr; Earth and land safely.<br>No payload required.<br>Standing contract: always available; each agency may complete it once per game.",
+  "flavor": "Light the candle, get it back in one piece.",
+  "tier": "Tier 1",
+  "rewardCredits": 2,
+  "copies": 1,
+  "art": null
+ },
+ "S16": {
+  "id": "S16",
+  "type": "Support",
+  "name": "Airbag Shell",
+  "cost": 1,
+  "thrust": null,
+  "range": null,
+  "mass": 1,
+  "energy": null,
+  "energyMode": "",
+  "reliability": null,
+  "vp": 0,
+  "tags": [
+   "Lander",
+   "Airbag"
+  ],
+  "text": "Airbag landing for an Uncrewed craft, on Earth or Mars. A cushioned bounce touchdown that needs no parachute or engine. Single-use: discard after landing.",
+  "flavor": "Wrap it up and bounce it down.",
+  "tier": "",
+  "rewardCredits": 0,
+  "copies": 3,
+  "art": null
+ },
+ "S17": {
+  "id": "S17",
+  "type": "Support",
+  "name": "Splashdown Kit",
+  "cost": 1,
+  "thrust": null,
+  "range": null,
+  "mass": null,
+  "energy": null,
+  "energyMode": "",
+  "reliability": null,
+  "vp": 0,
+  "tags": [
+   "Parachute",
+   "Reusable"
+  ],
+  "text": "Water landing (splashdown), Earth only. Ocean recovery under canopy; after landing, gain 1 Credit. If this craft returns to Earth, return this card to hand.",
+  "flavor": "Aim for the ocean, wait for the boat.",
+  "tier": "",
+  "rewardCredits": 0,
+  "copies": 3,
   "art": null
  }
 }

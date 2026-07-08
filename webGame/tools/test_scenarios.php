@@ -74,7 +74,7 @@ ok($asset !== null, 'satellite deployed at LEO');
 ok($asset && $asset['energy'] === 2, 'deployed satellite has 2 Energy from Solar Panel');
 ok(!in_array('M01#1', $g['missions'], true), 'M01 LEO Deployment auto-claimed');
 ok($g['players'][0]['vp'] === $vp0 + 2, 'M01 pays 2 VP');
-ok($g['players'][0]['credits'] === $cr0 + 5, 'M01 pays 5 Credits');
+ok($g['players'][0]['credits'] === $cr0 + 5 + 1, 'M01 pays 5 Credits (+1 first-LEO exploration floor)');
 // run maintenance income
 $creditsBefore = $g['players'][0]['credits'];
 sar_asset_operations($g);
@@ -83,28 +83,41 @@ ok($g['players'][0]['credits'] === $creditsBefore + 1, 'Comm Satellite pays 1 Cr
 echo "— Scenario 2: Crewed mission gate — Tourist Hop needs Pressurized tank\n";
 $g = fresh();
 $g['missions'] = ['M13#1'];
-[$eng, $tank, $crew, $shield, $bat] = give($g, 0, ['E02', 'T05', 'P04', 'S01', 'S09']);
-$g['players'][0]['hand'] = [$eng, $tank, $crew, $shield, $bat];
+$g['players'][0]['standingDone'] = ['M21']; // isolate: M13's route also satisfies the M21 standing contract
+[$eng, $tank, $crew, $chute, $bat] = give($g, 0, ['E02', 'T05', 'P04', 'S02', 'S09']); // S02 parachute (crews can't use airbags)
+$g['players'][0]['hand'] = [$eng, $tank, $crew, $chute, $bat];
 $vp0 = $g['players'][0]['vp'];
 do {
     $snapshot = $g;
-    sar_apply($g, 0, ['type' => 'launch', 'components' => [$eng, $tank, $crew, $shield, $bat],
+    sar_apply($g, 0, ['type' => 'launch', 'components' => [$eng, $tank, $crew, $chute, $bat],
         'plan' => ['path' => ['earth', 'subEarth', 'earth'],
-                   'landing' => [2 => ['method' => 'reentry', 'card' => $shield]]]]);
+                   'landing' => [2 => ['method' => 'reentry', 'card' => $chute]]]]);
     $done = !in_array('M13#1', $g['missions'], true);
     if (!$done) { $g = $snapshot; }
 } while (!$done);
-ok($g['players'][0]['vp'] === $vp0 + 2, 'Tourist Hop claimed with Pressurized tank + Crew Capsule (battery powered launch)');
+ok($g['players'][0]['vp'] === $vp0 + 2, 'Tourist Hop claimed with Pressurized tank + Crew Capsule (parachute landing)');
+
+// A heat shield alone cannot land the craft.
+$gh = fresh();
+[$e2, $t2, $p2, $s2] = give($gh, 0, ['E02', 'T01', 'P05', 'S01']);
+$gh['players'][0]['hand'] = [$e2, $t2, $p2, $s2];
+$err = null;
+try {
+    sar_apply($gh, 0, ['type' => 'launch', 'components' => [$e2, $t2, $p2, $s2],
+        'plan' => ['path' => ['earth', 'subEarth', 'earth'],
+                   'landing' => [2 => ['method' => 'reentry', 'card' => $s2]]]]);
+} catch (SarError $e) { $err = $e->getMessage(); }
+ok($err !== null && strpos($err, 'cannot land') !== false, 'Heat Shield cannot land the craft (needs a parachute/airbags/propulsive)');
 
 $g2 = fresh();
 $g2['missions'] = ['M13#1'];
-[$eng, $tank, $crew, $shield, $bat] = give($g2, 0, ['E02', 'T01', 'P04', 'S01', 'S09']); // T01: NOT pressurized
-$g2['players'][0]['hand'] = [$eng, $tank, $crew, $shield, $bat];
+[$eng, $tank, $crew, $chute, $bat] = give($g2, 0, ['E02', 'T01', 'P04', 'S02', 'S09']); // T01: NOT pressurized
+$g2['players'][0]['hand'] = [$eng, $tank, $crew, $chute, $bat];
 do {
     $snap = $g2;
-    sar_apply($g2, 0, ['type' => 'launch', 'components' => [$eng, $tank, $crew, $shield, $bat],
+    sar_apply($g2, 0, ['type' => 'launch', 'components' => [$eng, $tank, $crew, $chute, $bat],
         'plan' => ['path' => ['earth', 'subEarth', 'earth'],
-                   'landing' => [2 => ['method' => 'reentry', 'card' => $shield]]]]);
+                   'landing' => [2 => ['method' => 'reentry', 'card' => $chute]]]]);
     $flew = false;
     foreach ($g2['crafts'] as $c) if ($c['node'] === 'earth' && $c['launchRound']) $flew = true;
     if (!$flew) $g2 = $snap;
@@ -193,10 +206,10 @@ $deckBefore = count($g['decks']['component']);
 sar_apply($g, 0, ['type' => 'flush_market']);
 ok($g['players'][0]['credits'] === 8, 'flush costs 2 Credits');
 ok($g['turnSeat'] === 0 && $g['players'][0]['turnsUsed'] === 0, 'flush is a free action — turn not consumed');
-ok(count(array_filter($g['market'])) === 5, 'market refilled to 5 cards');
-ok(!array_intersect($g['market'], $before), 'all 5 market cards replaced');
-ok(count($g['decks']['componentDiscard']) >= 5, 'old market cards went to the component discard');
-ok(count($g['decks']['component']) === $deckBefore - 5, '5 new cards drawn from the component deck');
+ok(count(array_filter($g['market'])) === 7, 'market refilled to 7 cards');
+ok(!array_intersect($g['market'], $before), 'all 7 market cards replaced');
+ok(count($g['decks']['componentDiscard']) >= 7, 'old market cards went to the component discard');
+ok(count($g['decks']['component']) === $deckBefore - 7, '7 new cards drawn from the component deck');
 $err = null;
 try { sar_apply($g, 0, ['type' => 'flush_market']); } catch (SarError $e) { $err = $e->getMessage(); }
 ok($err !== null, 'second flush in the same command turn is rejected');

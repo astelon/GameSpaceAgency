@@ -35,10 +35,10 @@ const HINTS = {
   P09: 'Deploy on the Moon or Mars surface. Pays 1 VP every Maintenance if it has Energy — pack an RTG (solar panels burn up entering Mars atmosphere).',
   P10: 'Deploy at GEO or beyond. Pays 1 VP per Maintenance (2 VP during storm events) while it has Energy.',
   P11: 'Deploy in orbit. Once per round one of your craft at the same node may draw 1 of its Energy for +2 Range. Give it Solar Panels.',
-  S01: 'Use it when crossing from a Sub-Orbital node to a surface (Earth or Mars): safe landing, card discarded. Can also be jettisoned while descending (aerobrake: +2 Range). Basic — always purchasable.',
-  S02: 'Earth-only landing (parachutes need thick air). Pays +1 Credit after touchdown. Single use.',
-  S03: 'Reusable heat shield for Earth or Mars. Survives one aerobrake per flight and returns to hand after Earth recovery.',
-  S04: 'Earth-only reusable landing; +1 Credit after touchdown; returns to hand after recovery.',
+  S01: 'Reentry heat protection — survives atmospheric entry and can be jettisoned to aerobrake (+2 Range). It does NOT land the craft: pair it with a parachute, airbags, a Lander, or a propulsive landing. Basic — always purchasable.',
+  S02: 'Parachute — Earth-only landing (needs thick air). Pays +1 Credit after touchdown. Single use.',
+  S03: 'Reusable reentry heat shield (Earth or Mars). Survives one aerobrake per flight and returns to hand after Earth recovery. Not a landing device on its own.',
+  S04: 'Guided parachute — Earth-only landing; +1 Credit after touchdown; returns to hand after recovery.',
   S05: 'Required for Docking missions. Docking costs 1 Energy. Reusable.',
   S06: 'Docking hardware + engine tug: when you activate the craft in orbit, spend 1 Energy for +1 Range. Reusable.',
   S07: 'Generates 2 Energy every round while in space — the cheapest way to keep satellites paying out. Burns up if the craft enters an atmosphere.',
@@ -60,6 +60,12 @@ const HINTS = {
   C08: 'Basic cards (Sterling Booster, Standard Tank, Heat Shield, Basic Battery) cost you 1 Credit less (minimum 1).',
   C09: 'All your Stage bonuses give +1 extra Range.',
   C10: 'Your deployed assets beyond Earth ZOI get +1 Power — deep-space probes work every round.',
+  P12: 'A plain payload with no abilities — just fills the "carry a payload" requirement. Basic: always purchasable for 1 Credit. Mass 1.',
+  P13: 'A plain payload, Mass 2 — the cheap way to satisfy "payload Mass 2+" missions. Basic — always purchasable.',
+  P14: 'A plain heavy payload, Mass 3 — for Mass-3 requirements, but it stresses your Thrust budget. Basic — always purchasable.',
+  M21: 'Standing contract, always available: fly Earth → Sub-Orbital → Earth and land (parachute or propulsive). No payload needed. Each agency may claim it once per game for 2 Credits + 1 VP — a guaranteed first job.',
+  S16: 'Airbag landing for an Uncrewed craft, Earth or Mars — no parachute or engine needed. Single use. Also counts as a Lander for missions.',
+  S17: 'Splashdown Kit — reusable Earth-only water landing; +1 Credit after recovery; returns to hand.',
 };
 
 export function hintFor(uid) {

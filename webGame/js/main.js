@@ -359,16 +359,31 @@ function renderRight() {
   mp.append(mrow);
   col.append(mp);
 
+  if (g.standing && g.standing.length) {
+    const sp = el('div', { class: 'stack-panel' });
+    sp.append(el('div', { class: 'side-label' }, 'Standing contracts ',
+      el('span', { class: 'tip', title: 'Always available. Each agency may complete each of these once per game — a guaranteed early job that needs no drawn contract or payload.' }, '?')));
+    const srow = el('div', { class: 'cards' });
+    const done = g.players[seat] ? (g.players[seat].standingDone || []) : [];
+    for (const mid of g.standing) {
+      const card = renderCard(mid + '#1');
+      if (done.includes(mid)) { card.style.opacity = '0.45'; card.title = 'Already completed by your agency'; }
+      srow.append(card);
+    }
+    sp.append(srow);
+    col.append(sp);
+  }
+
   const mk = el('div', { class: 'stack-panel' });
   const mkLabel = el('div', { class: 'side-label' },
     el('span', {}, 'Card market ',
-      el('span', { class: 'tip', title: 'Acquire Card action: pay the cost, take the card to hand. The slot refills immediately. Basic cards (Sterling Booster, Standard Tank, Heat Shield, Basic Battery) are always available via the Basic shop.' }, '?')));
+      el('span', { class: 'tip', title: 'Acquire Card action: pay the cost, take the card to hand. The slot refills immediately. Basic cards (Sterling Booster, Standard Tank, Heat Shield, Basic Battery, and the Light/Standard/Heavy Payloads) are always available via the Basic shop.' }, '?')));
   if (canAct()) {
     const p = g.players[seat];
     const flushed = p.flushedTurn === p.turnsUsed;
     mkLabel.append(el('button', {
       class: 'btn small ghost',
-      title: 'Free action: pay 2 Credits to discard all 5 market cards and reveal 5 new ones. Once per command turn — does not use the turn.',
+      title: 'Free action: pay 2 Credits to discard all 7 market cards and reveal 7 new ones. Once per command turn — does not use the turn.',
       disabled: flushed || p.credits < 2 ? '' : null,
       onclick: () => doAction({ type: 'flush_market' }),
     }, flushed ? '♻ Flushed' : '♻ Flush 2 Cr'));

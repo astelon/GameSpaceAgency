@@ -957,7 +957,7 @@
 
   <h2>Shared Areas</h2>
   <ul>
-    <li><strong>Card Market</strong> — 5 face-up component cards available for purchase. Refilled immediately when a card is bought and topped up during Maintenance. Any player may <strong>flush</strong> it on their Command Turn for 2 Credits (see Actions).</li>
+    <li><strong>Card Market</strong> — 7 face-up component cards available for purchase. Refilled immediately when a card is bought and topped up during Maintenance. Any player may <strong>flush</strong> it on their Command Turn for 2 Credits (see Actions).</li>
     <li><strong>Component Deck</strong> — All Engines, Tanks, Payloads, Support, and Technology cards shuffled together into one draw pile.</li>
     <li><strong>Event Deck</strong> — Shuffled separately. One card flipped per round.</li>
     <li><strong>Mission Deck &amp; Display</strong> — 3 face-up missions. Refilled during Maintenance.</li>
@@ -977,10 +977,10 @@
       <strong>Heat Shield</strong> (S01, <span class="tag" style="font-size:.7rem">Basic</span> Support),
       1 Credit marker, 1 VP marker (placed on 0), 1 Agency Level marker (set to Level 1), and 6 Craft markers.</li>
     <li><strong>Sort Mission cards by Tier.</strong> Shuffle the Tier 1 Mission stack and place it face-down as the Mission deck. Set Tier 2 and Tier 3 Missions aside face-down — they enter the game later.</li>
-    <li><strong>Reveal 3 Tier 1 Mission cards</strong> face-up to form the starting Mission display.</li>
+    <li><strong>Reveal 3 Tier 1 Mission cards</strong> face-up to form the starting Mission display. Make sure at least one <strong>easy</strong> mission (a payload-only or deploy job such as <em>LEO Deployment</em>) is among them so round 1 is never a dead hand — if none appears, swap the oldest for one drawn from the deck.</li>
     <li><strong>Scale the Component Deck</strong> to the player count. With <strong>4 players</strong>, use all component cards (~143). With <strong>3 players</strong>, remove 1 copy of every card that has 3+ copies (~114 remain). With <strong>2 players</strong>, remove 1 copy of every card, plus a 2nd copy of every card with 5+ copies (~91 remain). Return removed copies to the box unseen — this keeps roughly the same share of the deck flowing through each game, so key cards stay findable.</li>
     <li>Shuffle the remaining component cards (Engines, Tanks, Payloads, Support, Technology) into one <strong>Component Deck</strong>. Shuffle the <strong>Event Deck</strong> separately.</li>
-    <li><strong>Reveal 5 Component cards</strong> face-up to form the starting <strong>Card Market</strong>.</li>
+    <li><strong>Reveal 7 Component cards</strong> face-up to form the starting <strong>Card Market</strong>.</li>
     <li><strong>Determine the first player</strong> randomly. Give them the First Player token. In turn order, players receive <strong>5, 6, 7, and 8 Credits</strong> — later seats get a small budget head start to offset first-player advantage.</li>
     <li>Place the <strong>Transfer Window marker</strong> on the first space of its printed cycle (TW 3).</li>
     <li>The game lasts <strong>8 rounds</strong>.</li>
@@ -988,7 +988,7 @@
 
   <div class="box cyan">
     <div class="box-title">&#x1F4A1; Basic Cards</div>
-    <p>Cards tagged <span class="tag" style="font-size:.7rem">Basic</span> (Sterling Booster, Standard Tank, Heat Shield, Basic Battery) are <strong>always available</strong> for purchase at their printed cost — even if none appear in the Card Market. Any player may buy a Basic card as an Acquire Card action at any time. The <strong>Basic Battery</strong> (S15) is the budget power option: a single-use 1-Energy burst that works anywhere, but its Mass 1 counts toward launch Thrust checks.</p>
+    <p>Cards tagged <span class="tag" style="font-size:.7rem">Basic</span> are <strong>always available</strong> for purchase at their printed cost — even if none appear in the Card Market. Any player may buy a Basic card as an Acquire Card action at any time. Besides the starting kit, the Basic supply includes the <strong>Basic Battery</strong> (S15, a single-use 1-Energy burst, Mass 1) and the <strong>Light / Standard / Heavy Payload</strong> (P12 / P13 / P14) — plain payloads with no special ability at Mass 1 / 2 / 3 and cost 1 / 1 / 2. These exist so a payload is <em>always</em> buyable: even with a bad market you can always acquire one and fly a real payload mission. The heavier ones satisfy "Mass 2+"/"Mass 3" missions but eat more Thrust budget; none can be deployed as an asset.</p>
   </div>
 
   <div class="example-scene">
@@ -1019,7 +1019,7 @@
     <div class="phase-card">
       <div class="phase-num">Phase 03</div>
       <div class="phase-name">Maintenance</div>
-      <div class="phase-desc">Recover Reusable parts. Discard the Event. Refill the Mission display to 3 and the Card Market to 5.</div>
+      <div class="phase-desc">Recover Reusable parts. Discard the Event. Refill the Mission display to 3 and the Card Market to 7.</div>
     </div>
   </div>
 
@@ -1039,7 +1039,7 @@
     <li>Discard the current round's Event card.</li>
     <li><strong>Mission Sweep:</strong> if no mission was completed this round, discard the mission that has been in the display longest.</li>
     <li>Refill the Mission display to 3 cards if needed (place new missions to the right, so the oldest is always leftmost).</li>
-    <li>Refill the <strong>Card Market</strong> to 5 cards from the Component Deck.</li>
+    <li>Refill the <strong>Card Market</strong> to 7 cards from the Component Deck.</li>
   </ul>
 
   <h3>Energy Timing</h3>
@@ -1123,14 +1123,33 @@
   </div>
 
   <div class="box cyan">
+    <div class="box-title">&#128640; Exploration Bonuses</div>
+    <p style="margin-bottom:.4rem"><strong>Personal orbit floor:</strong> the first time your agency reaches <strong>LEO</strong>, gain <strong>+1 Credit</strong> — getting to orbit always pays a little.</p>
+    <p style="margin-bottom:.4rem"><strong>Exploration Race ladder</strong> — the 1st / 2nd / 3rd / 4th agency to first reach each frontier earns a diminishing reward (near-Earth pays Credits, deep space pays VP):</p>
+    <table>
+      <thead><tr><th>Frontier</th><th>1st</th><th>2nd</th><th>3rd</th><th>4th</th></tr></thead>
+      <tbody>
+        <tr><td>High Orbit (GEO)</td><td>+2 Cr</td><td>+1 Cr</td><td>+1 Cr</td><td>—</td></tr>
+        <tr><td>Earth ZOI</td><td>+1 VP +1 Cr</td><td>+1 Cr</td><td>—</td><td>—</td></tr>
+        <tr><td>Moon branch (Moon Orbit+)</td><td>+2 VP</td><td>+1 VP</td><td>—</td><td>—</td></tr>
+        <tr><td>Mars branch (Mars ZOI+)</td><td>+4 VP</td><td>+2 VP</td><td>+1 VP</td><td>—</td></tr>
+      </tbody>
+    </table>
+    <p style="margin-bottom:0">Each rung scores once per agency. The classic <strong>first-to-Moon (+2 VP)</strong> and <strong>first-to-Mars (+4 VP)</strong> bonuses are simply this ladder's top rung.</p>
+  </div>
+
+  <div class="box cyan">
     <div class="box-title">&#127757; Milestone VP Bonuses</div>
     <ul style="margin-bottom:0">
-      <li><strong>First to Moon branch</strong> (Moon Orbit or farther): <strong>+2 VP</strong></li>
-      <li><strong>First to Mars branch</strong> (Mars ZOI or farther): <strong>+4 VP</strong></li>
       <li><strong>Tech starter bonus:</strong> first player to develop their 2nd Technology gains <strong>+1 VP</strong></li>
       <li><strong>Tech pace bonus:</strong> first player to develop 4 Technologies gains <strong>+2 VP</strong></li>
       <li><strong>Orbit-linked innovation:</strong> if you develop a Technology while you control an on-orbit Satellite or Station, gain <strong>+1 VP</strong> (max once per round)</li>
     </ul>
+  </div>
+
+  <div class="box gold">
+    <div class="box-title">&#128203; Standing Contracts</div>
+    <p style="margin-bottom:0">Some missions are <span class="tag" style="font-size:.7rem">Basic</span> <strong>standing contracts</strong> — always available, never in the display, completable <strong>once per agency per game</strong>. <strong>Suborbital Test Flight</strong> (M21): fly Earth → Sub-Orbital → Earth and land (parachute or propulsive), <em>no payload needed</em>, for <strong>2 Credits + 1 VP</strong>. It guarantees a productive first turn with only the starting kit. Reward hierarchy: lifting off is the floor; carrying a payload always pays more.</p>
   </div>
 
 
@@ -1240,7 +1259,7 @@
       <div class="mini-card-art" style="background:linear-gradient(160deg,#080010,#100020); font-size:28px;">🪂</div>
       <div class="mini-card-name">Heat Shield</div>
       <div class="mini-card-stats">Cost 1<br><span class="tag" style="font-size:.62rem">Reentry</span> <span class="tag" style="font-size:.62rem">Basic</span></div>
-      <div class="mini-card-text">Use from Sub-Orbital to land safely. Always available.</div>
+      <div class="mini-card-text">Reentry heat protection + aerobrake. Not a landing method — pair with a parachute/airbags/propulsive. Always available.</div>
     </div>
   </div>
 
@@ -1339,12 +1358,14 @@
 
   <p><strong>Atmosphere nodes:</strong> Earth, Sub-Orbital Earth, Sub-Orbital Mars, and Mars Surface. The Moon branch has no atmosphere — that is why Moon landings are propulsive only. Cards that react to "entering atmosphere" (e.g., Solar Panel) trigger when a craft moves onto any atmosphere node.</p>
 
+  <p><strong>A heat shield does not land you.</strong> A <span class="tag" style="font-size:.7rem">Reentry</span> heat shield (Heat Shield, Ceramic Tile Shield) survives reentry heat and can aerobrake, but it does <strong>not</strong> slow the craft for touchdown. Landing needs one of the methods below.</p>
+
   <table>
     <thead><tr><th>Body</th><th>Landing Method</th></tr></thead>
     <tbody>
-      <tr><td>Earth</td><td>Use a <span class="tag" style="font-size:.7rem">Reentry</span> card — Heat Shield or Parachute — (discard after use unless Reusable), <strong>or</strong> propulsive landing (1 extra Range + Engine).</td></tr>
+      <tr><td>Earth</td><td><strong>Parachute</strong> (<span class="tag" style="font-size:.7rem">Parachute</span> — Recovery Chutes, Guided Parafoil, Splashdown Kit; discard unless Reusable), <strong>airbags</strong> (<span class="tag" style="font-size:.7rem">Airbag</span>, Uncrewed craft only), a <strong>Lander</strong>, <strong>or</strong> a propulsive landing (1 extra Range + Engine). Crews must use a parachute or propulsive landing.</td></tr>
       <tr><td>Moon</td><td><strong>Propulsive only</strong> (no atmosphere). Requires Engine. Use a Landing Lander <strong>or</strong> Rocket-as-Lander.</td></tr>
-      <tr><td>Mars</td><td>Use a heat-shield-type <span class="tag" style="font-size:.7rem">Reentry</span> card (parachute-type cards are <strong>Earth only</strong> — Mars air is too thin for them, as printed on the card), <strong>or</strong> propulsive landing (1 extra Range + Engine). Landing Lander or Rocket-as-Lander for surface missions.</td></tr>
+      <tr><td>Mars</td><td>Parachutes don't work (air too thin). Use <strong>airbags</strong> (Uncrewed), a <strong>Lander</strong>, <strong>or</strong> a propulsive landing (1 extra Range + Engine). A heat shield may still aerobrake on the way down.</td></tr>
     </tbody>
   </table>
 
@@ -1598,7 +1619,9 @@
     <div class="tag-row"><span class="tag">Electronics</span><span class="tag-desc">Computers and comms; satisfies Electronics requirements and station qualification.</span></div>
     <div class="tag-row"><span class="tag">Scientific</span><span class="tag-desc">Scientific instruments; satisfies Scientific mission requirements and station qualification.</span></div>
     <div class="tag-row"><span class="tag">Power</span><span class="tag-desc">Generates Energy (or bursts it, for Batteries); needed for asset income and stations.</span></div>
-    <div class="tag-row"><span class="tag">Reentry</span><span class="tag-desc">Heat shields and parachutes. Lands a craft safely from a Sub-Orbital node (Earth/Mars). Discarded after use unless Reusable.</span></div>
+    <div class="tag-row"><span class="tag">Reentry</span><span class="tag-desc">Heat shield: survives reentry heat and can aerobrake (+2 Range). <strong>Not</strong> a landing method on its own.</span></div>
+    <div class="tag-row"><span class="tag">Parachute</span><span class="tag-desc">Earth-only landing device (parachutes, splashdown). Discarded after use unless Reusable; some pay a recovery Credit.</span></div>
+    <div class="tag-row"><span class="tag">Airbag</span><span class="tag-desc">Cushioned landing for an Uncrewed craft on Earth or Mars. Single-use.</span></div>
     <div class="tag-row"><span class="tag">Lander</span><span class="tag-desc">Enables surface landing; satisfies Surface mission requirements (or use Rocket-as-Lander).</span></div>
     <div class="tag-row"><span class="tag">Docking</span><span class="tag-desc">Docking hardware. Required on the rocket for Docking-tagged missions.</span></div>
     <div class="tag-row"><span class="tag">Satellite</span><span class="tag-desc">Payload that stays on the board as a persistent asset when deployed.</span></div>
@@ -1631,7 +1654,7 @@
       <tr><td>Agency Tableau</td><td>Your personal area of face-up Technology cards. Their effects apply to all your craft permanently.</td></tr>
       <tr><td>Atmosphere</td><td>The nodes Earth, Sub-Orbital Earth, Sub-Orbital Mars, and Mars Surface. The Moon branch has none.</td></tr>
       <tr><td>Basic Card</td><td>A card tagged Basic (E02, T01, S01, S15) that can always be purchased at printed cost, even if not in the Card Market.</td></tr>
-      <tr><td>Card Market</td><td>5 face-up component cards. Refilled immediately when a card is bought and during Maintenance. May be flushed for 2 Credits as a free action (once per Command Turn).</td></tr>
+      <tr><td>Card Market</td><td>7 face-up component cards. Refilled immediately when a card is bought and during Maintenance. May be flushed for 2 Credits as a free action (once per Command Turn).</td></tr>
       <tr><td>Command Turn</td><td>One action taken during the Action Phase. You take one at a time, alternating with other players.</td></tr>
       <tr><td>Component Deck</td><td>All Engines, Tanks, Payloads, Support, and Technology cards shuffled into one draw pile.</td></tr>
       <tr><td>Craft</td><td>Any assembled rocket, satellite, or station on the orbital board. Each may be activated once per Action Phase.</td></tr>

@@ -375,19 +375,35 @@ function sar_validate_landing(array &$g, string $craftId, string $to, array $cho
         if (!$engine) throw new SarError('Moon landing is propulsive — the craft needs an Engine');
         return ['method' => 'propulsive', 'uid' => null, 'extraRange' => 0];
     }
+    // Card-based landing device (parachute / airbags). A heat shield (Reentry only)
+    // survives the heat but does NOT slow the craft for touchdown.
     if ($method === 'reentry') {
-        if (!$uid || !in_array($uid, $craft['cards'], true)) throw new SarError('Choose a Reentry card for the landing');
-        if (!sar_has_tag($uid, 'Reentry')) throw new SarError(sar_card($uid)['name'] . ' is not a Reentry card');
-        if ($to === 'mars' && in_array(explode('#', $uid)[0], SAR_EARTH_ONLY_REENTRY, true)) {
-            throw new SarError(sar_card($uid)['name'] . ' only works in Earth\'s thick atmosphere');
+        if (!$uid || !in_array($uid, $craft['cards'], true)) throw new SarError('Choose a landing device (parachute or airbags)');
+        $isChute = sar_has_tag($uid, 'Parachute');
+        $isAirbag = sar_has_tag($uid, 'Airbag');
+        if (!$isChute && !$isAirbag) {
+            if (sar_has_tag($uid, 'Reentry')) {
+                throw new SarError(sar_card($uid)['name'] . ' shields against reentry heat but cannot land the craft. Use a parachute, airbags, a Lander, or a propulsive landing.');
+            }
+            throw new SarError(sar_card($uid)['name'] . ' is not a landing device');
+        }
+        if ($isChute && $to !== 'earth') {
+            throw new SarError(sar_card($uid)['name'] . ' only works in Earth\'s thick atmosphere.');
+        }
+        if ($isAirbag && (bool)sar_craft_cards($craft, 'Payload', 'Crewed')) {
+            throw new SarError('Airbags are uncrewed-only — a crew cannot survive the impact. Use a parachute or a propulsive landing.');
         }
         return ['method' => 'reentry', 'uid' => $uid, 'extraRange' => 0];
+    }
+    if ($method === 'lander') {
+        if (!sar_craft_cards($craft, null, 'Lander')) throw new SarError('No Lander on this craft');
+        return ['method' => 'lander', 'uid' => null, 'extraRange' => 0];
     }
     if ($method === 'propulsive') {
         if (!$engine) throw new SarError('A propulsive landing requires an Engine');
         return ['method' => 'propulsive', 'uid' => null, 'extraRange' => $hasLegs ? 0 : 1];
     }
-    throw new SarError('Landing at ' . SAR_NODES[$to]['name'] . ' needs a landing method (Reentry card or propulsive)');
+    throw new SarError('Landing at ' . SAR_NODES[$to]['name'] . ' needs a landing method (parachute, airbags, a Lander, or propulsive).');
 }
 
 function sar_apply_landing(array &$g, string $craftId, string $to, array $landing, bool $dry): void {
@@ -404,11 +420,13 @@ function sar_apply_landing(array &$g, string $craftId, string $to, array $landin
             $g['decks']['componentDiscard'][] = $uid;
             if (!$dry) sar_log($g, 'land', $craft['name'] . ' lands using ' . sar_card($uid)['name'] . ' (expended).', ['craft' => $craftId]);
         }
-        // Recovery bonus credits (Recovery Chutes / Guided Parafoil), Earth landings.
-        if ($to === 'earth' && in_array($cid, ['S02', 'S04'], true)) {
+        // Recovery bonus credits (Recovery Chutes / Guided Parafoil / Splashdown Kit), Earth landings.
+        if ($to === 'earth' && in_array($cid, ['S02', 'S04', 'S17'], true)) {
             $g['players'][$craft['owner']]['credits'] += 1;
             if (!$dry) sar_log($g, 'gain', sar_pname($g, $craft['owner']) . ' recovers hardware cleanly: +1 Credit.', ['seat' => $craft['owner'], 'credits' => 1]);
         }
+    } elseif ($landing['method'] === 'lander') {
+        if (!$dry) sar_log($g, 'land', $craft['name'] . ' sets down using its Lander on ' . SAR_NODES[$to]['name'] . '.', ['craft' => $craftId]);
     } else {
         if (!$dry) sar_log($g, 'land', $craft['name'] . ' performs a propulsive landing on ' . SAR_NODES[$to]['name'] . '.', ['craft' => $craftId]);
     }
@@ -545,17 +563,9 @@ function sar_on_arrival(array &$g, string $craftId, string $node): void {
         }
     }
 
-    // Exploration milestones.
-    if (in_array($node, SAR_MOON_BRANCH, true) && $g['milestones']['moon'] === null) {
-        $g['milestones']['moon'] = $seat;
-        $g['players'][$seat]['vp'] += 2;
-        sar_log($g, 'milestone', sar_pname($g, $seat) . ' reaches the Moon branch first: +2 VP!', ['seat' => $seat, 'vp' => 2]);
-    }
-    if (in_array($node, SAR_MARS_BRANCH, true) && $g['milestones']['mars'] === null) {
-        $g['milestones']['mars'] = $seat;
-        $g['players'][$seat]['vp'] += 4;
-        sar_log($g, 'milestone', sar_pname($g, $seat) . ' reaches the Mars branch first: +4 VP!', ['seat' => $seat, 'vp' => 4]);
-    }
+    // Exploration rewards: personal near-Earth floor + global race ladder
+    // (includes the first-to-Moon/Mars milestones as the top rung).
+    sar_award_exploration($g, $seat, $node);
 
     // Stranded Crew (EV13): visit LEO with a Crewed payload, then return to Earth.
     if ($g['strandedCrew'] === 'unclaimed') {
