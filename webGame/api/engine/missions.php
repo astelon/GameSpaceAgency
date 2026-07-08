@@ -119,13 +119,43 @@ function sar_mission_check(array $g, string $mid, array $craft): ?array {
             $sensor = (bool)array_filter($craft['cards'], fn($u) => explode('#', $u)[0] === 'S11');
             return (in_array('sunOrbit', $hist, true) && $sci && $sensor && sar_can_pay_energy($craft, 2))
                 ? ['energy' => 2] : null;
+        case 'M21': // Suborbital Test Flight (standing contract): Earth -> Sub-Orbital -> Earth, land safely
+            return ($atEarth && sar_history_seq($hist, ['earth', 'subEarth', 'earth'])) ? ['energy' => 0] : null;
     }
     return null;
+}
+
+// Try to claim standing contracts (always available, once per agency per game).
+function sar_check_standing(array &$g, string $craftId): void {
+    if (!isset($g['crafts'][$craftId])) return;
+    $craft = $g['crafts'][$craftId];
+    $seat = $craft['owner'];
+    foreach (SAR_STANDING_CONTRACTS as $mid) {
+        if (in_array($mid, $g['players'][$seat]['standingDone'], true)) continue;
+        $craft = $g['crafts'][$craftId];
+        $check = sar_mission_check($g, $mid, $craft);
+        if ($check === null) continue;
+        if ($check['energy'] > 0 && !sar_spend_energy($g, $craftId, $check['energy'], 'mission operations')) continue;
+        $card = sar_card($mid);
+        $vp = $card['vp'];
+        $credits = $card['rewardCredits'];
+        if (sar_has_tech($g, $seat, 'C07') && in_array('Commercial', $card['tags'], true)) $credits += 1;
+        $p = &$g['players'][$seat];
+        $p['vp'] += $vp;
+        $p['credits'] += $credits;
+        $p['missionsCompleted']++;
+        $p['standingDone'][] = $mid;
+        unset($p);
+        sar_log($g, 'missionDone', '🏁 ' . sar_pname($g, $seat) . ' completes the standing contract ' .
+            $card['name'] . "! Rewards: $vp VP, $credits Credits.",
+            ['seat' => $seat, 'card' => $mid, 'vp' => $vp, 'credits' => $credits]);
+    }
 }
 
 // Try to claim every display mission with this craft. Auto-claims on success.
 function sar_check_missions(array &$g, string $craftId): void {
     if (!isset($g['crafts'][$craftId])) return;
+    sar_check_standing($g, $craftId);
     foreach ($g['missions'] as $i => $muid) {
         if ($muid === null) continue;
         $craft = $g['crafts'][$craftId]; // re-read: a prior claim may have spent energy

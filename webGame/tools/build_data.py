@@ -50,7 +50,9 @@ def main():
             'flavor': (r['Flavor'] or '').strip(),
             'tier': (r['Tier'] or '').strip(),    # missions: "Tier 1".."Tier 3"
             'rewardCredits': to_int(r['RewardCredits']) or 0,
-            'copies': to_int(r['Copies']) or 1,
+            # Copies: explicit 0 = buy-only (never shuffled into the component deck);
+            # blank/invalid defaults to 1.
+            'copies': (0 if (r['Copies'] or '').strip() == '0' else (to_int(r['Copies']) or 1)),
             'art': None,
         }
         art = os.path.join(ART_SRC, cid + '.jpg')

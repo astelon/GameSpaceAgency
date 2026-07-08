@@ -26,6 +26,18 @@ const SAR_LEVEL_TURNS = [1 => 2, 2 => 3, 3 => 4];
 const SAR_LEVEL_COST = [2 => 6, 3 => 14];
 const SAR_HAND_LIMIT = 5;
 const SAR_MAX_CRAFT = 6;
+const SAR_MARKET_SIZE = 7;
+// Standing contracts: always available, completable once per agency per game;
+// never shuffled into the mission display deck.
+const SAR_STANDING_CONTRACTS = ['M21'];
+// Exploration race ladder: reward [Credits, VP] for the 1st/2nd/3rd/4th agency
+// to first reach each frontier. Near-Earth pays Credits, deep space pays VP.
+const SAR_EXPLORE_LADDER = [
+    'geo'      => [[2, 0], [1, 0], [1, 0], [0, 0]],
+    'earthZoi' => [[1, 1], [1, 0], [0, 0], [0, 0]],
+    'moon'     => [[0, 2], [0, 1], [0, 0], [0, 0]],
+    'mars'     => [[0, 4], [0, 2], [0, 1], [0, 0]],
+];
 const SAR_FLUSH_COST = 2;
 const SAR_ROUNDS = 8;
 const SAR_STORM_EVENTS = ['EV01', 'EV06', 'EV09'];
@@ -55,6 +67,8 @@ function sar_new_game(string $room, string $mode, string $hostToken): array {
         'tier2Unlocked' => false, 'tier3Unlocked' => false,
         'milestones' => ['moon' => null, 'mars' => null, 'level3' => null,
                          'secondTech' => null, 'fourthTech' => null],
+        'frontier' => [],       // exploration race: group => [seats in arrival order]
+        'standing' => [],       // standing contract ids in play (set at start)
         'crafts' => [], 'craftSeq' => 0,
         'turnSeat' => 0,
         'missionDoneThisRound' => false,
@@ -77,6 +91,8 @@ function sar_add_player(array &$g, string $name, string $token): int {
         'hand' => [], 'tableau' => [],
         'planningDone' => false, 'turnsUsed' => 0, 'passed' => false, 'flushedTurn' => null,
         'missionsCompleted' => 0, 'techOrbVpRound' => 0,
+        'visited' => [],        // nodes this agency has reached (personal exploration floor)
+        'standingDone' => [],   // standing contract ids this agency has completed
         'connected' => true,
     ];
     return $seat;
@@ -87,6 +103,43 @@ function sar_copies(string $cid, int $n): array {
     $out = [];
     for ($i = 1; $i <= $n; $i++) $out[] = "$cid#$i";
     return $out;
+}
+
+// Exploration rewards on node arrival: a personal near-Earth Credit floor plus a
+// global race ladder that pays the 1st/2nd/3rd/4th agency to reach each frontier.
+function sar_award_exploration(array &$g, int $seat, string $node): void {
+    // Personal floor: first time this agency reaches orbit (LEO), +1 Credit.
+    if ($node === 'leo' && !in_array('leo', $g['players'][$seat]['visited'], true)) {
+        $g['players'][$seat]['visited'][] = 'leo';
+        $g['players'][$seat]['credits'] += 1;
+        sar_log($g, 'gain', sar_pname($g, $seat) . ' reaches orbit (LEO) for the first time: +1 Credit.',
+            ['seat' => $seat, 'credits' => 1]);
+    }
+    // Global exploration race ladder (diminishing by arrival order).
+    $group = null;
+    if ($node === 'geo') $group = 'geo';
+    elseif ($node === 'earthZoi') $group = 'earthZoi';
+    elseif (in_array($node, SAR_MOON_BRANCH, true)) $group = 'moon';
+    elseif (in_array($node, SAR_MARS_BRANCH, true)) $group = 'mars';
+    if ($group === null) return;
+    if (!isset($g['frontier'][$group])) $g['frontier'][$group] = [];
+    if (in_array($seat, $g['frontier'][$group], true)) return; // already scored this frontier
+    $order = count($g['frontier'][$group]);         // 0 = first to arrive
+    $g['frontier'][$group][] = $seat;
+    if ($group === 'moon' && $g['milestones']['moon'] === null) $g['milestones']['moon'] = $seat;
+    if ($group === 'mars' && $g['milestones']['mars'] === null) $g['milestones']['mars'] = $seat;
+    [$cr, $vp] = SAR_EXPLORE_LADDER[$group][min($order, 3)];
+    if ($cr === 0 && $vp === 0) return;
+    $g['players'][$seat]['credits'] += $cr;
+    $g['players'][$seat]['vp'] += $vp;
+    $ord = ['first', 'second', 'third', 'fourth'][min($order, 3)];
+    $label = ['geo' => 'High Orbit', 'earthZoi' => 'Earth ZOI',
+              'moon' => 'the Moon branch', 'mars' => 'the Mars branch'][$group];
+    $bits = [];
+    if ($vp) $bits[] = "$vp VP";
+    if ($cr) $bits[] = "$cr Credit" . ($cr > 1 ? 's' : '');
+    sar_log($g, 'milestone', sar_pname($g, $seat) . " is the $ord agency to reach $label: +" .
+        implode(' +', $bits) . '.', ['seat' => $seat, 'vp' => $vp, 'credits' => $cr]);
 }
 
 function sar_start_game(array &$g): void {
@@ -105,6 +158,7 @@ function sar_start_game(array &$g): void {
             if ($np === 2) { $copies -= 1; if ($c['copies'] >= 5) $copies -= 1; }
             $component = array_merge($component, sar_copies($cid, max(0, $copies)));
         } elseif ($c['type'] === 'Mission') {
+            if (in_array($cid, SAR_STANDING_CONTRACTS, true)) continue; // standing contracts are not in the deck
             $tier = (int)substr($c['tier'], -1);
             $missionT[$tier][] = "$cid#1";
         } elseif ($c['type'] === 'Event') {
@@ -129,8 +183,27 @@ function sar_start_game(array &$g): void {
     }
     unset($p);
 
-    $g['market'] = array_splice($g['decks']['component'], 0, 5);
+    $g['market'] = array_splice($g['decks']['component'], 0, SAR_MARKET_SIZE);
     $g['missions'] = array_splice($g['decks']['mission'], 0, 3);
+    $g['standing'] = SAR_STANDING_CONTRACTS;
+
+    // Opening guarantee: make sure at least one easy Tier-1 mission (payload-only /
+    // deploy) is in the opening display so round 1 is never a dead hand.
+    $easy = ['M01', 'M10', 'M14'];
+    $hasEasy = false;
+    foreach ($g['missions'] as $mu) if (in_array(explode('#', $mu)[0], $easy, true)) { $hasEasy = true; break; }
+    if (!$hasEasy) {
+        foreach ($g['decks']['mission'] as $k => $mu) {
+            if (in_array(explode('#', $mu)[0], $easy, true)) {
+                $displaced = $g['missions'][0];
+                $g['missions'][0] = $mu;
+                array_splice($g['decks']['mission'], $k, 1);
+                $g['decks']['mission'][] = $displaced;
+                break;
+            }
+        }
+    }
+
     $g['status'] = 'playing';
     $g['round'] = 1;
     sar_log($g, 'setup', 'Game started with ' . $np . ' agencies. ' .
@@ -538,9 +611,9 @@ function sar_action_flush_market(array &$g, int $seat): void {
     foreach ($g['market'] as $uid) {
         if ($uid !== null) $g['decks']['componentDiscard'][] = $uid;
     }
-    $g['market'] = array_pad(sar_draw_component($g, 5), 5, null);
+    $g['market'] = array_pad(sar_draw_component($g, SAR_MARKET_SIZE), SAR_MARKET_SIZE, null);
     sar_log($g, 'flush', $p['name'] . ' pays ' . SAR_FLUSH_COST .
-        ' Credits to flush the Card Market — 5 new cards are revealed.', ['seat' => $seat]);
+        ' Credits to flush the Card Market — ' . SAR_MARKET_SIZE . ' new cards are revealed.', ['seat' => $seat]);
     unset($p);
 }
 

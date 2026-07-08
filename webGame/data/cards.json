@@ -1786,5 +1786,94 @@
   "rewardCredits": 0,
   "copies": 6,
   "art": null
+ },
+ "P12": {
+  "id": "P12",
+  "type": "Payload",
+  "name": "Light Payload",
+  "cost": 1,
+  "thrust": null,
+  "range": null,
+  "mass": 1,
+  "energy": null,
+  "energyMode": "",
+  "reliability": null,
+  "vp": 0,
+  "tags": [
+   "Basic"
+  ],
+  "text": "A plain payload with no special ability. Satisfies missions that require carrying an (uncrewed) payload. Always available for purchase.",
+  "flavor": "Cheap mass with a mission patch.",
+  "tier": "",
+  "rewardCredits": 0,
+  "copies": 0,
+  "art": null
+ },
+ "P13": {
+  "id": "P13",
+  "type": "Payload",
+  "name": "Standard Payload",
+  "cost": 1,
+  "thrust": null,
+  "range": null,
+  "mass": 2,
+  "energy": null,
+  "energyMode": "",
+  "reliability": null,
+  "vp": 0,
+  "tags": [
+   "Basic"
+  ],
+  "text": "A plain payload. Its heavier build satisfies missions that require payload Mass 2+. Always available for purchase.",
+  "flavor": "A little more heft for the manifest.",
+  "tier": "",
+  "rewardCredits": 0,
+  "copies": 0,
+  "art": null
+ },
+ "P14": {
+  "id": "P14",
+  "type": "Payload",
+  "name": "Heavy Payload",
+  "cost": 2,
+  "thrust": null,
+  "range": null,
+  "mass": 3,
+  "energy": null,
+  "energyMode": "",
+  "reliability": null,
+  "vp": 0,
+  "tags": [
+   "Basic"
+  ],
+  "text": "A plain heavy payload. Satisfies payload Mass 3 requirements and stresses your Thrust budget. Always available for purchase.",
+  "flavor": "Somebody has to lift the big one.",
+  "tier": "",
+  "rewardCredits": 0,
+  "copies": 0,
+  "art": null
+ },
+ "M21": {
+  "id": "M21",
+  "type": "Mission",
+  "name": "Suborbital Test Flight",
+  "cost": 0,
+  "thrust": null,
+  "range": 2,
+  "mass": null,
+  "energy": null,
+  "energyMode": "",
+  "reliability": null,
+  "vp": 1,
+  "tags": [
+   "Commercial",
+   "Basic"
+  ],
+  "text": "Fly Earth &rarr; Sub-Orbital Earth &rarr; Earth and land safely.<br>No payload required.<br>Standing contract: always available; each agency may complete it once per game.",
+  "flavor": "Light the candle, get it back in one piece.",
+  "tier": "Tier 1",
+  "rewardCredits": 2,
+  "copies": 1,
+  "art": null
  }
 }

@@ -60,6 +60,10 @@ const HINTS = {
   C08: 'Basic cards (Sterling Booster, Standard Tank, Heat Shield, Basic Battery) cost you 1 Credit less (minimum 1).',
   C09: 'All your Stage bonuses give +1 extra Range.',
   C10: 'Your deployed assets beyond Earth ZOI get +1 Power — deep-space probes work every round.',
+  P12: 'A plain payload with no abilities — just fills the "carry a payload" requirement. Basic: always purchasable for 1 Credit. Mass 1.',
+  P13: 'A plain payload, Mass 2 — the cheap way to satisfy "payload Mass 2+" missions. Basic — always purchasable.',
+  P14: 'A plain heavy payload, Mass 3 — for Mass-3 requirements, but it stresses your Thrust budget. Basic — always purchasable.',
+  M21: 'Standing contract, always available: fly Earth → Sub-Orbital → Earth and land (parachute or propulsive). No payload needed. Each agency may claim it once per game for 2 Credits + 1 VP — a guaranteed first job.',
 };
 
 export function hintFor(uid) {

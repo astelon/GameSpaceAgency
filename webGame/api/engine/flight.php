@@ -545,17 +545,9 @@ function sar_on_arrival(array &$g, string $craftId, string $node): void {
         }
     }
 
-    // Exploration milestones.
-    if (in_array($node, SAR_MOON_BRANCH, true) && $g['milestones']['moon'] === null) {
-        $g['milestones']['moon'] = $seat;
-        $g['players'][$seat]['vp'] += 2;
-        sar_log($g, 'milestone', sar_pname($g, $seat) . ' reaches the Moon branch first: +2 VP!', ['seat' => $seat, 'vp' => 2]);
-    }
-    if (in_array($node, SAR_MARS_BRANCH, true) && $g['milestones']['mars'] === null) {
-        $g['milestones']['mars'] = $seat;
-        $g['players'][$seat]['vp'] += 4;
-        sar_log($g, 'milestone', sar_pname($g, $seat) . ' reaches the Mars branch first: +4 VP!', ['seat' => $seat, 'vp' => 4]);
-    }
+    // Exploration rewards: personal near-Earth floor + global race ladder
+    // (includes the first-to-Moon/Mars milestones as the top rung).
+    sar_award_exploration($g, $seat, $node);
 
     // Stranded Crew (EV13): visit LEO with a Crewed payload, then return to Earth.
     if ($g['strandedCrew'] === 'unclaimed') {
