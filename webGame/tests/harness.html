@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- Resolve css/js/data/assets URLs from the webGame root, like index.html does. -->
+<base href="/">
+<title>Card sizing test harness</title>
+<link rel="stylesheet" href="css/game.css">
+</head>
+<body>
+<!-- Minimal copy of the real game layout: the three zones where cards are
+     shown to the player — hand, market and mission offer — with the same
+     ids/classes index.html and js/main.js use, so the production CSS applies
+     exactly as in the game. -->
+<div id="screen-game" class="screen">
+  <div id="layout">
+    <div id="center-col"></div>
+    <div id="right-col">
+      <div class="stack-panel">
+        <div class="side-label">Missions</div>
+        <div class="cards" id="mission-cards"></div>
+      </div>
+      <div class="stack-panel">
+        <div class="side-label">Card market</div>
+        <div class="cards" id="market-cards"></div>
+      </div>
+    </div>
+  </div>
+  <div id="bottombar">
+    <div id="hand-area"></div>
+  </div>
+</div>
+<div id="modal-root"></div>
+
+<script type="module">
+import { loadCards, CARDS } from '/js/data.js';
+import { renderCard } from '/js/cards.js';
+
+await loadCards();
+const ids = Object.keys(CARDS);
+const missions = ids.filter(id => CARDS[id].type === 'Mission');
+const components = ids.filter(id => !['Mission', 'Event'].includes(CARDS[id].type));
+
+// Every component card goes into the hand and the market, every mission card
+// into the mission offer — so a single odd-sized card anywhere fails the test.
+for (const id of components) document.getElementById('hand-area').append(renderCard(id + '#1'));
+for (const id of components) document.getElementById('market-cards').append(renderCard(id + '#1'));
+for (const id of missions) document.getElementById('mission-cards').append(renderCard(id + '#1'));
+
+window.__ready = true;
+</script>
+</body>
+</html>

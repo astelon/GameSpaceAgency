@@ -6,3 +6,8 @@ cards/art/generated/
 cards/output/print/
 webGame/api/data/*
 !webGame/api/data/.htaccess
+
+# Frontend test tooling
+node_modules/
+test-results/
+playwright-report/
