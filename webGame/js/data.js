@@ -38,6 +38,8 @@ export const EDGES = [
   ['marsZoi','marsHigh'], ['marsHigh','marsLow'], ['marsLow','subMars'], ['subMars','mars'],
 ];
 export const TW_CYCLE = [3,2,1,0,1,2,3,4];
+// Sub-orbital arcs decay at end of round: craft still there come down on the surface below.
+export const SUBORBITAL = { subEarth: 'earth', subMoon: 'moon', subMars: 'mars' };
 export const MOON_BRANCH = ['moonOrbit','subMoon','moon'];
 export const MARS_BRANCH = ['marsZoi','marsHigh','marsLow','subMars','mars'];
 export const EARTH_ONLY_REENTRY = ['S02','S04'];
@@ -144,6 +146,26 @@ export function tankRange(craft) {
 export function stageBonus(g, seat, uid) {
   const bonus = { E07: 2, T03: 1, T04: 2 }[cidOf(uid)] ?? 0;
   return bonus > 0 && hasTech(g, seat, 'C09') ? bonus + 1 : bonus;
+}
+
+// Mirrors sar_passive_landing: how a decaying sub-orbital craft would auto-land
+// at end of round without a command turn. Returns a label, or null (it crashes).
+export function passiveLanding(craft, surface) {
+  const engine = !!craftEngine(craft);
+  const legs = craft.cards.some(u => cidOf(u) === 'S14');
+  const lander = craftCards(craft, 'Payload', 'Lander').length > 0;
+  const crewed = craftCards(craft, 'Payload', 'Crewed').length > 0;
+  if (surface === 'moon') {
+    return engine && (legs || lander) ? (legs ? 'Landing Legs + Engine' : 'Lander + Engine') : null;
+  }
+  const chutes = surface === 'earth' ? craftCards(craft, null, 'Parachute') : [];
+  const reusable = chutes.find(u => hasTag(u, 'Reusable'));
+  if (reusable) return cardOf(reusable).name;
+  if (engine && legs) return 'Landing Legs + Engine';
+  if (chutes.length) return cardOf(chutes[0]).name;
+  if (lander) return 'Lander';
+  if (!crewed && craftCards(craft, null, 'Airbag').length) return 'airbags';
+  return null;
 }
 
 // ---------------------------------------------------------------- plan simulation
@@ -305,6 +327,16 @@ export function simulatePlan(g, craftIn, plan) {
     res.error = e.message;
   }
 
+  // Sub-orbital arcs decay: ending the plan there means an automatic touchdown
+  // (or a crash) during Maintenance unless a later command turn moves the craft.
+  if (res.ok && SUBORBITAL[craft.node]) {
+    const surf = SUBORBITAL[craft.node];
+    const dev = passiveLanding(craft, surf);
+    res.warnings.push(dev
+      ? `Sub-orbital arcs are not stable orbits: if the craft is still here at the end of the round it will touch down on ${NODES[surf].name} automatically (${dev}).`
+      : `⚠ Sub-orbital arcs are not stable orbits: with no parachute, airbags, Lander, or Landing Legs aboard, this craft will CRASH at the end of the round unless a later command turn lands it propulsively or climbs to orbit.`);
+  }
+
   function dock() {
     if (craft.node !== 'geo') throw new RuleFail('Docking happens at High Orbit (GEO)');
     if (!craftCards(craft, null, 'Docking').length) throw new RuleFail('Docking needs a Docking support card');
@@ -322,7 +354,7 @@ export function simulatePlan(g, craftIn, plan) {
       const card = cardOf(d.payload);
       const rover = cidOf(d.payload) === 'P09';
       if (rover) { if (!['moon','mars'].includes(craft.node)) throw new RuleFail('The Rover deploys on the Moon or Mars surface'); }
-      else if (!inSpace(craft.node)) throw new RuleFail(`${card.name} deploys at an orbital node`);
+      else if (!inSpace(craft.node) || SUBORBITAL[craft.node]) throw new RuleFail(`${card.name} deploys at a stable orbital node — a sub-orbital arc decays by the end of the round`);
       const assetCards = [d.payload, ...(d.supports || [])];
       craft.cards = craft.cards.filter(u => !assetCards.includes(u));
       res.assets.push({ node: craft.node, cards: assetCards, deployed: true, owner: seat,

@@ -786,6 +786,10 @@ function sar_maintenance(array &$g): void {
     $g['phase'] = 'maintenance';
     sar_log($g, 'phase', "Round {$g['round']} — Maintenance Phase.", ['phase' => 'maintenance']);
 
+    // 0. Sub-orbital decay: arcs are not orbits — anything still on one touches down.
+    require_once __DIR__ . '/flight.php';
+    sar_suborbital_decay($g);
+
     // 1. Recover craft that returned to Earth.
     foreach ($g['crafts'] as $id => $craft) {
         if ($craft['node'] !== 'earth' || $craft['deployed']) continue;
