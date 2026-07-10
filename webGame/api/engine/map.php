@@ -48,6 +48,10 @@ function sar_is_atmo(string $node): bool { return isset(SAR_NODES[$node]) ? SAR_
 // "In space" = any node that is not a surface (used for deploys and solar panels).
 function sar_in_space(string $node): bool { return isset(SAR_NODES[$node]) && !SAR_NODES[$node]['surface']; }
 
+// Sub-orbital arcs are ballistic, not stable orbits: a craft still on one at
+// the end of the round comes down on the mapped surface (see sar_suborbital_decay).
+const SAR_SUBORBITAL = ['subEarth' => 'earth', 'subMoon' => 'moon', 'subMars' => 'mars'];
+
 const SAR_MOON_BRANCH = ['moonOrbit', 'subMoon', 'moon'];
 const SAR_MARS_BRANCH = ['marsZoi', 'marsHigh', 'marsLow', 'subMars', 'mars'];
 

@@ -497,6 +497,11 @@ An Engine-free craft is only legal if it is already **in flight** or **in orbit*
 * **Moon landing** (Sub-Orbital Moon → Moon): the Moon has no atmosphere, so landing is always **propulsive** — an Engine is required. A dedicated Landing Lander **or** the rocket itself may serve as the lander (see Rocket-as-Lander below).
 * **Mars landing** (Sub-Orbital Mars → Mars Surface): Mars air is too thin for parachutes. Use **airbags** (uncrewed), a **Lander**, or a **propulsive** landing. A heat shield may still be used to aerobrake on the way down.
 * Each landing uses its own method. A Moon return trip needs a propulsive lunar landing plus an Earth landing method (parachute/propulsive) for the trip home.
+* **Sub-orbital arcs decay — touch down by the end of the round.** A Sub-Orbital node is a ballistic arc, not a stable orbit. Any craft still at `Sub-Orbital Earth`, `Sub-Orbital Moon`, or `Sub-Orbital Mars` when the Action Phase ends comes down on the body below during Maintenance:
+  * With a **passive lander** aboard — a parachute (Earth only), airbags (uncrewed, Earth/Mars), a Lander payload, or **Landing Legs + Engine** — the craft touches down **safely and automatically**: no command turn and no Range spent. Normal landing effects apply (single-use devices are expended, recovery credits pay out).
+  * On the airless Moon the automatic touchdown is always propulsive: it needs an **Engine** plus Landing Legs or a Lander to set down on.
+  * Without a passive lander, the player must spend one of their **command turns** during the round to land propulsively (or climb to a stable orbit) — otherwise the craft **crashes and is destroyed**.
+  * Because sub-orbital arcs decay, persistent assets (Satellites/Stations) may **not** be deployed at Sub-Orbital nodes.
 * **Aerobraking:** while moving *toward* a body with atmosphere (descending on the Earth or Mars branch), a craft may discard a `Reentry` heat-shield card to immediately gain **+2 Range**. The card is spent and, being a heat shield, was never a landing method anyway.
 * **Atmosphere nodes:** `Earth`, `Sub-Orbital Earth`, `Sub-Orbital Mars`, and `Mars Surface`. The Moon branch has no atmosphere. Cards that react to "entering atmosphere" (e.g., Solar Panel) trigger when a craft moves onto any atmosphere node.
 
@@ -688,6 +693,7 @@ Technologies should:
 * Assemble and Launch may be combined into one Command Turn if all components are in hand
 * **Early-game dynamics (v0.4):** always-buyable Basic payloads (Light/Standard/Heavy) so a payload is never unavailable; a 7-card market; the Suborbital Test Flight standing contract; and the two-layer Exploration Bonuses (personal LEO Credit floor + the diminishing Exploration Race ladder)
 * **Landing model:** a heat shield is heat/aerobrake only — landing requires a parachute (Earth), airbags (uncrewed, Earth/Mars), a Lander, or a propulsive burn
+* **Sub-orbital decay:** sub-orbital arcs are not stable orbits — a craft still on one at round end auto-lands with a passive lander (parachute / airbags / Lander / Landing Legs + Engine) or crashes; a propulsive landing without legs costs a command turn during the round
 
 ### Under Evaluation
 

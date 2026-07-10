@@ -434,6 +434,65 @@ function sar_apply_landing(array &$g, string $craftId, string $to, array $landin
 }
 
 // ---------------------------------------------------------------------------
+// Sub-orbital decay (Maintenance step 0). A sub-orbital node is a ballistic
+// arc, not a stable orbit: any craft still on one at the end of the round
+// comes down on the body below. With a passive lander aboard (parachute on
+// Earth, airbags if uncrewed, a Lander payload, or Landing Legs + Engine) it
+// touches down safely on its own; otherwise the owner had to spend a command
+// turn during the round to land it propulsively — and now it crashes.
+
+function sar_suborbital_decay(array &$g): void {
+    foreach (array_keys($g['crafts']) as $id) {
+        $craft = $g['crafts'][$id];
+        $surface = SAR_SUBORBITAL[$craft['node']] ?? null;
+        if ($surface === null) continue;
+        $landing = sar_passive_landing($craft, $surface);
+        if ($landing === null) {
+            foreach ($craft['cards'] as $uid) $g['decks']['componentDiscard'][] = $uid;
+            unset($g['crafts'][$id]);
+            sar_log($g, 'fail', $craft['name'] . "'s arc over " . SAR_NODES[$surface]['name'] .
+                ' decays with no way to brake — it crashes and is destroyed. (Land during the round with a command turn, or carry a parachute, airbags, a Lander, or Landing Legs.)',
+                ['craft' => $id, 'node' => $surface]);
+            continue;
+        }
+        $g['crafts'][$id]['node'] = $surface;
+        $g['crafts'][$id]['history'][] = $surface;
+        sar_log($g, 'move', $craft['name'] . "'s sub-orbital arc ends — it descends from " .
+            SAR_NODES[$craft['node']]['name'] . ' to ' . SAR_NODES[$surface]['name'] . '.',
+            ['craft' => $id, 'from' => $craft['node'], 'to' => $surface, 'cost' => 0]);
+        sar_apply_landing($g, $id, $surface, $landing, false);
+        sar_on_arrival($g, $id, $surface);
+    }
+}
+
+// Best hands-off landing available to a decaying sub-orbital craft, or null (crash).
+// Prefers options that expend nothing, then the ones that pay a recovery credit.
+function sar_passive_landing(array $craft, string $surface): ?array {
+    $engine = sar_craft_engine($craft) !== null;
+    $legs = (bool)array_filter($craft['cards'], fn($u) => explode('#', $u)[0] === 'S14');
+    $lander = (bool)sar_craft_cards($craft, 'Payload', 'Lander');
+    $crewed = (bool)sar_craft_cards($craft, 'Payload', 'Crewed');
+
+    if ($surface === 'moon') {
+        // No atmosphere: only a propulsive touchdown works, and hands-off only
+        // with deployed Landing Legs or a dedicated Lander to set down on.
+        return $engine && ($legs || $lander) ? ['method' => 'propulsive', 'uid' => null, 'extraRange' => 0] : null;
+    }
+    $chutes = $surface === 'earth' ? sar_craft_cards($craft, null, 'Parachute') : [];
+    foreach ($chutes as $uid) { // a reusable canopy is kept and still pays its recovery credit
+        if (sar_has_tag($uid, 'Reusable')) return ['method' => 'reentry', 'uid' => $uid, 'extraRange' => 0];
+    }
+    if ($engine && $legs) return ['method' => 'propulsive', 'uid' => null, 'extraRange' => 0];
+    if ($chutes) return ['method' => 'reentry', 'uid' => $chutes[0], 'extraRange' => 0];
+    if ($lander) return ['method' => 'lander', 'uid' => null, 'extraRange' => 0];
+    if (!$crewed) {
+        $bags = sar_craft_cards($craft, null, 'Airbag');
+        if ($bags) return ['method' => 'reentry', 'uid' => $bags[0], 'extraRange' => 0];
+    }
+    return null;
+}
+
+// ---------------------------------------------------------------------------
 // Deploys, docking, ability operation, arrival triggers
 
 function sar_plan_deploys(array &$g, string $craftId, array $plan, int $step, bool $dry): void {
@@ -459,6 +518,9 @@ function sar_deploy(array &$g, string $craftId, string $payloadUid, array $suppo
         if (!in_array($node, ['moon', 'mars'], true)) throw new SarError('The Rover deploys on the Moon or Mars surface');
     } else {
         if (!sar_in_space($node) || $node === 'earth') throw new SarError($card['name'] . ' must be deployed at an orbital node');
+        if (isset(SAR_SUBORBITAL[$node])) {
+            throw new SarError('A sub-orbital arc is not a stable orbit — the asset would fall by the end of the round. Deploy at an orbital node.');
+        }
         if ($cid === 'P10' && !in_array($node, ['geo', 'earthZoi', 'moonOrbit', 'subMoon', 'sunOrbit', 'marsZoi', 'marsHigh', 'marsLow', 'subMars'], true) && SAR_NODES[$node]['dist'] < 3) {
             throw new SarError('The Space Telescope deploys at High Orbit (GEO) or beyond');
         }
