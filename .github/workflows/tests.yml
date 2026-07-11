@@ -1,0 +1,44 @@
+name: Tests
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  backend:
+    name: Backend (PHP engine & card data)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+      - name: Card database integrity (schema + PHP/JSON consistency)
+        run: php webGame/tools/test_cards_data.php
+      - name: Engine fuzz/smoke games
+        run: php webGame/tools/test_engine.php 30
+      - name: Scripted rule scenarios
+        run: php webGame/tools/test_scenarios.php
+      - name: Sub-orbital decay rules
+        run: php webGame/tools/test_suborbital.php
+
+  frontend:
+    name: Frontend (card rendering)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - name: Install Playwright Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Card sizing tests (hand / market / mission offer)
+        run: npx playwright test
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-results
+          path: test-results/
+          retention-days: 7

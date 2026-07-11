@@ -1,0 +1,13 @@
+{
+  "name": "gamespaceagency",
+  "private": true,
+  "description": "Space Agency Race — tests for the web game",
+  "scripts": {
+    "test:frontend": "playwright test",
+    "test:backend": "php webGame/tools/test_cards_data.php && php webGame/tools/test_engine.php 20 && php webGame/tools/test_scenarios.php && php webGame/tools/test_suborbital.php",
+    "test": "npm run test:backend && npm run test:frontend"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.56"
+  }
+}

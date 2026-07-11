@@ -18,6 +18,7 @@
   --tech: #e377c2;
   --mission: #f5c542;
   --event: #d62728;
+  --card-w: 128px; /* uniform card width for hand, market and mission offers */
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { height: 100%; }
@@ -177,9 +178,20 @@ button { font-family: inherit; }
 
 .cardrow { display: flex; gap: 8px; flex-wrap: wrap; }
 
+/* Hand, market and mission offers share one uniform card size: same width
+   (--card-w) and same height (the physical card's aspect ratio), regardless
+   of how much content a card carries. Long rules text is clipped — the zoom
+   view shows it in full. */
+#hand-area .card, .stack-panel .card {
+  --cw: var(--card-w);
+  aspect-ratio: 744/1039;
+  display: flex; flex-direction: column;
+}
+#hand-area .card > *, .stack-panel .card > * { flex-shrink: 0; }
+#hand-area .card .c-text, .stack-panel .card .c-text { flex: 1 1 0; min-height: 0; overflow: hidden; }
+
 /* hand */
 #hand-area { display: flex; gap: 8px; padding-top: 8px; overflow-x: auto; min-height: 30px; align-items: flex-end; }
-#hand-area .card { --cw: 128px; }
 #action-bar { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
 #action-bar .info { font-size: 13px; color: var(--dim); margin-right: auto; }
 #action-bar .info b { color: var(--gold); }
@@ -207,7 +219,6 @@ button { font-family: inherit; }
 /* ============ RIGHT: market & missions ============ */
 .stack-panel { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 9px; }
 .stack-panel .cards { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 7px; }
-.stack-panel .card { --cw: 128px; }
 
 /* ============ LOG ============ */
 #log-panel { border-top: 1px solid var(--line); background: #0b1222; max-height: 160px;
@@ -344,7 +355,7 @@ button { font-family: inherit; }
   #action-bar::-webkit-scrollbar { display: none; }
   #action-bar .btn { padding: 10px 13px; font-size: 13.5px; white-space: nowrap; }
   #action-bar .info { font-size: 12px; min-width: 120px; }
-  #hand-area .card { --cw: 108px; }
+  :root { --card-w: 108px; } /* hand, market and missions all shrink together */
   #hand-area { padding-top: 6px; }
 
   /* full-screen sheets */
