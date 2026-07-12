@@ -5,6 +5,7 @@ export let CARDS = {};
 
 export async function loadCards() {
   const res = await fetch('data/cards.json');
+  if (!res.ok) throw new Error(`Card database failed to load (HTTP ${res.status})`);
   CARDS = await res.json();
 }
 

@@ -181,9 +181,29 @@ async function enterGame() {
     toast(e.message, 'bad');
     if (e instanceof ApiError) { session.clear(); showLobby(); return; }
   }
-  st.polling = setInterval(() => poll().catch(() => {}), 2200);
+  st.pollBusy = false; st.pollFails = 0; st.pollSkip = 0;
+  st.polling = setInterval(pollTick, 2200);
 }
 function stopPolling() { if (st.polling) clearInterval(st.polling); st.polling = null; }
+
+// One poll at a time, and back off when the server is failing: a slow or
+// overloaded host must not accumulate a queue of overlapping state requests
+// (each stuck request occupies a PHP process on the server — enough of them
+// takes the whole site down on shared hosting).
+async function pollTick() {
+  if (st.pollBusy) return;
+  if (st.pollSkip > 0) { st.pollSkip--; return; }
+  st.pollBusy = true;
+  try {
+    await poll();
+    st.pollFails = 0;
+  } catch {
+    st.pollFails++;
+    st.pollSkip = Math.min(2 ** st.pollFails, 16) - 1; // 4.4s → 8.8s → … → ~35s
+  } finally {
+    st.pollBusy = false;
+  }
+}
 
 async function poll(force = false) {
   const r = await gameCall('state', { since: force ? 0 : st.version });
@@ -720,7 +740,22 @@ function showGameOver() {
 // ---------------------------------------------------------------- boot
 
 (async function boot() {
-  await loadCards();
+  // Never leave the page blank: if the card database can't be fetched (server
+  // overloaded / offline), show the problem in the lobby and offer a retry.
+  for (;;) {
+    try { await loadCards(); break; }
+    catch (e) {
+      const box = $('lobby-content');
+      clear(box);
+      await new Promise(retry => {
+        box.append(
+          el('p', { class: 'help-note' },
+            'Could not reach the game server — it may be down or overloaded. ' +
+            '(' + e.message + ')'),
+          el('button', { class: 'btn', onclick: retry }, 'Retry'));
+      });
+    }
+  }
   if (session.room) enterGame();
   else showLobby();
 })();
