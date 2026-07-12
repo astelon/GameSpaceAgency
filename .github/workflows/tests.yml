@@ -21,6 +21,8 @@ jobs:
         run: php webGame/tools/test_scenarios.php
       - name: Sub-orbital decay rules
         run: php webGame/tools/test_suborbital.php
+      - name: HTTP API integration (auth, hand hiding, storage locking)
+        run: php webGame/tools/test_api.php
 
   frontend:
     name: Frontend (card rendering)

@@ -7,6 +7,7 @@ class SarStorage {
     private string $dir;
     /** @var resource|null */
     private $lockHandle = null;
+    private bool $inTxn = false;
 
     public function __construct() {
         $this->dir = __DIR__ . '/data';
@@ -23,6 +24,7 @@ class SarStorage {
                 $this->db = new PDO('sqlite:' . $this->dir . '/games.db');
                 $this->db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
                 $this->db->exec('PRAGMA journal_mode=WAL');
+                $this->db->exec('PRAGMA busy_timeout=5000');
                 $this->db->exec('CREATE TABLE IF NOT EXISTS games (
                     room TEXT PRIMARY KEY, state TEXT NOT NULL, version INTEGER NOT NULL, updated INTEGER NOT NULL)');
             } catch (Throwable $e) {
@@ -34,7 +36,12 @@ class SarStorage {
     // Serialize the whole request handling for one room.
     public function lock(string $room): void {
         if ($this->db) {
-            $this->db->beginTransaction();
+            // beginTransaction() opens a *deferred* SQLite transaction — no
+            // lock is actually taken until the first write, so two
+            // concurrent requests can both read, both mutate, and the last
+            // save() wins. BEGIN IMMEDIATE takes the write lock up front.
+            $this->db->exec('BEGIN IMMEDIATE');
+            $this->inTxn = true;
         } else {
             if (!preg_match('/^[A-Z0-9]{1,10}$/', $room)) {
                 throw new RuntimeException('Invalid room code');
@@ -52,7 +59,10 @@ class SarStorage {
 
     public function unlock(): void {
         if ($this->db) {
-            if ($this->db->inTransaction()) $this->db->commit();
+            if ($this->inTxn) {
+                $this->db->exec('COMMIT');
+                $this->inTxn = false;
+            }
         } elseif ($this->lockHandle) {
             flock($this->lockHandle, LOCK_UN);
             fclose($this->lockHandle);
@@ -60,16 +70,27 @@ class SarStorage {
         }
     }
 
+    // Decode a stored state blob, distinguishing "no row" (null input) from
+    // a corrupted one (invalid JSON, which json_decode also returns as null).
+    private function decodeState(?string $json): ?array {
+        if ($json === null) return null;
+        $data = json_decode($json, true);
+        if ($data === null && json_last_error() !== JSON_ERROR_NONE) {
+            throw new RuntimeException('Corrupted game state in storage: ' . json_last_error_msg());
+        }
+        return $data;
+    }
+
     public function load(string $room): ?array {
         if ($this->db) {
             $st = $this->db->prepare('SELECT state FROM games WHERE room = ?');
             $st->execute([$room]);
             $row = $st->fetchColumn();
-            return $row === false ? null : json_decode($row, true);
+            return $this->decodeState($row === false ? null : $row);
         }
         $file = $this->dir . '/' . $room . '.json';
         if (!file_exists($file)) return null;
-        return json_decode(file_get_contents($file), true);
+        return $this->decodeState(file_get_contents($file));
     }
 
     public function save(array $state): void {
@@ -80,7 +101,13 @@ class SarStorage {
                 ON CONFLICT(room) DO UPDATE SET state=excluded.state, version=excluded.version, updated=excluded.updated');
             $st->execute([$room, $json, $state['version'], time()]);
         } else {
-            file_put_contents($this->dir . '/' . $room . '.json', $json, LOCK_EX);
+            // Write to a per-save tmp file and rename() into place — rename is
+            // atomic on POSIX filesystems, so a crash mid-write can never leave
+            // a half-written ROOM.json for a later load() to trip over.
+            $file = $this->dir . '/' . $room . '.json';
+            $tmp = $file . '.tmp' . bin2hex(random_bytes(4));
+            file_put_contents($tmp, $json, LOCK_EX);
+            rename($tmp, $file);
         }
     }
 
@@ -95,11 +122,21 @@ class SarStorage {
         return $s ? $s['version'] : null;
     }
 
-    // Housekeeping: drop rooms idle for 3+ days.
+    // Housekeeping: drop rooms idle for 3+ days. Runs on a random 1-in-50
+    // sample of requests so it stays cheap without a cron job.
     public function cleanup(): void {
+        if (random_int(1, 50) !== 1) return;
         if ($this->db) {
-            if (random_int(1, 50) === 1) {
-                $this->db->exec('DELETE FROM games WHERE updated < ' . (time() - 3 * 86400));
+            $this->db->exec('DELETE FROM games WHERE updated < ' . (time() - 3 * 86400));
+            return;
+        }
+        $cutoff = time() - 3 * 86400;
+        foreach (glob($this->dir . '/*.json') ?: [] as $file) {
+            $mtime = @filemtime($file);
+            if ($mtime !== false && $mtime < $cutoff) {
+                $room = basename($file, '.json');
+                @unlink($file);
+                @unlink($this->dir . '/' . $room . '.lock');
             }
         }
     }

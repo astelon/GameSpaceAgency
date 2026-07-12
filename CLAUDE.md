@@ -19,6 +19,10 @@ hand, and always regenerate both together.
   - `php webGame/tools/test_engine.php 30` — full-game fuzz/smoke via `sar_apply()`
   - `php webGame/tools/test_scenarios.php` — scripted rule scenarios
   - `php webGame/tools/test_suborbital.php` — sub-orbital decay rules
+  - `php webGame/tools/test_api.php` — HTTP API integration: boots `php -S`
+    against an isolated temp copy of `api/`, drives create/join/start/state/
+    action over real HTTP, and asserts auth, hand hiding, and that concurrent
+    actions to one room serialize correctly (storage locking)
 - Frontend (Playwright): `npm ci && npx playwright test` — renders every card
   into the hand, market and mission-offer zones (desktop + mobile layouts) and
   asserts they all have identical dimensions. Harness: `webGame/tests/harness.html`.
