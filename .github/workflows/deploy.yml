@@ -1,0 +1,41 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'webGame/**'
+      - '.github/workflows/deploy.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-webgame
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: FTP deploy (webGame → htdocs)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Only the web edition is published: webGame/ becomes the web root
+      # inside htdocs/. Dev-only folders (tools/, tests/) and logs stay out,
+      # matching webGame/tools/deploy.sh. Files created on the server at
+      # runtime (api/data/ saves) are never tracked by the sync state, so
+      # they are left untouched.
+      - name: Sync webGame/ to htdocs/
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          local-dir: ./webGame/
+          server-dir: htdocs/
+          exclude: |
+            **/.git*
+            **/.git*/**
+            **/node_modules/**
+            tools/**
+            tests/**
+            **/*.log
