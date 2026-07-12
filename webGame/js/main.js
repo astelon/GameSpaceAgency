@@ -432,7 +432,7 @@ function renderRight() {
     if (!uid) return;
     const canBuy = canAct() && g.players[seat].credits >= basicCost(g, seat, cardOf(uid));
     const card = renderCard(uid, { onClick: () => zoomCard(uid, canBuy ? [
-      el('button', { class: 'btn', onclick: () => { closeAllModals(); doAction({ type: 'acquire', slot: i }); } },
+      el('button', { class: 'btn', onclick: () => { closeAllModals(); doAction({ type: 'acquire', slot: i, uid }); } },
         `Buy for ${basicCost(g, seat, cardOf(uid))} Cr (1 turn)`)] : []) });
     if (!canBuy && canAct()) card.classList.add('dim');
     row.append(card);

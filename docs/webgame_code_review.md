@@ -5,11 +5,19 @@ Static review of `webGame/` (frontend `js/`, PHP engine `api/engine/`, HTTP API
 state of `main` at c676caa. Every bug marked **[confirmed]** was reproduced
 with a script driving the real engine through `sar_apply()`.
 
+## Status
+
+The four confirmed engine bugs (§1.1–§1.4), two of the quick server fixes
+(§2.4, §2.5), and the Phase 0 safety net are **done** — see **[fixed]** /
+**[done]** tags below and the "Progress" note at the top of §7. Everything
+else in this document (§2.1–§2.3, §2.6, §3, §4, §5, §6, and the rest of §7)
+is still open.
+
 ---
 
 ## 1. Confirmed engine bugs
 
-### 1.1 Launch Abort System reroll result is discarded — the check is rolled *again* **[confirmed]**
+### 1.1 Launch Abort System reroll result is discarded — the check is rolled *again* **[confirmed] [fixed]**
 
 `flight.php` — when a reliability roll fails and the player owns C06, the
 engine parks a `pending` decision recording the failing step. Accepting the
@@ -34,7 +42,14 @@ indefinitely.
 `skipCheckStep` in the pending data and have `sar_launch_checks` return `'ok'`
 without rolling (and without re-charging energy) when resuming that exact step.
 
-### 1.2 Declining (or re-failing) the reroll never spends the command turn **[confirmed]**
+**Fixed:** `sar_run_flight()` now takes a `$skipCheckStep` parameter;
+`sar_resolve_reroll()` passes the pending decision's `step` through it so the
+resumed loop treats that surface departure as already cleared instead of
+calling `sar_launch_checks()` again. Regression test: `test_scenarios.php`
+Scenario 9 asserts exactly one `roll`-type log entry for the original check
+plus one for the reroll (reverting the fix reproduces the extra roll).
+
+### 1.2 Declining (or re-failing) the reroll never spends the command turn **[confirmed] [fixed]**
 
 `sar_resolve_reroll` failure/decline paths call `sar_launch_failure()` +
 `sar_skip_to_next_actor()` directly, never incrementing `turnsUsed`. A
@@ -45,7 +60,12 @@ retries — the failed attempt costs nothing but the destroyed engine.
 **Fix direction:** route all reroll resolutions through `sar_end_command_turn`
 (or increment `turnsUsed` when the pending decision is created).
 
-### 1.3 `stagedEngineFlight` is never cleared — engineless craft maneuver forever **[confirmed]**
+**Fixed:** the decline and reroll-failure paths in `sar_resolve_reroll()` now
+call `sar_end_command_turn($g, $seat)` instead of `sar_skip_to_next_actor($g)`
+directly, so `turnsUsed` increments. Regression test: Scenario 9 asserts
+`turnsUsed` advances by 1 after a decline.
+
+### 1.3 `stagedEngineFlight` is never cleared — engineless craft maneuver forever **[confirmed] [fixed]**
 
 Staging a Kick Stage (E07) sets `$craft['stagedEngineFlight'] = true` so the
 craft "still counts as the engine for the whole flight". Nothing ever resets
@@ -57,13 +77,26 @@ satisfying engine-dependent mission checks (`sar_craft_has_engine_or_staged`).
 **Fix direction:** clear the flag in `sar_finish_flight` (and on launch
 failure). Mission checks evaluated during the flight still see it set.
 
-### 1.4 `version` increments twice for decision actions **[confirmed]**
+**Fixed:** `sar_finish_flight()` and `sar_launch_failure()` both now reset
+`stagedEngineFlight` to `false` once the flight/attempt ends (mission checks
+mid-flight still observe it set beforehand, as intended). Regression test:
+`test_scenarios.php` Scenario 10 stages a craft's only Engine mid-flight,
+advances to the next round, and asserts `activate` with a multi-hop plan now
+throws "without an Engine".
+
+### 1.4 `version` increments twice for decision actions **[confirmed] [fixed]**
 
 `sar_resolve_reroll` does `$g['version']++` and `sar_apply` increments again
 after the action returns. Harmless today (version stays monotonic) but it
 breaks the "one action → one version" invariant the polling protocol implies,
 and it is exactly the kind of drift that hides real bugs later. Remove the
 inner increments.
+
+**Fixed:** removed both inner `$g['version']++` calls from
+`sar_resolve_reroll()`; `sar_apply()`'s single increment is now the only one.
+The fuzzer (`test_engine.php`) now asserts `version` advances by exactly 1 per
+accepted action, and `test_scenarios.php` Scenario 9 checks it across every
+reroll retry.
 
 ---
 
@@ -100,7 +133,7 @@ raising phantom ones. Fix: make `sar_apply` transactional (`$tmp = $g;`
 mutate `$tmp`; assign back on success — cheap with PHP copy-on-write), then
 the API layer and the fuzzer both get the right semantics for free.
 
-### 2.4 Fuel Depot check is looser on the server than the rule
+### 2.4 Fuel Depot check is looser on the server than the rule **[fixed]**
 
 `flight.php` validates a depot with `sar_craft_cards($depot, 'Payload', 'Station')`
 — i.e. *any* deployed Station-tagged payload. P08 (Station Hub) also carries
@@ -108,12 +141,21 @@ the `Station` tag, so a crafted request can refuel from a Station Hub. The
 client only offers P11. Check the card id (or add a dedicated `Depot` tag in
 the CSV so data, not code, decides).
 
-### 2.5 Acquire-by-slot races in online games
+**Fixed:** the depot check in `sar_run_flight()` now requires the specific
+`P11` card id on the depot craft instead of the `Station` tag.
+
+### 2.5 Acquire-by-slot races in online games **[fixed]**
 
 `{type:'acquire', slot:i}` buys whatever is in slot *i* at execution time.
 Between rendering and the click another player may have bought that slot and
 it refilled — the buyer silently gets (and pays for) a different card. Include
 the expected `uid` in the action and reject on mismatch.
+
+**Fixed:** the client (`main.js`) now sends the market slot's `uid` alongside
+`slot`; `sar_action_acquire()` rejects the action with "That market slot
+changed — someone else bought it first" if the slot no longer holds that uid.
+The `uid` field is optional server-side for backward compatibility with older
+clients/requests that omit it.
 
 ### 2.6 Smaller server items
 
@@ -235,11 +277,16 @@ full-game fuzz, scripted scenarios, sub-orbital rules, card-sizing UI), but:
    (hand hiding), lobby lifecycle, storage locking. Bugs §2.1–§2.6 live in
    exactly the files with zero tests.
 2. **No parity tests between the PHP engine and the JS mirror** (§3.3).
-3. **The fuzzer's `try_apply` keeps state after `SarError`** (§2.3), which
-   undermines the invariant checking that is its whole point.
-4. **The confirmed bugs of §1 show the gap:** no scenario ever accepts a
+3. ~~**The fuzzer's `try_apply` keeps state after `SarError`** (§2.3), which
+   undermines the invariant checking that is its whole point.~~ **[fixed]**
+   `try_apply()` now snapshots `$g` before each action and restores it on
+   `SarError`; it also asserts `version` advances by exactly 1 per accepted
+   action.
+4. ~~**The confirmed bugs of §1 show the gap:** no scenario ever accepts a
    reroll, checks `turnsUsed` after a failure, or activates a kick-staged
-   craft in a later round.
+   craft in a later round.~~ **[fixed]** `test_scenarios.php` Scenarios 9–10
+   cover exactly these cases (both were verified to fail against the
+   pre-fix code).
 5. **CI never verifies the generated data files match the CSV** — a hand edit
    of `cards.json`/`cards_data.php` (which CLAUDE.md forbids) would pass.
 6. No linters: `php -l`, PHPStan, ESLint. No PHP version matrix even though
@@ -255,22 +302,30 @@ Ordered so each phase lands green on the existing suites before the next
 starts. Phases 1–3 are engine/server work; 4 is frontend; 5 is CI. Effort
 markers: (S)mall < ~1h, (M)edium, (L)arge.
 
-### Phase 0 — Safety net first
-- (S) Fix `try_apply` in the fuzzer to snapshot/restore state around rejected
+### Phase 0 — Safety net first ✅ done
+- [x] (S) Fix `try_apply` in the fuzzer to snapshot/restore state around rejected
   actions, and drop the no-op `assert()` calls.
-- (M) Add regression scenarios for bugs §1.1–§1.3 to `test_scenarios.php`
-  (they will fail — that's the point; they gate Phase 1).
-- (S) Add `version` monotonicity (+1 per action) to the fuzzer invariants.
+- [x] (M) Add regression scenarios for bugs §1.1–§1.3 to `test_scenarios.php`
+  (they will fail — that's the point; they gate Phase 1). Confirmed: both new
+  scenarios fail when run against the pre-fix engine code, and pass after.
+- [x] (S) Add `version` monotonicity (+1 per action) to the fuzzer invariants.
 
-### Phase 1 — Correctness fixes (small, independent commits)
-- (M) §1.1 reroll resume: record the resumed step in pending data; skip the
+### Phase 1 — Correctness fixes (small, independent commits) — partially done
+- [x] (M) §1.1 reroll resume: record the resumed step in pending data; skip the
   reliability roll and its energy charges on resume.
-- (S) §1.2 spend the command turn on reroll decline/failure.
-- (S) §1.3 clear `stagedEngineFlight` in `sar_finish_flight` /
+- [x] (S) §1.2 spend the command turn on reroll decline/failure.
+- [x] (S) §1.3 clear `stagedEngineFlight` in `sar_finish_flight` /
   `sar_launch_failure`.
-- (S) §1.4 remove the inner `version++`.
-- (S) §2.4 depot check by card id (or new `Depot` tag).
-- (S) §2.5 optional `uid` echo on acquire; reject mismatches.
+- [x] (S) §1.4 remove the inner `version++`.
+- [x] (S) §2.4 depot check by card id (or new `Depot` tag).
+- [x] (S) §2.5 optional `uid` echo on acquire; reject mismatches.
+
+All Phase 0 + Phase 1 items above are done, covered by 51 assertions in
+`test_scenarios.php` (2 new scenarios), the strengthened `test_engine.php`
+fuzzer (40-game run green), `test_suborbital.php`, `test_cards_data.php`, and
+the Playwright card-sizing suite (8/8) — all pass with the fixes applied.
+Remaining Phase 2–5 items (transactional engine core, storage/API hardening,
+frontend robustness/parity, CI) are unstarted.
 
 ### Phase 2 — Transactional engine core
 - (M) Make `sar_apply` copy-on-write: mutate a copy, commit on success. Then
