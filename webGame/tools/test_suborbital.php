@@ -5,9 +5,7 @@
 // otherwise they crash. Also checks the deploy restriction at sub-orbital nodes.
 // Usage: php webGame/tools/test_suborbital.php
 
-require_once __DIR__ . '/../api/engine/engine.php';
-require_once __DIR__ . '/../api/engine/flight.php';
-require_once __DIR__ . '/../api/engine/missions.php';
+require_once __DIR__ . '/../api/engine/bootstrap.php';
 
 $fails = 0;
 function check(bool $cond, string $label): void {

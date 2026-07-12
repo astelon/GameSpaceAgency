@@ -127,7 +127,12 @@ webGame/
 │   ├── storage.php       SQLite or JSON-file persistence with locking
 │   ├── data/             runtime saves (blocked from the web)
 │   └── engine/
-│       ├── engine.php    state machine: setup, phases, actions, maintenance
+│       ├── bootstrap.php requires + sar_apply() public entry point
+│       ├── constants.php error types, game/card constants, logging
+│       ├── state.php     derived values, craft helpers, state schema
+│       ├── lobby.php     game creation, lobby, game start
+│       ├── phases.php    phase flow, maintenance, scoring, pending decisions
+│       ├── actions.php   simple command-turn actions
 │       ├── flight.php    launches, movement, staging, landings, deploys, docking
 │       ├── missions.php  mission predicates + auto-claiming
 │       ├── map.php       orbital node graph

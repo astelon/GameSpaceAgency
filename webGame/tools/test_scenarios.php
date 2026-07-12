@@ -3,9 +3,7 @@
 // incomes, stations, maintenance and end-game scoring.
 // Usage: php webGame/tools/test_scenarios.php
 
-require_once __DIR__ . '/../api/engine/engine.php';
-require_once __DIR__ . '/../api/engine/flight.php';
-require_once __DIR__ . '/../api/engine/missions.php';
+require_once __DIR__ . '/../api/engine/bootstrap.php';
 
 $pass = 0; $fail = 0;
 function ok(bool $cond, string $label): void {
@@ -332,6 +330,24 @@ try {
     sar_apply($g, 0, ['type' => 'activate', 'craft' => $craftId, 'plan' => ['path' => ['leo', 'geo']]]);
 } catch (SarError $e) { $threw = str_contains($e->getMessage(), 'without an Engine'); }
 ok($threw, 'an engineless craft cannot maneuver in a later round — stagedEngineFlight no longer bypasses the Engine gate (§1.3)');
+
+echo "— Scenario 11: sar_apply() is transactional — a rejected action leaves state untouched (regression for review §2.3)\n";
+$g = fresh();
+[$eng, $tank] = give($g, 0, ['E02', 'T01']);
+$g['players'][0]['hand'] = [$eng, $tank];
+$before = $g;
+$threw = false;
+try {
+    // sar_action_launch mutates the craft (node → earth, range, launchRound,
+    // history) *before* the dry-run probe validates the plan. 'moon' is not
+    // directly connected to 'earth', so the probe throws "Invalid route" —
+    // if sar_apply() were not transactional, the half-launched craft would
+    // leak into $g even though the whole action was rejected.
+    sar_apply($g, 0, ['type' => 'launch', 'components' => [$eng, $tank],
+        'plan' => ['path' => ['earth', 'moon']]]);
+} catch (SarError $e) { $threw = str_contains($e->getMessage(), 'Invalid route'); }
+ok($threw, 'the malformed launch plan is rejected with "Invalid route"');
+ok($g == $before, 'state is byte-for-byte identical to before the rejected action — no half-launched craft leaked (§2.3)');
 
 echo "\n$pass passed, $fail failed\n";
 exit($fail ? 1 : 0);

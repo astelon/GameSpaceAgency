@@ -3,35 +3,13 @@
 // bot through the public sar_apply() interface and checks invariants.
 // Usage: php webGame/tools/test_engine.php [games=20] [-v]
 
-require_once __DIR__ . '/../api/engine/engine.php';
-require_once __DIR__ . '/../api/engine/flight.php';
-require_once __DIR__ . '/../api/engine/missions.php';
+require_once __DIR__ . '/../api/engine/bootstrap.php';
 
 $games = (int)($argv[1] ?? 20);
 $verbose = in_array('-v', $argv, true);
 
 function invariants(array $g): void {
-    foreach ($g['players'] as $p) {
-        if ($p['credits'] < 0) throw new Exception("negative credits for {$p['name']}");
-        if ($p['vp'] < 0) throw new Exception("negative vp for {$p['name']}");
-    }
-    foreach ($g['crafts'] as $c) {
-        if ($c['range'] < 0) throw new Exception('negative range on ' . $c['id']);
-        if ($c['energy'] < 0) throw new Exception('negative energy on ' . $c['id']);
-        if ($c['node'] !== 'assembly' && !isset(SAR_NODES[$c['node']])) throw new Exception('bad node ' . $c['node']);
-    }
-    // No card duplication: every uid appears at most once across all zones.
-    $seen = [];
-    $zones = [$g['decks']['component'], $g['decks']['componentDiscard'], $g['market']];
-    foreach ($g['players'] as $p) { $zones[] = $p['hand']; $zones[] = $p['tableau']; }
-    foreach ($g['crafts'] as $c) $zones[] = $c['cards'];
-    foreach ($zones as $zone) {
-        foreach ((array)$zone as $uid) {
-            if ($uid === null) continue;
-            if (isset($seen[$uid])) throw new Exception("card duplicated: $uid");
-            $seen[$uid] = true;
-        }
-    }
+    sar_validate_state($g); // schema + no-negative-resources + no-duplicate-cards (state.php)
 }
 
 function try_apply(array &$g, int $seat, array $action): bool {

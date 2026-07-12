@@ -4,7 +4,8 @@
 // mission's printed conditions claims it immediately (energy costs are paid
 // automatically, Battery Packs included).
 
-require_once __DIR__ . '/engine.php';
+require_once __DIR__ . '/constants.php';
+require_once __DIR__ . '/state.php';
 
 // True if $needle appears as an ordered subsequence of node history.
 function sar_history_seq(array $history, array $needle): bool {
@@ -27,7 +28,7 @@ function sar_payload_info(array $craft): array {
 }
 
 function sar_craft_has_engine_or_staged(array $craft): bool {
-    return sar_craft_engine($craft) !== null || !empty($craft['stagedEngineFlight']);
+    return sar_craft_engine($craft) !== null || $craft['stagedEngineFlight'];
 }
 
 function sar_player_has_deployed(array $g, int $seat, string $tag, bool $inSpace = false): bool {
@@ -71,7 +72,7 @@ function sar_mission_check(array $g, string $mid, array $craft): ?array {
                 ? ['energy' => 2] : null;
         case 'M06': // Crewed Station Visit: GEO, dock with station, return; Crewed + Docking + Engine
             $dockCard = (bool)sar_craft_cards($craft, null, 'Docking');
-            return ($atEarth && !empty($craft['docked']) && $crewed && $dockCard && sar_craft_has_engine_or_staged($craft))
+            return ($atEarth && $craft['docked'] && $crewed && $dockCard && sar_craft_has_engine_or_staged($craft))
                 ? ['energy' => 0] : null;
         case 'M07': // Emergency Resupply: LEO + return, payload Mass 2+
             return ($atEarth && in_array('leo', $hist, true) && $pm >= 2) ? ['energy' => 0] : null;
@@ -84,18 +85,18 @@ function sar_mission_check(array $g, string $mid, array $craft): ?array {
                 && sar_craft_has_engine_or_staged($craft)
                 && sar_player_has_deployed($g, $seat, 'Satellite', true)) ? ['energy' => 0] : null;
         case 'M10': // Capsule Recovery: land at Earth from Sub-Orbital, payload Mass 1+, Reentry support
-            return ($atEarth && !empty($craft['usedReentry']) && $pm >= 1) ? ['energy' => 0] : null;
+            return ($atEarth && $craft['usedReentry'] && $pm >= 1) ? ['energy' => 0] : null;
         case 'M11': // Reusable Flight Test: Earth→Sub-Orbital→Earth, Reusable payload + Reusable Reentry
             $reusablePayload = $pl['uid'] && in_array('Reusable', $pl['card']['tags'], true);
             return ($atEarth && sar_history_seq($hist, ['earth', 'subEarth', 'earth'])
-                && $reusablePayload && !empty($craft['usedReusableReentry'])) ? ['energy' => 0] : null;
+                && $reusablePayload && $craft['usedReusableReentry']) ? ['energy' => 0] : null;
         case 'M12': // Lunar Sample Return: Moon surface + return; Cargo Return Capsule; Reentry for Earth
             $cargo = (bool)array_filter($craft['cards'], fn($u) => explode('#', $u)[0] === 'P07');
-            return ($atEarth && in_array('moon', $hist, true) && $cargo && !empty($craft['usedReentry']))
+            return ($atEarth && in_array('moon', $hist, true) && $cargo && $craft['usedReentry'])
                 ? ['energy' => 0] : null;
         case 'M13': // Tourist Hop: Earth→Sub-Orbital→Earth, Crewed payload + Reentry support
             return ($atEarth && sar_history_seq($hist, ['earth', 'subEarth', 'earth'])
-                && $crewed && !empty($craft['usedReentry'])) ? ['energy' => 0] : null;
+                && $crewed && $craft['usedReentry']) ? ['energy' => 0] : null;
         case 'M14': // Weather Satellite: deploy a Satellite payload at High Orbit (GEO)
             return ($craft['deployed'] && $node === 'geo' && $pl['uid'] && in_array('Satellite', $pl['card']['tags'], true))
                 ? ['energy' => 0] : null;
@@ -107,7 +108,7 @@ function sar_mission_check(array $g, string $mid, array $craft): ?array {
             return ($craft['deployed'] && $node === 'moonOrbit' && $pl['uid'] && in_array('Satellite', $pl['card']['tags'], true))
                 ? ['energy' => 0] : null;
         case 'M17': // Crewed Lunar Flyby: Moon Orbit + return, Crewed + Reentry support
-            return ($atEarth && in_array('moonOrbit', $hist, true) && $crewed && !empty($craft['usedReentry']))
+            return ($atEarth && in_array('moonOrbit', $hist, true) && $crewed && $craft['usedReentry'])
                 ? ['energy' => 0] : null;
         case 'M18': // Station Assembly: designate an On-Orbit Station
             return ($craft['isStation'] && $node === 'geo') ? ['energy' => 0] : null;
@@ -201,7 +202,7 @@ function sar_check_missions(array &$g, string $craftId): void {
             $bonusBits[] = 'Contracting Office +1 Credit';
         }
         // Habitation Ring: crewed missions that dock at the ring's station grant +1 VP.
-        if ($mid === 'M06' && !empty($craft['dockedHab'])) {
+        if ($mid === 'M06' && $craft['dockedHab']) {
             $vp += 1;
             $bonusBits[] = 'Habitation Ring +1 VP';
         }

@@ -8,10 +8,11 @@ with a script driving the real engine through `sar_apply()`.
 ## Status
 
 The four confirmed engine bugs (§1.1–§1.4), two of the quick server fixes
-(§2.4, §2.5), and the Phase 0 safety net are **done** — see **[fixed]** /
-**[done]** tags below and the "Progress" note at the top of §7. Everything
-else in this document (§2.1–§2.3, §2.6, §3, §4, §5, §6, and the rest of §7)
-is still open.
+(§2.4, §2.5), §2.3 (transactional `sar_apply`), the `engine.php` split
+(part of the §4 code smells), Phase 0, and Phase 2 are **done** — see
+**[fixed]** / **[done]** tags below and the "Progress" note at the top of §7.
+Everything else in this document (§2.1–§2.2, §2.6, §3, the rest of §4, §5,
+§6, and Phases 3–5 of §7) is still open.
 
 ---
 
@@ -119,7 +120,7 @@ action, and the last `save()` wins — a classic lost update (or an unhandled
 trivially avoidable: generate inside the lock and retry while `load()` is
 non-null.
 
-### 2.3 `sar_apply` can throw mid-mutation; callers must know to discard state
+### 2.3 `sar_apply` can throw mid-mutation; callers must know to discard state **[fixed]**
 
 `sar_action_launch` mutates the craft (node → `earth`, `launchRound`,
 `history`) and charges the EV03 credit *before* the dry-run validation can
@@ -132,6 +133,18 @@ states that are unreachable in production, masking real bugs and potentially
 raising phantom ones. Fix: make `sar_apply` transactional (`$tmp = $g;`
 mutate `$tmp`; assign back on success — cheap with PHP copy-on-write), then
 the API layer and the fuzzer both get the right semantics for free.
+
+**Fixed:** `sar_apply()` now mutates a local `$tmp = $g` copy and only
+assigns it back to the caller's `$g` reference after the action completes
+without throwing (`bootstrap.php`). A thrown `SarError` therefore always
+leaves `$g` byte-for-byte untouched, regardless of how far the action got
+before failing. Regression test: `test_scenarios.php` Scenario 11 launches a
+real craft with a plan whose path steps to an unconnected node (`moon` is not
+adjacent to `earth`) — `sar_action_launch` mutates the craft's node/range/
+history *before* the dry-run probe rejects the bad route, and the test
+asserts `$g` is unchanged afterwards (reverting the fix reproduces a leaked
+half-launched craft). `test_engine.php`'s `try_apply` keeps its own
+snapshot/restore as a second, independent check of the same guarantee.
 
 ### 2.4 Fuel Depot check is looser on the server than the rule **[fixed]**
 
@@ -234,15 +247,35 @@ phase 4.
 
 ## 4. Code smells & structure
 
-- **`engine.php` is a 964-line grab bag** of constants, lobby, setup, phase
+- ~~**`engine.php` is a 964-line grab bag** of constants, lobby, setup, phase
   flow, six action handlers, maintenance, and scoring, all free functions over
   an untyped array. There is no written schema for the game state or the craft
   record; per-card fields (`p03Round`, `s11Round`, `relayUsedRound`,
   `ceramicAeroUsed`, `dockedHab`, `stagedEngineFlight`) get bolted on at first
-  use, so "does this key exist?" is answered with `?? / !empty()` everywhere.
-- **`require_once` inside functions** (`sar_apply`, `sar_maintenance`,
-  `sar_action_decision`) — a load-order hack; a single bootstrap include that
-  loads `map → engine → flight → missions` removes it.
+  use, so "does this key exist?" is answered with `?? / !empty()` everywhere.~~
+  **[fixed]** `engine.php` is gone, split into `constants.php` (error types,
+  card/game constants, logging), `state.php` (derived values, craft helpers,
+  and the explicit player/craft schema — see below), `lobby.php`
+  (new/add/start), `phases.php` (planning/action/maintenance/scoring/pending
+  decisions), `actions.php` (the simple command-turn actions), and
+  `bootstrap.php` (requires + the public `sar_apply()` entry point). Pure
+  mechanical move, no behavior change — same test suites, all green.
+  Every craft now gets its full field set (`relayUsedRound`, `p03Round`,
+  `s11Round`, `ceramicAeroUsed`, `dockedHab`, `stagedEngineFlight`, etc.)
+  initialized in `sar_new_craft()`, so the `?? / !empty()` guards that only
+  existed because a field might be missing were removed in favor of direct
+  access; `sar_validate_state()` (`state.php`) is the single place that
+  documents and enforces the player/craft schema, called by the test suites
+  after every accepted action (not by `sar_apply()` itself — that per-action
+  cost isn't worth paying in production).
+- **`require_once` inside functions** (`sar_maintenance`,
+  `sar_action_decision` in `phases.php`) — a load-order hack to avoid a
+  top-level circular require with `flight.php` (which itself requires
+  `phases.php`). `bootstrap.php` now requires every module unconditionally at
+  the top before `sar_apply()` is ever called, so these two lazy requires are
+  redundant in practice and kept only as defensive belt-and-suspenders;
+  `sar_apply()`'s own former `require_once` of `flight.php`/`missions.php`
+  (truly dead now that `bootstrap.php` requires them) was removed.
 - **Magic card ids everywhere.** `'C01'…'C10'`, `'EV01'…'EV13'`, `'S07'`,
   `'P04'`… are hard-coded in PHP, duplicated in JS, and described a third time
   in `cards.js` HINTS. The CSV already has a Tags column; moving behavior
@@ -324,20 +357,36 @@ All Phase 0 + Phase 1 items above are done, covered by 51 assertions in
 `test_scenarios.php` (2 new scenarios), the strengthened `test_engine.php`
 fuzzer (40-game run green), `test_suborbital.php`, `test_cards_data.php`, and
 the Playwright card-sizing suite (8/8) — all pass with the fixes applied.
-Remaining Phase 2–5 items (transactional engine core, storage/API hardening,
-frontend robustness/parity, CI) are unstarted.
+Phase 2 (below) is now also done. Remaining Phase 3–5 items (storage/API
+hardening, frontend robustness/parity, CI) are unstarted.
 
-### Phase 2 — Transactional engine core
-- (M) Make `sar_apply` copy-on-write: mutate a copy, commit on success. Then
+### Phase 2 — Transactional engine core ✅ done
+- [x] (M) Make `sar_apply` copy-on-write: mutate a copy, commit on success. Then
   document (in one place) that a thrown `SarError` leaves `$g` untouched.
-- (M) Define the state and craft schemas explicitly: initialize *all* craft
+  **Fixed:** see §2.3 above; regression test in `test_scenarios.php` Scenario 11.
+- [x] (M) Define the state and craft schemas explicitly: initialize *all* craft
   fields in `sar_new_craft`, add `sar_validate_state()` (used by tests and
   optionally after each apply in debug), delete the `?? 0`/`!empty()` guards
   that only exist because fields may be missing.
-- (L) Split `engine.php`: `bootstrap.php` (requires), `constants.php`,
+  **Fixed:** every craft field is initialized in `sar_new_craft()`
+  (`state.php`); `sar_validate_state()` checks the full player/craft field
+  set (`SAR_PLAYER_FIELDS`/`SAR_CRAFT_FIELDS`) plus non-negative
+  credits/vp/range/energy, valid `level`/`owner`/`node`, and no card uid
+  duplicated across zones. `test_engine.php`'s fuzzer now calls it after
+  every accepted action across all 40 games in the default run; it throws a
+  distinct `SarInvariantError` (not `SarError`) so the fuzzer's
+  legal-rejection handling can never accidentally swallow a real schema bug.
+- [x] (L) Split `engine.php`: `bootstrap.php` (requires), `constants.php`,
   `lobby.php` (new/add/start), `phases.php` (planning/action/maintenance/
   scoring), `actions.php` (simple actions), keeping `flight.php`/`missions.php`.
   Pure mechanical moves, no behavior change, fuzz + scenarios green after.
+  **Fixed:** see §4 above; also added `state.php` for the derived-value/craft
+  helpers and the schema validator, which the original sketch didn't call out
+  a home for. All four require sites (`api/index.php`,
+  `tools/test_engine.php`, `tools/test_scenarios.php`,
+  `tools/test_suborbital.php`) now require `bootstrap.php` instead of the old
+  `engine.php`; verified end-to-end over real HTTP (`php -S` + create/start/
+  state/action) in addition to the CLI suites.
 
 ### Phase 3 — Storage & API hardening
 - (S) `BEGIN IMMEDIATE` + `busy_timeout` in SQLite mode (§2.1).
