@@ -1,6 +1,6 @@
 # 🚀 SPACE AGENCY RACE
 
-**Official Design & Ruleset Draft (v0.4)**
+**Official Design & Ruleset Draft (v0.5)**
 
 > *This document defines the current state of the game design. It is intended as the **first official draft** to be reviewed by designers, developers, and playtesters. The goal is to present a **complete, playable ruleset** while clearly documenting design intent, assumptions, and future iteration points.*
 
@@ -116,7 +116,7 @@ The Transfer Window represents planetary alignment for interplanetary transfers.
 | Moon Orbit | 5 | |
 | Sub-Orbital Moon | 6 | |
 | Moon (surface) | 7 | |
-| Sun Orbit | 5 | Shared with Moon branch start |
+| Sun Orbit | 5 | On the Mars branch; same distance as Moon Orbit |
 | Transfer Window | 5 + TW | TW = 0–5 per round |
 | Mars ZOI | 6 + TW | |
 | Mars High Orbit | 7 + TW | |
@@ -174,7 +174,7 @@ Tracking note:
    * Separate Mission cards by **Tier 1**, **Tier 2**, and **Tier 3** before shuffling.
    * Shuffle only the **Tier 1 Mission** stack at setup.
    * Keep Tier 2 and Tier 3 Missions face-down beside the board until they unlock.
-   * **Scale the Component Deck to the player count:** 4 players use all cards (~143); 3 players remove 1 copy of every card with 3+ copies (~114); 2 players remove 1 copy of every card plus a 2nd copy of every card with 5+ copies (~91). Removed copies go back in the box unseen. (Players cycle ~16 drawn cards each plus market churn; this keeps ~60% of the deck flowing per game at any count, so combo pieces like the Station Hub stay findable.)
+   * **Scale the Component Deck to the player count:** 4 players use all cards (~155); 3 players remove 1 copy of every card with 3+ copies (~123); 2 players remove 1 copy of every card plus a 2nd copy of every card with 5+ copies (~99). Removed copies go back in the box unseen. (Players cycle ~16 drawn cards each plus market churn; this keeps ~60% of the deck flowing per game at any count, so combo pieces like the Station Hub stay findable.)
    * Shuffle the remaining component cards (Engines, Tanks, Payloads, Support, Technology) into one **Component Deck**.
    * Shuffle the **Event Deck** separately. Missions and Events are always used in full.
 
@@ -182,7 +182,8 @@ Tracking note:
 
    * 3 Tier 1 Mission cards in the Mission display. Ensure at least one **easy** Tier 1 mission
      (a payload-only or deploy mission such as *LEO Deployment*) is among the three, so round 1
-     is never a dead hand — if none appears, swap the oldest for one drawn from the deck.
+     is never a dead hand — if none appears, set one of the three aside and draw replacements
+     until an easy one appears, then shuffle the set-aside cards back into the Mission deck.
    * 7 Component cards in the **Card Market** (a wider offer means a useful part is reliably on
      display).
 
@@ -213,7 +214,7 @@ The game ends after a fixed number of rounds (**8**). If the Mission deck is dep
 ### 7.1 Planning Phase
 
 1. **Reveal Event:** Flip the top card of the Event Deck. Its effect applies for the entire round. If the Event Deck is empty, skip this step.
-2. **Advance Transfer Window:** Move the TW marker one step along its printed cycle: **3 → 2 → 1 → 0 → 1 → 2 → 3 → 4**, repeating. The full cycle is visible on the board so windows can be planned in advance. (The marker starts on the first space at setup.)
+2. **Advance Transfer Window:** Move the TW marker one step along its printed cycle: **3 → 2 → 1 → 0 → 1 → 2 → 3 → 4**, repeating. The full cycle is visible on the board so windows can be planned in advance. The marker starts on the first space at setup and **the advance is skipped on round 1**, so rounds 1–8 play the eight printed values in order.
 3. **Draw Cards:** Each player draws **2 cards** from the Component Deck into their hand (hand limit is **5**).
 4. **Emergency Sell:** Each player may discard up to 2 cards from hand to gain 1 Credit each. (This is the only way to sell cards — there is no Sell action.)
 
@@ -234,9 +235,9 @@ At the **start of the Action Phase**, refill each in-flight craft's Energy to it
 #### Available Actions
 
 * **Acquire Card** – Buy one face-up card from the **Card Market** (or any `Basic` card) by paying its Credit cost; add it to your hand. Immediately refill the empty market slot from the Component Deck.
-* **Flush the Market** *(free action)* – Once per Command Turn, before or instead of browsing a stale market, pay **2 Credits** to discard all five face-up Card Market cards and reveal five new ones from the Component Deck. This does **not** consume the Command Turn, so you may flush and then Acquire one of the new cards in the same turn.
+* **Flush the Market** *(free action)* – Once per Command Turn, before or instead of browsing a stale market, pay **2 Credits** to discard all seven face-up Card Market cards and reveal seven new ones from the Component Deck. This does **not** consume the Command Turn, so you may flush and then Acquire one of the new cards in the same turn.
 * **Develop Technology** – Pay the Technology card's Credit cost and place it face-up in your **Agency Tableau**. It applies to **all your craft** from now on. Technology cards remain in your tableau permanently unless another card effect removes them. A player may not have two developed Technology cards with the same **Name**.
-* **Engineering** – Attach Engine, Fuel, Payload, and optional Support cards to a rocket in your Launch Area, and/or replace components on it
+* **Engineering** – Attach Engine, Fuel, Payload, and optional Support cards to a rocket in your Rocket Assembly Area, and/or replace components on it. You may also attach **one card sideways** as jury-rigged hardware (see §9 *Jury-Rigging*).
 * **Launch New Craft** – Place an assembled rocket at `Earth`, perform the launch capability check, optionally Stage, then fly it along the orbital map spending Range. Resolve the mission immediately if the craft reaches its destination. May be combined with Engineering into a single Command Turn if all components are in hand. (See §7.3 Launch Resolution.)
 * **Activate Craft** – Choose one of your in-flight craft and **move** it (spend 1 Range per node crossed), **operate** it (spend Energy to trigger an ability printed on an attached card), or both. A craft with **0 remaining Range** can still be activated to operate in place — it simply cannot move. May resolve a mission if it reaches the destination. *(Routine persistent-asset income is collected for free during Maintenance instead — see §7.4 Asset Operations — so you rarely need to spend a Command Turn just to bank it.)*
 * **Expand Agency** – Increase your Agency Level by paying Credits
@@ -295,7 +296,7 @@ agency to *first* reach each frontier earns a scaled reward. Near-Earth frontier
 
 #### Technology Milestone Bonuses
 
-* The first time a player develops their **second Technology**, they gain **+1 VP**.
+* Each player gains **+1 VP** the first time they develop their **second Technology**.
 * The first player to develop their **fourth Technology** gains **+2 VP**.
 * If you develop a Technology while you control an `On-Orbit` `Satellite` or `Station`, gain **+1 VP** (max once per round).
 
@@ -305,8 +306,8 @@ agency to *first* reach each frontier earns a scaled reward. Near-Earth frontier
 
 When a craft is launched or activated, resolve the flight immediately:
 
-1. **Launch Capability Check:** Verify Engine Thrust ≥ Total Rocket Mass (sum of all Fuel Tank Mass values + Payload Mass). In design terms, this answers whether the stack can leave the surface; `Range` handles orbital travel after liftoff.
-2. **Reliability Check:** Roll a d10. If the result is **≤ the Engine's Reliability value** (after modifiers from Technology cards and Events), the launch succeeds. If the roll is **above** Reliability, the launch **fails** — the craft does not move, and any non-Reusable Engine is discarded. Reusable Engines survive a failed check but the craft still does not launch this action. *(Skip this step when activating a craft already in flight. A Rocket-as-Lander relaunching from a surface must pass a new Reliability Check.)*
+1. **Launch Capability Check:** Verify Engine Thrust ≥ Total Rocket Mass (sum of all Fuel Tank Mass values + the Mass of every Payload). In design terms, this answers whether the stack can leave the surface; `Range` handles orbital travel after liftoff.
+2. **Reliability Check:** Roll a d10. If the result is **≤ the Engine's Reliability value** (after modifiers from Technology cards and Events), the launch succeeds. If the roll is **above** Reliability, the launch **fails** — the craft does not move, and any non-Reusable Engine is discarded. Reusable Engines survive a failed check but the craft still does not launch this action. **Flight Data:** whenever one of your launches fails its Reliability check, gain **1 Credit** — even a fireball returns telemetry, so a failed test still moves the program forward. *(Skip this step when activating a craft already in flight. A Rocket-as-Lander relaunching from a surface must pass a new Reliability Check.)*
 3. Optionally **Stage** one card with the `Stageable` tag to gain its printed bonus Range for this launch (at most one card pre-flight).
 4. The player chooses a path on the orbital map. The craft moves along this path, spending **1 Range per node** crossed. The player may **stop at any node**, preserving unspent Range for future activations.
 5. **Mid-Flight Staging:** During movement, a player may stage `Stageable` cards (typically empty Fuel Tanks) to gain their stage bonus Range — each card may be staged only once, and at most one card per node crossing. The staged card is discarded. This also reduces the craft's Mass for future relaunch capability checks.
@@ -361,7 +362,7 @@ If requirements are not met:
 * Reusable parts from craft that returned to `Earth` return to hand if they were not staged
 * Ongoing technology effects trigger
 * **Asset Operations:** Each persistent `Satellite` or `Station` you control may trigger each of its "spend Energy" income abilities **once**, spending the asset's remaining Energy this round. Collect the Credits or VP. This is free and costs no Command Turn. **Income scales with distance:** Satellite assets pay 1 Credit at `Earth ZOI` or closer, 1 VP beyond `Earth ZOI`; Station cards pay as printed. (Energy simply refills at the start of the next Action Phase — there is no separate Energy cleanup.)
-* Discard the current round's Event card
+* Discard the current round's Event card, unless its text says it persists (e.g., *Stranded Crew* stays in play until claimed)
 * **Mission Sweep:** if no mission was completed this round, discard the mission that has been in the display longest
 * Refill the Mission display to 3 cards if needed (place new missions to the right, so the oldest is always leftmost)
 * Refill the **Card Market** to 7 cards from the Component Deck
@@ -418,6 +419,11 @@ Mission economy note:
   Earth → Earth` and land safely (parachute or propulsive) — **no payload required** — for
   **2 Credits + 1 VP**. It guarantees every agency a productive first turn using only the
   starting kit, and teaches the launch-and-land loop.
+* **Shakedown recovery:** when an agency completes the Suborbital Test Flight, **all unstaged
+  parts of that craft return to its owner's hand, Reusable or not** — the test articles are
+  fished out of the desert and rebuilt. The first flight teaches the full loop without
+  consuming the starting kit, so round 1 is pure progress. (This exception applies only to
+  this standing contract.)
 * **Reward hierarchy:** simply lifting off (a no-payload standing contract) is the *floor* and
   pays the least. Carrying a payload is the real job and always pays more — e.g. *LEO
   Deployment* (payload → LEO) pays 5 Credits + 2 VP versus the test flight's 2 + 1. Longer and
@@ -443,7 +449,7 @@ A rocket consists of:
 
 * **0–1 Engine**
 * **1–3 Fuel Tanks**
-* **0–1 Payload**
+* **0–1 Payload**, plus optionally **one additional `Lander` payload** — a dedicated lander may ride along with the mission payload (both Mass values count toward Total Rocket Mass)
 * **0–3 Support Cards**
 
 A rocket's **total Range** equals the sum of all its Fuel Tank Range values. Some rockets may also use **staging** effects printed on cards to discard part of the rocket mid-flight for extra Range.
@@ -455,7 +461,7 @@ An Engine-free craft is only legal if it is already **in flight** or **in orbit*
 
 * Every Fuel Tank and Payload card has a numeric **Mass** value (tanks 1–4, payloads 1–3).
 * Some Support cards also have printed **Mass**.
-* **Total Rocket Mass** = sum of all Fuel Tank Mass values + Payload Mass + any printed Support Mass.
+* **Total Rocket Mass** = sum of all Fuel Tank Mass values + the Mass of every Payload + any printed Support Mass.
 * An Engine's **Thrust** must be **≥ Total Rocket Mass** for the rocket to launch.
 * If your rocket has **no Engine**, it may not launch from a planet.
 * If your craft has **no Engine** but is already in flight or in orbit, its Total Rocket Mass must be **≤ 3**.
@@ -471,6 +477,22 @@ An Engine-free craft is only legal if it is already **in flight** or **in orbit*
 * If a rocket has no payload, only Fuel Tank Mass counts toward Total Rocket Mass.
 * **Uncrewed** means any payload *without* the `Crewed` tag.
 * Card text is authoritative. When a card gives a more specific instruction than the general rules, resolve that card effect as written.
+
+### Jury-Rigging (Sideways Cards)
+
+Any card in hand can be strapped onto a rocket as improvised hardware instead of being played normally. During an **Engineering** (or combined Engineering + Launch) action, you may attach **at most one card sideways** to a rocket. A sideways card ignores its printed text, tags, Cost, and Mass — what it does depends only on its card type:
+
+| Sideways card | Acts as | Effect |
+| --- | --- | --- |
+| **Engine** | Strap-on booster | **+1 Thrust** on this craft's launch and relaunch capability checks |
+| **Fuel Tank** | Drop tank | **+1 Range** added to the craft's Range when it launches |
+| **Any other card** | Mass simulator | A plain payload: **Mass 1**, no tags (counts as Uncrewed) |
+
+* A jury-rigged booster or drop tank does **not** occupy an engine/tank/support slot; the mass simulator **does** occupy the rocket's payload slot.
+* A jury-rigged card is never a real component: it can never be **staged**, **recovered**, or targeted by card effects. Discard it when its craft is discarded or returns to Earth.
+* Limit: **one sideways card per rocket**.
+
+> Design intent: every dead card in hand is one strut away from being useful — the KSP "add more boosters" fantasy, and a reason turns feel different even with an awkward hand. The exchange rate is fair by construction: a hand card is worth ~1 Credit via Emergency Sell, and each sideways effect is deliberately weaker than the 1-Credit purchase it imitates (Fuel Pod, Basic Battery, Light Payload).
 
 ### Orbital Node Travel
 
@@ -694,11 +716,15 @@ Technologies should:
 * **Early-game dynamics (v0.4):** always-buyable Basic payloads (Light/Standard/Heavy) so a payload is never unavailable; a 7-card market; the Suborbital Test Flight standing contract; and the two-layer Exploration Bonuses (personal LEO Credit floor + the diminishing Exploration Race ladder)
 * **Landing model:** a heat shield is heat/aerobrake only — landing requires a parachute (Earth), airbags (uncrewed, Earth/Mars), a Lander, or a propulsive burn
 * **Sub-orbital decay:** sub-orbital arcs are not stable orbits — a craft still on one at round end auto-lands with a passive lander (parachute / airbags / Lander / Landing Legs + Engine) or crashes; a propulsive landing without legs costs a command turn during the round
+* **v0.5 pacing pass** (see `docs/design_review_pacing.md`): round-1 TW advance skipped so the printed 8-value cycle maps to rounds 1–8; **Flight Data** (1 Credit whenever a launch fails its Reliability check); **Shakedown recovery** (the Suborbital Test Flight returns all unstaged parts, so round 1 never consumes the starting kit); the **Lander ride-along** payload slot (makes Lander + Cargo Return Capsule builds like *Lunar Sample Return* legal); and the **Jury-Rigging** sideways-card rule
 
 ### Under Evaluation
 
 * Player asymmetry (agency specialization or starting bonuses)
 * Whether second players completing a mission should get a reduced reward
+* **Orbital congestion:** cap the number of income-paying `Satellite` assets per node (e.g., 3 slots each at LEO and GEO; first deployed keep them) so near-Earth real estate becomes a race that one player can lock other players out of — see `docs/design_review_pacing.md` §3
+* **Jury-Rigging free-choice variant:** let the player pick any of the three sideways effects regardless of card type (simpler to abuse, but even easier to teach)
+* Additional standing contracts at higher tiers (e.g., a once-per-agency "GEO comm license") so every agency always has a fallback job
 
 ### Playtest Readiness
 
@@ -720,4 +746,4 @@ This draft prioritizes:
 
 ---
 
-**End of Draft v0.2**
+**End of Draft v0.5**
