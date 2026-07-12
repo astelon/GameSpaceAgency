@@ -247,5 +247,91 @@ ok(in_array($bat, $g['decks']['componentDiscard'], true), 'expended battery went
 $mass = sar_craft_mass($g, ['owner' => 0, 'cards' => [$eng, $ptank, $caps, $bat]]);
 ok($mass === 2 + 2 + 1, 'Basic Battery Mass 1 counts toward launch mass (2+2+1)');
 
+echo "— Scenario 9: Launch Abort System reroll (regression for review §1.1/§1.2/§1.4)\n";
+$g = fresh();
+$g['players'][0]['tableau'][] = 'C06#t1'; // Launch Abort System
+$g['players'][0]['credits'] = 200; // cover many reroll retries below
+[$eng, $tank] = give($g, 0, ['E06', 'T01']); // Raptor-X: reliability 6 (~40% fail chance)
+$g['players'][0]['hand'] = [$eng, $tank];
+
+// Retry the launch until the reliability roll fails and LAS offers a reroll.
+$pendingType = null; $tries = 0;
+do {
+    $snap = $g;
+    try {
+        sar_apply($g, 0, ['type' => 'launch', 'components' => [$eng, $tank],
+            'plan' => ['path' => ['earth', 'subEarth', 'leo']]]);
+    } catch (SarError $e) { echo '  error: ' . $e->getMessage() . "\n"; break; }
+    $pendingType = $g['pending']['type'] ?? null;
+    if ($pendingType !== 'reroll') $g = $snap;
+} while ($pendingType !== 'reroll' && ++$tries < 60);
+ok($pendingType === 'reroll', 'reliability roll failed and the Launch Abort System offers a reroll');
+
+// --- §1.2: declining the reroll must still spend the command turn.
+$declineSnap = $g;
+$turnsBefore = $g['players'][0]['turnsUsed'];
+sar_apply($g, 0, ['type' => 'decision', 'accept' => false]);
+ok($g['players'][0]['turnsUsed'] === $turnsBefore + 1, 'declining the reroll spends the command turn (§1.2)');
+ok($g['pending'] === null, 'pending decision cleared after decline');
+
+// --- §1.1/§1.4: an accepted reroll that succeeds must not roll the check
+// again (only ever the original roll + one reroll), and each decision
+// action must advance version by exactly 1.
+$g = $declineSnap; // restore to just before the decision
+$craftId = null;
+foreach ($g['crafts'] as $id => $c) if ($c['owner'] === 0) $craftId = $id;
+$rerollOk = false; $versionOk = true; $tries = 0;
+do {
+    $snap = $g;
+    $verBefore = $g['version'];
+    sar_apply($g, 0, ['type' => 'decision', 'accept' => true]);
+    if ($g['version'] !== $verBefore + 1) $versionOk = false;
+    $rerollOk = isset($g['crafts'][$craftId]) && $g['crafts'][$craftId]['node'] === 'leo';
+    if (!$rerollOk) $g = $snap;
+} while (!$rerollOk && ++$tries < 60);
+ok($rerollOk, 'accepted reroll eventually succeeds and the craft reaches LEO');
+ok($versionOk, 'each decision action advances version by exactly 1 (§1.4)');
+$rollLogs = array_values(array_filter($g['log'], fn($e) => $e['type'] === 'roll' && ($e['data']['craft'] ?? null) === $craftId));
+ok(count($rollLogs) === 2, 'exactly the original roll + one reroll — the check was not re-rolled on resume (§1.1)');
+
+echo "— Scenario 10: staged Kick Stage engine doesn't grant free maneuvering in a later round (regression for review §1.3)\n";
+$g = fresh();
+[$eng, $tank] = give($g, 0, ['E07', 'T01']); // Kick Stage: Stageable Engine, reliability 7
+$g['players'][0]['hand'] = [$eng, $tank];
+$flew = false; $tries = 0;
+do {
+    $snap = $g;
+    try {
+        sar_apply($g, 0, ['type' => 'launch', 'components' => [$eng, $tank],
+            'plan' => ['path' => ['earth', 'subEarth', 'leo'], 'midStages' => [2 => $eng]]]);
+    } catch (SarError $e) { echo '  error: ' . $e->getMessage() . "\n"; break; }
+    $craftId = null;
+    foreach ($g['crafts'] as $id => $c) if ($c['owner'] === 0) $craftId = $id;
+    $flew = $craftId !== null && $g['crafts'][$craftId]['node'] === 'leo';
+    if (!$flew) $g = $snap;
+} while (!$flew && ++$tries < 60);
+ok($flew, 'craft stages away its only Engine mid-flight and still reaches LEO');
+ok($flew && sar_craft_engine($g['crafts'][$craftId]) === null, 'the Kick Stage is discarded — no Engine remains on the craft');
+ok($flew && $g['crafts'][$craftId]['stagedEngineFlight'] === false, 'stagedEngineFlight is cleared once the flight finishes (§1.3)');
+
+// Advance to round 2 and try to maneuver the now-engineless craft.
+foreach ($g['players'] as &$pp) { $pp['passed'] = true; }
+unset($pp);
+sar_maintenance($g);
+foreach ($g['players'] as $p) {
+    if (!$p['planningDone']) {
+        $over = count($g['players'][$p['seat']]['hand']) - 5;
+        $discard = $over > 0 ? array_slice($g['players'][$p['seat']]['hand'], 0, $over) : [];
+        sar_apply($g, $p['seat'], ['type' => 'planning_done', 'sell' => [], 'discard' => $discard]);
+    }
+}
+ok($g['round'] === 2 && $g['phase'] === 'action', 'round 2 action phase reached');
+ok(isset($g['crafts'][$craftId]) && !$g['crafts'][$craftId]['activated'], 'craft is fresh for round 2 (not activated)');
+$threw = false;
+try {
+    sar_apply($g, 0, ['type' => 'activate', 'craft' => $craftId, 'plan' => ['path' => ['leo', 'geo']]]);
+} catch (SarError $e) { $threw = str_contains($e->getMessage(), 'without an Engine'); }
+ok($threw, 'an engineless craft cannot maneuver in a later round — stagedEngineFlight no longer bypasses the Engine gate (§1.3)');
+
 echo "\n$pass passed, $fail failed\n";
 exit($fail ? 1 : 0);

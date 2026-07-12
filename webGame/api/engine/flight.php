@@ -107,7 +107,7 @@ function sar_action_activate(array &$g, int $seat, array $a): void {
 // ---------------------------------------------------------------------------
 // The step executor. Returns 'done' | 'pending' | 'failed'.
 
-function sar_run_flight(array &$g, string $craftId, array $plan, int $fromStep, bool $dry): string {
+function sar_run_flight(array &$g, string $craftId, array $plan, int $fromStep, bool $dry, int $skipCheckStep = -1): string {
     $path = $plan['path'];
     $seat = $g['crafts'][$craftId]['owner'];
 
@@ -132,7 +132,8 @@ function sar_run_flight(array &$g, string $craftId, array $plan, int $fromStep, 
             if (!isset($g['crafts'][$depotId])) throw new SarError('No such Fuel Depot');
             $depot = $g['crafts'][$depotId];
             if ($depot['owner'] !== $seat) throw new SarError('You can only refuel at your own Fuel Depot');
-            if (!$depot['deployed'] || !sar_craft_cards($depot, 'Payload', 'Station')) throw new SarError('That asset is not a deployed Fuel Depot');
+            $isFuelDepot = (bool)array_filter($depot['cards'], fn($u) => explode('#', $u)[0] === 'P11');
+            if (!$depot['deployed'] || !$isFuelDepot) throw new SarError('That asset is not a deployed Fuel Depot');
             if ($depot['node'] !== $g['crafts'][$craftId]['node']) throw new SarError('The Fuel Depot is not at this node');
             if (($depot['depotUsedRound'] ?? 0) === $g['round']) throw new SarError('That Fuel Depot was already used this round');
             if ($depot['energy'] < 1) throw new SarError('The Fuel Depot has no Energy');
@@ -157,7 +158,10 @@ function sar_run_flight(array &$g, string $craftId, array $plan, int $fromStep, 
         if (!$edge) throw new SarError("Invalid route: " . SAR_NODES[$from]['name'] . ' is not connected to ' . SAR_NODES[$to]['name']);
 
         // Leaving a surface = a launch: capability + reliability checks.
-        if (sar_is_surface($from)) {
+        // (Skipped when resuming a step whose check already passed via a
+        // successful Launch Abort System reroll — it was already charged
+        // and rolled once; see sar_resolve_reroll.)
+        if (sar_is_surface($from) && $k !== $skipCheckStep) {
             $res = sar_launch_checks($g, $craftId, $plan, $k, $dry);
             if ($res !== 'ok') return $res; // 'pending' or 'failed'
         }
@@ -284,6 +288,8 @@ function sar_launch_failure(array &$g, string $craftId): void {
         $craft['launchRound'] = null;
         $craft['range'] = 0;
     }
+    // The flight this staged Kick Stage was covering for is over.
+    $craft['stagedEngineFlight'] = false;
     unset($craft);
 }
 
@@ -293,8 +299,7 @@ function sar_resolve_reroll(array &$g, int $seat, bool $accept): void {
     $craftId = $data['craft'];
     if (!$accept) {
         sar_launch_failure($g, $craftId);
-        sar_skip_to_next_actor($g);
-        $g['version']++;
+        sar_end_command_turn($g, $seat);
         return;
     }
     $p = &$g['players'][$seat];
@@ -306,13 +311,14 @@ function sar_resolve_reroll(array &$g, int $seat, bool $accept): void {
     sar_log($g, 'roll', 'Launch Abort System reroll: ' . $roll . ' vs ' . $data['rel'] . ' — ' . ($ok ? 'SUCCESS' : 'FAILURE') . '.',
         ['craft' => $craftId, 'roll' => $roll, 'need' => $data['rel'], 'ok' => $ok]);
     if ($ok) {
-        $result = sar_run_flight($g, $craftId, $data['plan'], $data['step'], false);
+        // The reliability check for this step already succeeded (once, paid
+        // for) — resume without rolling or re-charging it again.
+        $result = sar_run_flight($g, $craftId, $data['plan'], $data['step'], false, $data['step']);
         if ($result !== 'pending') sar_finish_flight($g, $craftId, $data['plan']);
     } else {
         sar_launch_failure($g, $craftId);
-        sar_skip_to_next_actor($g);
+        sar_end_command_turn($g, $seat);
     }
-    $g['version']++;
 }
 
 // ---------------------------------------------------------------------------
@@ -689,7 +695,8 @@ function sar_finish_flight(array &$g, string $craftId, array $plan): void {
     if (isset($g['crafts'][$craftId])) {
         $craft = &$g['crafts'][$craftId];
         $craft['activated'] = true;
-        $craft['stagedEngineFlight'] = $craft['stagedEngineFlight'] ?? false;
+        // The flight this staged Kick Stage was covering for is over.
+        $craft['stagedEngineFlight'] = false;
         $seat = $craft['owner'];
         unset($craft);
         sar_check_missions($g, $craftId);

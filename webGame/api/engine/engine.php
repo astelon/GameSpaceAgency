@@ -572,6 +572,9 @@ function sar_action_acquire(array &$g, int $seat, array $a): void {
         $slot = (int)$a['slot'];
         if (!isset($g['market'][$slot]) || $g['market'][$slot] === null) throw new SarError('Empty market slot');
         $uid = $g['market'][$slot];
+        if (isset($a['uid']) && $a['uid'] !== $uid) {
+            throw new SarError('That market slot changed — someone else bought it first');
+        }
         $cost = sar_basic_cost($g, $seat, sar_card($uid));
         if ($p['credits'] < $cost) throw new SarError("Not enough Credits (need $cost)");
         $p['credits'] -= $cost;

@@ -12,9 +12,8 @@ $verbose = in_array('-v', $argv, true);
 
 function invariants(array $g): void {
     foreach ($g['players'] as $p) {
-        assert($p['credits'] >= 0, "negative credits for {$p['name']}");
-        assert($p['vp'] >= 0, 'negative vp');
-        if ($p['credits'] < 0 || $p['vp'] < 0) throw new Exception('negative resources');
+        if ($p['credits'] < 0) throw new Exception("negative credits for {$p['name']}");
+        if ($p['vp'] < 0) throw new Exception("negative vp for {$p['name']}");
     }
     foreach ($g['crafts'] as $c) {
         if ($c['range'] < 0) throw new Exception('negative range on ' . $c['id']);
@@ -36,11 +35,17 @@ function invariants(array $g): void {
 }
 
 function try_apply(array &$g, int $seat, array $action): bool {
+    $backup = $g; // PHP arrays are copy-on-write — cheap snapshot
+    $beforeVersion = $g['version'];
     try {
         sar_apply($g, $seat, $action);
         invariants($g);
+        if ($g['version'] !== $beforeVersion + 1) {
+            throw new Exception("version did not advance by exactly 1 (was $beforeVersion, now {$g['version']})");
+        }
         return true;
     } catch (SarError $e) {
+        $g = $backup; // a rejected action must leave state untouched
         return false; // legal rejection
     }
 }
