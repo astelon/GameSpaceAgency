@@ -14,8 +14,6 @@ require_once __DIR__ . '/phases.php';
 require_once __DIR__ . '/actions.php';
 require_once __DIR__ . '/missions.php';
 
-const SAR_EARTH_ONLY_REENTRY = ['S02', 'S04']; // parachute-type: too thin air on Mars
-
 // ---------------------------------------------------------------------------
 // Actions
 
@@ -26,7 +24,7 @@ function sar_action_launch(array &$g, int $seat, array $a): void {
     // Optionally combine Engineering + Launch in one command turn.
     if (!empty($a['components'])) {
         $craftId = sar_apply_engineering($g, $seat, ['craft' => $a['craft'] ?? null,
-            'add' => $a['components'], 'remove' => $a['remove'] ?? []], false);
+            'add' => $a['components'], 'remove' => $a['remove'] ?? []]);
     } else {
         $craftId = $a['craft'] ?? '';
     }

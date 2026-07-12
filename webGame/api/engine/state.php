@@ -174,7 +174,7 @@ function sar_new_craft(array &$g, int $seat, array $cards, string $node): string
         'id' => $id, 'owner' => $seat, 'name' => $name, 'node' => $node,
         'cards' => array_values($cards), 'range' => 0, 'energy' => 0,
         'deployed' => false, 'isStation' => false, 'activated' => false,
-        'history' => [$node === 'assembly' ? null : $node],
+        'history' => $node === 'assembly' ? [] : [$node],
         'launchRound' => null,
         'usedReentry' => false, 'usedReusableReentry' => false,
         'docked' => false, 'dockedHab' => false, 'visitedLeoAfterStranded' => false,
@@ -185,7 +185,6 @@ function sar_new_craft(array &$g, int $seat, array $cards, string $node): string
         'relayUsedRound' => false, 'p03Round' => 0, 's11Round' => 0,
         'ceramicAeroUsed' => false, 'stagedEngineFlight' => false,
     ];
-    if ($node === 'assembly') $g['crafts'][$id]['history'] = [];
     return $id;
 }
 

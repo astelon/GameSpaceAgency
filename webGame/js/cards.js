@@ -1,7 +1,7 @@
 // Card rendering + teaching hints ("what will the game do with this card?").
 
 import { cardOf, cidOf } from './data.js';
-import { el, openModal } from './ui.js';
+import { el, openModal, textWithBreaks } from './ui.js';
 
 const TYPE_ICON = {
   Engine: 'engine', Tank: 'tank', Payload: 'payload', Support: 'support',
@@ -114,7 +114,7 @@ export function renderCard(uid, { size = '', onClick = null, zoomable = true } =
   }
   if (stats.children.length) root.append(stats);
 
-  if (c.text) root.append(el('div', { class: 'c-text', html: c.text.replaceAll('<br>', '<br>') }));
+  if (c.text) root.append(el('div', { class: 'c-text' }, ...textWithBreaks(c.text)));
 
   root.addEventListener('click', e => {
     if (onClick) onClick(uid, e);

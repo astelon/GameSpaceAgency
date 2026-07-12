@@ -24,11 +24,28 @@ jobs:
       - name: HTTP API integration (auth, hand hiding, storage locking)
         run: php webGame/tools/test_api.php
 
-  frontend:
-    name: Frontend (card rendering)
+  parity:
+    name: PHP<->JS rules parity
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Generate fixtures from the PHP engine and replay them through data.js
+        run: npm run test:parity
+
+  frontend:
+    name: Frontend (card rendering + smoke)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
@@ -36,7 +53,7 @@ jobs:
       - run: npm ci
       - name: Install Playwright Chromium
         run: npx playwright install --with-deps chromium
-      - name: Card sizing tests (hand / market / mission offer)
+      - name: Card sizing + hot-seat smoke test
         run: npx playwright test
       - uses: actions/upload-artifact@v4
         if: failure()

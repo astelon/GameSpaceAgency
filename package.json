@@ -5,7 +5,8 @@
   "scripts": {
     "test:frontend": "playwright test",
     "test:backend": "php webGame/tools/test_cards_data.php && php webGame/tools/test_engine.php 20 && php webGame/tools/test_scenarios.php && php webGame/tools/test_suborbital.php && php webGame/tools/test_api.php",
-    "test": "npm run test:backend && npm run test:frontend"
+    "test:parity": "mkdir -p webGame/tests/fixtures && php webGame/tools/gen_parity_fixtures.php > webGame/tests/fixtures/parity.json && node webGame/tools/test_parity.mjs",
+    "test": "npm run test:backend && npm run test:parity && npm run test:frontend"
   },
   "devDependencies": {
     "@playwright/test": "1.56"

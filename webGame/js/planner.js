@@ -265,7 +265,6 @@ export function openPlanner(g, seat, { mode, cards = null, engDiff = null, craft
       if (node === 'moon' && k === path.length - 1) {
         stepBox.append(el('div', { style: 'color:var(--dim)' }, 'Propulsive Moon landing (Engine required, no extra Range).'));
       }
-      stepBox.append(...stepControls(craft, k, node));
       side.append(stepBox);
     });
 
@@ -419,8 +418,6 @@ export function openPlanner(g, seat, { mode, cards = null, engDiff = null, craft
     board.setTw(g, seat);
     return sim;
   }
-
-  function stepControls() { return []; }
 
   function checkbox(label, checked, onChange) {
     const cb = el('input', { type: 'checkbox' });

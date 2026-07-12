@@ -42,7 +42,6 @@ export const TW_CYCLE = [3,2,1,0,1,2,3,4];
 export const SUBORBITAL = { subEarth: 'earth', subMoon: 'moon', subMars: 'mars' };
 export const MOON_BRANCH = ['moonOrbit','subMoon','moon'];
 export const MARS_BRANCH = ['marsZoi','marsHigh','marsLow','subMars','mars'];
-export const EARTH_ONLY_REENTRY = ['S02','S04'];
 
 export function edgeBetween(a, b) {
   for (const e of EDGES) {
@@ -164,7 +163,10 @@ export function passiveLanding(craft, surface) {
   if (engine && legs) return 'Landing Legs + Engine';
   if (chutes.length) return cardOf(chutes[0]).name;
   if (lander) return 'Lander';
-  if (!crewed && craftCards(craft, null, 'Airbag').length) return 'airbags';
+  if (!crewed) {
+    const bags = craftCards(craft, null, 'Airbag');
+    if (bags.length) return cardOf(bags[0]).name;
+  }
   return null;
 }
 
@@ -430,6 +432,7 @@ export function checkMission(g, mid, craft) {
     case 'M19': return node === 'mars' && (craftCards(craft, null, 'Lander').length > 0 || engineOr);
     case 'M20': return hist.includes('sunOrbit') && plc?.tags.includes('Scientific') && pm >= 2 &&
       craft.cards.some(u => cidOf(u) === 'S11') && canPay(2);
+    case 'M21': return atEarth && seqIn(hist, ['earth','subEarth','earth']);
   }
   return false;
 }

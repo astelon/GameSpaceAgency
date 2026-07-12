@@ -4,7 +4,6 @@ export function el(tag, attrs = {}, ...children) {
   const node = document.createElement(tag);
   for (const [k, v] of Object.entries(attrs)) {
     if (k === 'class') node.className = v;
-    else if (k === 'html') node.innerHTML = v;
     else if (k.startsWith('on')) node.addEventListener(k.slice(2), v);
     else if (v !== null && v !== undefined) node.setAttribute(k, v);
   }
@@ -13,6 +12,20 @@ export function el(tag, attrs = {}, ...children) {
     node.append(c.nodeType ? c : document.createTextNode(c));
   }
   return node;
+}
+
+// Turn text that may contain literal "<br>" line breaks (card text from the
+// CSV) into safe DOM nodes — text nodes plus real <br> elements — with no
+// HTML parsing, so no other substring of the text can ever be interpreted
+// as markup.
+export function textWithBreaks(text) {
+  const parts = String(text).split('<br>');
+  const nodes = [];
+  parts.forEach((part, i) => {
+    if (i > 0) nodes.push(el('br'));
+    if (part) nodes.push(document.createTextNode(part));
+  });
+  return nodes;
 }
 
 export function clear(node) { while (node.firstChild) node.removeChild(node.firstChild); return node; }
@@ -69,8 +82,10 @@ export function showDice(roll, need, ok, label) {
     o.classList.remove('hidden');
     o.append(
       el('div', { class: 'die' }, String(roll)),
-      el('div', { class: 'die-caption', html: `${label}<br>rolled <b>${roll}</b> — needed ≤ ${need}<br>` +
-        (ok ? '<b class="ok">LAUNCH SUCCESS</b>' : '<b class="no">LAUNCH FAILURE</b>') }),
+      el('div', { class: 'die-caption' },
+        label, el('br'),
+        'rolled ', el('b', {}, String(roll)), ` — needed ≤ ${need}`, el('br'),
+        el('b', { class: ok ? 'ok' : 'no' }, ok ? 'LAUNCH SUCCESS' : 'LAUNCH FAILURE')),
     );
     setTimeout(() => { o.classList.add('hidden'); resolve(); }, 2100);
   });

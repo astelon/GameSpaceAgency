@@ -23,10 +23,21 @@ hand, and always regenerate both together.
     against an isolated temp copy of `api/`, drives create/join/start/state/
     action over real HTTP, and asserts auth, hand hiding, and that concurrent
     actions to one room serialize correctly (storage locking)
-- Frontend (Playwright): `npm ci && npx playwright test` — renders every card
-  into the hand, market and mission-offer zones (desktop + mobile layouts) and
-  asserts they all have identical dimensions. Harness: `webGame/tests/harness.html`.
-- `npm test` runs both suites.
+- PHP<->JS rules parity: `npm run test:parity` — `webGame/tools/gen_parity_fixtures.php`
+  runs the real PHP engine (`craftReliability`/`passiveLanding`/`checkMission`/
+  flight-plan dry-runs) over a battery of inputs and writes the results as
+  fixtures; `webGame/tools/test_parity.mjs` (plain Node, no test framework)
+  replays the same inputs through the JS mirror in `webGame/js/data.js` and
+  asserts they agree. Regenerate fixtures whenever `data.js` or the PHP rules
+  change — this is the test that catches PHP<->JS drift.
+- Frontend (Playwright): `npm ci && npx playwright test` — card-sizing.spec.mjs
+  renders every card into the hand, market and mission-offer zones (desktop +
+  mobile layouts) and asserts they all have identical dimensions (harness:
+  `webGame/tests/harness.html`); smoke.spec.mjs boots `php -S` + a real
+  browser and plays a hot-seat game through the lobby, Planning Phase, and an
+  Action-Phase acquire, asserting the resulting log line — the one check that
+  exercises frontend JS + HTTP API + PHP engine together end-to-end.
+- `npm test` runs all of the above (backend, parity, then frontend).
 
 Cards must always render at one uniform size in the hand, the market, and the
 mission offer (`--card-w` + fixed aspect-ratio in `webGame/css/game.css`);

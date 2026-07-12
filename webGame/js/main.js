@@ -3,7 +3,7 @@ import { loadCards, CARDS, cardOf, cidOf, hasTag, NODES, TW_CYCLE, twCost, handL
          eventId, basicCost, craftEngine, craftPayload, tankRange, craftCards } from './data.js';
 import { api, gameCall, session, ApiError } from './api.js';
 import { el, clear, openModal, closeModal, closeAllModals, toast, banner, showDice } from './ui.js';
-import { renderCard, zoomCard, hintFor } from './cards.js';
+import { renderCard, zoomCard } from './cards.js';
 import { renderBoard } from './board.js';
 import { openBuilder, openPlanner } from './planner.js';
 
@@ -13,8 +13,10 @@ const st = {
   g: null,            // filtered game state
   version: 0,
   lastLogSeq: 0,
+  logRenderedSeq: 0,
   board: null,
   polling: null,
+  pollBusy: false,
   planningSel: new Set(),
   busy: false,
   gameOverShown: false,
@@ -176,22 +178,38 @@ function showWaitingRoom() {
 async function enterGame() {
   stopPolling();
   keepAwake();
-  st.version = 0; st.lastLogSeq = 0; st.gameOverShown = false; st.autoFsDone = false;
+  st.version = 0; st.lastLogSeq = 0; st.logRenderedSeq = 0; st.gameOverShown = false; st.autoFsDone = false;
   try { await poll(true); } catch (e) {
     toast(e.message, 'bad');
-    if (e instanceof ApiError) { session.clear(); showLobby(); return; }
+    // Only forget the room on a genuine "you're not in this game" answer —
+    // a transient 500 or a dropped connection must not log the player out.
+    if (e instanceof ApiError && (e.status === 403 || e.status === 404)) {
+      session.clear(); showLobby(); return;
+    }
   }
-  st.polling = setInterval(() => poll().catch(() => {}), 2200);
+  st.polling = setInterval(() => {
+    if (document.hidden) return; // paused while the tab isn't visible
+    poll().catch(() => {});
+  }, 2200);
 }
 function stopPolling() { if (st.polling) clearInterval(st.polling); st.polling = null; }
 
 async function poll(force = false) {
-  const r = await gameCall('state', { since: force ? 0 : st.version });
-  if (r.unchanged) return;
-  applyState(r);
+  if (st.pollBusy) return; // an overlapping poll is already in flight — skip this tick
+  st.pollBusy = true;
+  try {
+    const r = await gameCall('state', { since: force ? 0 : st.version });
+    if (r.unchanged) return;
+    applyState(r);
+  } finally {
+    st.pollBusy = false;
+  }
 }
 
 function applyState(r) {
+  // A slow request that resolves after a newer one (or after an action
+  // response already advanced the state) must never roll the UI backward.
+  if (st.g && r.version < st.version) return;
   const prev = st.g;
   st.version = r.version;
   st.g = r.state;
@@ -522,11 +540,21 @@ function renderBottom() {
 function renderLog() {
   const g = st.g;
   const body = $('log-body');
-  clear(body);
-  for (const l of g.log.slice(-120)) {
-    body.append(el('div', { class: `l-${l.type}` }, l.text));
+  const nearBottom = body.scrollHeight - body.scrollTop - body.clientHeight < 40;
+  const entries = g.log.slice(-120);
+  const fresh = st.logRenderedSeq ? entries.filter(l => l.seq > st.logRenderedSeq) : entries;
+  if (fresh.length === entries.length) {
+    // First render (or nothing on screen overlaps with the new window): rebuild.
+    clear(body);
+    for (const l of entries) body.append(el('div', { class: `l-${l.type}` }, l.text));
+  } else {
+    for (const l of fresh) body.append(el('div', { class: `l-${l.type}` }, l.text));
+    while (body.children.length > 120) body.firstChild.remove();
   }
-  body.scrollTop = body.scrollHeight;
+  if (entries.length) st.logRenderedSeq = entries[entries.length - 1].seq;
+  // Only auto-scroll if the reader was already at (or near) the bottom —
+  // otherwise new entries would yank them away from history they're reading.
+  if (nearBottom) body.scrollTop = body.scrollHeight;
 }
 $('log-head').addEventListener('click', () => {
   const b = $('log-body');

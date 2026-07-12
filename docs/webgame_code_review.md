@@ -8,10 +8,11 @@ with a script driving the real engine through `sar_apply()`.
 ## Status
 
 The four confirmed engine bugs (§1.1–§1.4), all of §2 (§2.1–§2.6, the server/
-API-layer issues), the `engine.php` split (part of the §4 code smells),
-Phase 0, Phase 2, and Phase 3 are **done** — see **[fixed]** / **[done]**
+API-layer issues), all of §3 (§3.1–§3.4, the frontend issues), the
+`engine.php` split and most of the remaining §4 dead-code items, Phase 0,
+Phase 2, Phase 3, and Phase 4 are **done** — see **[fixed]** / **[done]**
 tags below and the "Progress" note at the top of §7. Everything else in this
-document (§3, the rest of §4, §5, §6, and Phases 4–5 of §7) is still open.
+document (the rest of §4, §5, §6, and Phase 5 of §7) is still open.
 
 ---
 
@@ -216,7 +217,7 @@ clients/requests that omit it.
 
 ## 3. Frontend issues
 
-### 3.1 `el()`'s `html:` attribute is an XSS foothold
+### 3.1 `el()`'s `html:` attribute is an XSS foothold **[fixed]**
 
 `ui.js` `el()` supports `html:` → `innerHTML`. It is used for card text
 (trusted CSV) but also in `showDice()`, whose `label` is derived from log text
@@ -228,7 +229,15 @@ across all clients in a room. Remove `html:` support; the only legitimate use
 is `<br>` in card text, which can be handled by splitting on `<br>` and
 appending text nodes + `el('br')`.
 
-### 3.2 A stale poll response can roll the UI back
+**Fixed:** `el()` no longer has an `html:` attribute at all. Added
+`textWithBreaks()`, which splits a string on literal `<br>` and returns text
+nodes interleaved with real `el('br')` elements — no HTML parsing, so no
+substring of the input can ever become markup. `cards.js`'s card-text
+rendering and `ui.js`'s `showDice()` both use it (or plain `el()` children)
+instead of `innerHTML`; the Playwright card-sizing suite (which renders every
+card's text) stays green.
+
+### 3.2 A stale poll response can roll the UI back **[fixed]**
 
 `applyState()` accepts any response unconditionally. `poll()` runs on a 2.2s
 interval with no in-flight guard, so a slow poll that resolves *after* an
@@ -237,7 +246,13 @@ until the next poll). Guard with `if (r.version <= st.version) return;` and/or
 skip polling while a request is in flight; pause polling when
 `document.hidden`.
 
-### 3.3 The JS rules mirror is a hand-maintained fork of the PHP engine
+**Fixed:** `applyState()` now ignores any response whose `version` is older
+than the state already applied; `poll()` tracks an `st.pollBusy` flag so an
+overlapping tick is skipped instead of firing a second concurrent request;
+and the `setInterval` tick is a no-op while `document.hidden` (the existing
+`visibilitychange` handler already force-polls on becoming visible again).
+
+### 3.3 The JS rules mirror is a hand-maintained fork of the PHP engine **[fixed]**
 
 `data.js` (`simulatePlan`, `checkMission`, `passiveLanding`, `craftReliability`,
 …) re-implements ~400 lines of the PHP rules for previews. Nothing checks that
@@ -247,26 +262,55 @@ semantics differ between `sar_passive_landing` — Payload-only — and
 the single biggest maintainability risk in the codebase. See refactor plan
 phase 4.
 
-### 3.4 Smaller frontend items
+**Fixed (parity harness; the `Lander`-tag/S16 drift itself is still open):**
+`tools/gen_parity_fixtures.php` drives the real PHP engine (`sar_craft_reliability`,
+`sar_passive_landing`, `sar_mission_check` for all 21 missions, and
+`sar_run_flight` dry-runs for representative flight plans) over a battery of
+craft/plan inputs and writes the PHP-authoritative results as JSON fixtures;
+`tools/test_parity.mjs` (plain Node, no test framework — consistent with the
+zero-dependency style of the PHP test scripts) replays the same inputs
+through `craftReliability`/`passiveLanding`/`checkMission`/`simulatePlan` in
+`data.js` and asserts they agree. Wired into `npm run test:parity` (part of
+`npm test`) and its own CI job. Writing this harness immediately found two
+real drifts, now fixed: `checkMission` was missing the `M21` case entirely
+(the standing-contract mission was never previewable client-side), and
+`passiveLanding`'s uncrewed-airbag branch returned the generic string
+`'airbags'` instead of the actual card's name (inconsistent with every other
+branch of the same function). `sar_validate_landing`'s any-type `Lander` tag
+vs. `sar_passive_landing`'s Payload-only check (the S16 Airbag Shell
+discrepancy noted above) was not added as a fixture and remains open.
 
-- `renderLog()` rebuilds 120 DOM nodes and forces `scrollTop` to bottom on
-  every state change — the user gets yanked down while reading history. Render
-  only new entries; only autoscroll when already at the bottom.
-- Planner/builder modals capture `g` by reference at open time; a poll can
-  swap `st.g` underneath, so the modal submits plans against stale state
-  (server re-validates, but errors are confusing). Consider freezing input or
-  refreshing the modal on state change.
-- `enterGame()` clears the whole session on *any* `ApiError` — a transient 500
-  logs the player out of the room.
-- Dead code: `cards.js:117` `c.text.replaceAll('<br>', '<br>')` (no-op);
+### 3.4 Smaller frontend items — mostly fixed
+
+- ~~`renderLog()` rebuilds 120 DOM nodes and forces `scrollTop` to bottom on
+  every state change — the user gets yanked down while reading history.
+  Render only new entries; only autoscroll when already at the bottom.~~
+  **[fixed]** `renderLog()` now tracks the last rendered log `seq` and only
+  appends entries newer than that (trimming the oldest DOM nodes past 120
+  instead of rebuilding), and only forces `scrollTop` when the reader was
+  already within 40px of the bottom.
+- **Still open:** Planner/builder modals capture `g` by reference at open
+  time; a poll can swap `st.g` underneath, so the modal submits plans against
+  stale state (server re-validates, but errors are confusing). Consider
+  freezing input or refreshing the modal on state change.
+- ~~`enterGame()` clears the whole session on *any* `ApiError` — a transient
+  500 logs the player out of the room.~~ **[fixed]** `ApiError` now carries
+  the HTTP status; `enterGame()` only clears the session on a genuine 403/404
+  ("you're not in this game" / "room not found"), not on a transient 500 or
+  network failure.
+- ~~Dead code: `cards.js:117` `c.text.replaceAll('<br>', '<br>')` (no-op);
   `planner.js` `stepControls()` stub (called with 3 args, takes none, returns
   `[]`); unused import `hintFor` in `main.js`; unused exports
   `EARTH_ONLY_REENTRY` (data.js) and `SAR_EARTH_ONLY_REENTRY` (flight.php);
   unused `$asAction` parameter in `sar_apply_engineering`;
   `sar_new_craft`'s `[$node === 'assembly' ? null : $node]` history branch is
-  immediately overwritten for the assembly case.
-- `api.js` `fetch` has no timeout/`AbortController`; a hung request wedges
-  `st.busy` actions until it settles.
+  immediately overwritten for the assembly case.~~ **[fixed]** all removed
+  (the no-op `replaceAll` went away as part of the §3.1 fix, which replaced
+  that whole line).
+- ~~`api.js` `fetch` has no timeout/`AbortController`; a hung request wedges
+  `st.busy` actions until it settles.~~ **[fixed]** `api()` now races the
+  fetch against a 15s `AbortController` timeout and surfaces it as an
+  `ApiError` like any other failure.
 
 ---
 
@@ -435,18 +479,27 @@ Phase 2 and Phase 3 (below) are now also done. Remaining Phase 4–5 items
   update on every run of the repeated race. Wired into `npm run test:backend`
   and the `Tests` CI workflow.
 
-### Phase 4 — Frontend robustness & parity
-- (S) Remove `el()`'s `html:` path; handle `<br>` by splitting into text
+### Phase 4 — Frontend robustness & parity ✅ done
+- [x] (S) Remove `el()`'s `html:` path; handle `<br>` by splitting into text
   nodes (§3.1). Keep the Playwright sizing suite green.
-- (S) Version guard + hidden-tab pause + in-flight guard in polling (§3.2).
-- (M) **Parity fixtures:** a PHP script generates N scenario fixtures
+- [x] (S) Version guard + hidden-tab pause + in-flight guard in polling (§3.2).
+- [x] (M) **Parity fixtures:** a PHP script generates N scenario fixtures
   (craft + plan + expected outcome/mission set) as JSON; a Node test runs
   `simulatePlan`/`checkMission` against the same fixtures. Wire into CI. This
   turns the silent PHP↔JS drift (§3.3) into a failing test forever after.
-- (S) Incremental log rendering + scroll preservation; session kept on
+- [x] (S) Incremental log rendering + scroll preservation; session kept on
   transient errors; dead-code sweep (§3.4).
-- (M) One Playwright smoke test: boot a hot-seat game against a PHP dev server
+- [x] (M) One Playwright smoke test: boot a hot-seat game against a PHP dev server
   (or a canned state fixture), take an acquire action, assert the log line.
+  **Fixed:** see §3.1–§3.4 above for the first four items.
+  `tests/smoke.spec.mjs` copies `webGame/` to a temp dir, boots a real
+  `php -S`, and drives an actual browser through the hot-seat lobby → both
+  players ready up in Planning Phase (each dropping one card first, since
+  Round 1 always starts at the 5-card hand limit: 3 starting + 2 drawn on the
+  Planning reveal) → Action Phase → a Basic Shop `acquire`, then asserts the
+  `"... from the Basic supply"` log line appears. Runs alongside the card-sizing
+  suite in the `frontend` CI job (now with PHP installed); stable across
+  repeated local runs on both the desktop and mobile Playwright projects.
 
 ### Phase 5 — CI
 - (S) Add `php -l` over `api/`, and a PHP version matrix (8.1–8.4; or drop the

@@ -181,7 +181,7 @@ function sar_catchup_grant(array &$g, int $amount): void {
 }
 
 // Engineering: build or modify an assembly-area rocket from hand cards.
-function sar_apply_engineering(array &$g, int $seat, array $a, bool $asAction): ?string {
+function sar_apply_engineering(array &$g, int $seat, array $a): ?string {
     $p = &$g['players'][$seat];
     $craftId = $a['craft'] ?? null;
     $add = $a['add'] ?? [];
@@ -240,6 +240,6 @@ function sar_apply_engineering(array &$g, int $seat, array $a, bool $asAction): 
 
 function sar_action_engineering(array &$g, int $seat, array $a): void {
     sar_require_turn($g, $seat);
-    sar_apply_engineering($g, $seat, $a, true);
+    sar_apply_engineering($g, $seat, $a);
     sar_end_command_turn($g, $seat);
 }
