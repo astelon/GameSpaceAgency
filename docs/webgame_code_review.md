@@ -7,12 +7,11 @@ with a script driving the real engine through `sar_apply()`.
 
 ## Status
 
-The four confirmed engine bugs (§1.1–§1.4), two of the quick server fixes
-(§2.4, §2.5), §2.3 (transactional `sar_apply`), the `engine.php` split
-(part of the §4 code smells), Phase 0, and Phase 2 are **done** — see
-**[fixed]** / **[done]** tags below and the "Progress" note at the top of §7.
-Everything else in this document (§2.1–§2.2, §2.6, §3, the rest of §4, §5,
-§6, and Phases 3–5 of §7) is still open.
+The four confirmed engine bugs (§1.1–§1.4), all of §2 (§2.1–§2.6, the server/
+API-layer issues), the `engine.php` split (part of the §4 code smells),
+Phase 0, Phase 2, and Phase 3 are **done** — see **[fixed]** / **[done]**
+tags below and the "Progress" note at the top of §7. Everything else in this
+document (§3, the rest of §4, §5, §6, and Phases 4–5 of §7) is still open.
 
 ---
 
@@ -103,7 +102,7 @@ reroll retry.
 
 ## 2. Server / API-layer issues (static)
 
-### 2.1 The SQLite "lock" does not serialize requests
+### 2.1 The SQLite "lock" does not serialize requests **[fixed]**
 
 `SarStorage::lock()` calls `beginTransaction()`, which in SQLite is a
 **deferred** transaction: no lock is taken until the first write. Two
@@ -113,12 +112,28 @@ action, and the last `save()` wins — a classic lost update (or an unhandled
 `flock()` is actually the *stronger* path. Fix: `BEGIN IMMEDIATE` +
 `PRAGMA busy_timeout`, or `flock()` a per-room lockfile in both modes.
 
-### 2.2 Room-code collision silently overwrites a running game
+**Fixed:** `lock()` now issues `BEGIN IMMEDIATE` directly (bypassing PDO's
+deferred `beginTransaction()`) so the write lock is taken up front, and the
+constructor sets `PRAGMA busy_timeout=5000` so a second writer blocks and
+retries instead of failing immediately on `SQLITE_BUSY`. `unlock()` commits
+the same way (`COMMIT` via `exec()`, tracked with an explicit `$inTxn` flag
+rather than `PDO::inTransaction()`). Regression test: `test_api.php` fires
+two concurrent `action` requests (via `curl_multi`, against a real
+multi-worker `php -S`) at the same room across 8 fresh rooms and asserts
+neither update is lost — reverting the fix reproduces the lost update on
+every run.
+
+### 2.2 Room-code collision silently overwrites a running game **[fixed]**
 
 `room_code()` never checks for an existing room, and `save()` upserts
 (`ON CONFLICT ... DO UPDATE`). At 31⁵ ≈ 28.6M codes this is unlikely but
 trivially avoidable: generate inside the lock and retry while `load()` is
 non-null.
+
+**Fixed:** the `create` op now generates a candidate code, locks it, and
+checks `load()` is `null` before committing to it; on a collision it unlocks
+and retries (up to 5 attempts, then fails with 503) instead of ever calling
+`sar_new_game()`/`save()` against an occupied room code.
 
 ### 2.3 `sar_apply` can throw mid-mutation; callers must know to discard state **[fixed]**
 
@@ -170,17 +185,27 @@ changed — someone else bought it first" if the slot no longer holds that uid.
 The `uid` field is optional server-side for backward compatibility with older
 clients/requests that omit it.
 
-### 2.6 Smaller server items
+### 2.6 Smaller server items — partially done
 
-- `seats_for()` compares the hot-seat host token with `===` while player
-  tokens use `hash_equals` — use `hash_equals` for both.
-- 500 responses echo `$e->getMessage()` to the client — internal paths/details
-  can leak. Log the detail, return a generic message.
-- JSON-file mode: `cleanup()` is a no-op (stale `ROOM.json` + `.lock` files
+- ~~`seats_for()` compares the hot-seat host token with `===` while player
+  tokens use `hash_equals` — use `hash_equals` for both.~~ **[fixed]** both
+  comparisons now go through `hash_equals`.
+- ~~500 responses echo `$e->getMessage()` to the client — internal
+  paths/details can leak. Log the detail, return a generic message.~~
+  **[fixed]** the catch-all `Throwable` handler in `api/index.php` and the
+  `SarStorage` construction failure both `error_log()` the real message and
+  return a generic one to the client (the storage failure still points
+  admins at `?op=health` for a full diagnosis, which leaks nothing sensitive).
+- ~~JSON-file mode: `cleanup()` is a no-op (stale `ROOM.json` + `.lock` files
   accumulate forever) and `save()` is not atomic (no tmp-file + `rename`), so
   a crash mid-write can corrupt a room. `load()` never checks
-  `json_decode` failure.
-- `filter_state()` leaks minor hidden info: exact `missionT2`/`missionT3` deck
+  `json_decode` failure.~~ **[fixed]** `save()` writes to a per-save tmp file
+  and `rename()`s it into place; `load()` (both storage modes) throws if
+  `json_decode` fails on non-empty input instead of silently returning a
+  corrupt/empty state; `cleanup()`'s random 1-in-50 sample now also sweeps
+  JSON-mode `*.json` + matching `.lock` files idle for 3+ days, not just the
+  SQLite table.
+- **Still open:** `filter_state()` leaks minor hidden info: exact `missionT2`/`missionT3` deck
   counts, and maintenance "Returned to hand: …" log lines reveal opponents'
   recovered cards. Decide deliberately what is public.
 - `players[].connected` is written once and never read — dead field.
@@ -357,8 +382,8 @@ All Phase 0 + Phase 1 items above are done, covered by 51 assertions in
 `test_scenarios.php` (2 new scenarios), the strengthened `test_engine.php`
 fuzzer (40-game run green), `test_suborbital.php`, `test_cards_data.php`, and
 the Playwright card-sizing suite (8/8) — all pass with the fixes applied.
-Phase 2 (below) is now also done. Remaining Phase 3–5 items (storage/API
-hardening, frontend robustness/parity, CI) are unstarted.
+Phase 2 and Phase 3 (below) are now also done. Remaining Phase 4–5 items
+(frontend robustness/parity, CI) are unstarted.
 
 ### Phase 2 — Transactional engine core ✅ done
 - [x] (M) Make `sar_apply` copy-on-write: mutate a copy, commit on success. Then
@@ -388,16 +413,27 @@ hardening, frontend robustness/parity, CI) are unstarted.
   `engine.php`; verified end-to-end over real HTTP (`php -S` + create/start/
   state/action) in addition to the CLI suites.
 
-### Phase 3 — Storage & API hardening
-- (S) `BEGIN IMMEDIATE` + `busy_timeout` in SQLite mode (§2.1).
-- (S) Retry room-code generation on collision inside the lock (§2.2).
-- (S) Atomic JSON writes (tmp + rename), `json_decode` failure handling,
+### Phase 3 — Storage & API hardening ✅ done
+- [x] (S) `BEGIN IMMEDIATE` + `busy_timeout` in SQLite mode (§2.1).
+- [x] (S) Retry room-code generation on collision inside the lock (§2.2).
+- [x] (S) Atomic JSON writes (tmp + rename), `json_decode` failure handling,
   cleanup of stale `.json`/`.lock` files (§2.6).
-- (S) `hash_equals` for the host token; generic 500 messages with server-side
-  logging (§2.6).
-- (M) An API integration test: run `php -S` against a temp data dir, drive
+- [x] (S) `hash_equals` for the host token; generic 500 messages with
+  server-side logging (§2.6).
+- [x] (M) An API integration test: run `php -S` against a temp data dir, drive
   create/join/start/state/action over HTTP, assert hand hiding, seat
   authorization, and that two racing actions to one room serialize correctly.
+  **Fixed:** all five items above are implemented in `storage.php`/
+  `index.php`; `tools/test_api.php` copies `api/` into a temp dir, boots
+  `php -S` with `PHP_CLI_SERVER_WORKERS=4` so requests genuinely run in
+  parallel, and drives create/join/start/state/action over real HTTP with
+  `curl`/`curl_multi`. It asserts hand hiding (a player's own hand is
+  visible, opponents' are `null` with just a count), seat authorization
+  (403 on acting for a seat you don't control, non-host `start` rejected),
+  and — across 8 fresh rooms — that two concurrent `planning_done` actions to
+  one room never lose an update; reverting the §2.1 fix reproduces the lost
+  update on every run of the repeated race. Wired into `npm run test:backend`
+  and the `Tests` CI workflow.
 
 ### Phase 4 — Frontend robustness & parity
 - (S) Remove `el()`'s `html:` path; handle `<br>` by splitting into text

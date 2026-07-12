@@ -56,7 +56,8 @@ if ($op === 'health') {
 try {
     $store = new SarStorage();
 } catch (Throwable $e) {
-    fail('Server error: ' . $e->getMessage() . ' (open api/index.php?op=health for a full diagnosis)', 500);
+    error_log('SAR storage init failed: ' . $e->getMessage());
+    fail('Server error: storage is not configured correctly (open api/index.php?op=health for a full diagnosis)', 500);
 }
 
 function room_code(): string {
@@ -85,7 +86,7 @@ function clean_room($raw): string {
 
 // Which seats does this token control?
 function seats_for(array $g, string $token): array {
-    if ($g['mode'] === 'hotseat' && $token === $g['hostToken']) {
+    if ($g['mode'] === 'hotseat' && hash_equals($g['hostToken'], $token)) {
         return array_column($g['players'], 'seat');
     }
     $seats = [];
@@ -127,8 +128,16 @@ try {
             $mode = ($req['mode'] ?? 'online') === 'hotseat' ? 'hotseat' : 'online';
             if ($mode === 'online' && $name === '') fail('Enter a name');
             $token = make_token();
-            $room = room_code();
-            $store->lock($room);
+            // Generate the code inside the lock and retry on collision —
+            // otherwise a (rare) repeat would upsert over a running room.
+            $room = null;
+            for ($attempt = 0; $attempt < 5; $attempt++) {
+                $candidate = room_code();
+                $store->lock($candidate);
+                if ($store->load($candidate) === null) { $room = $candidate; break; }
+                $store->unlock();
+            }
+            if ($room === null) fail('Server busy, please try again', 503);
             $g = sar_new_game($room, $mode, $token);
             if ($mode === 'hotseat') {
                 $names = array_values(array_filter(array_map('trim', (array)($req['names'] ?? []))));
@@ -222,5 +231,5 @@ try {
     fail($e->getMessage());
 } catch (Throwable $e) {
     error_log('SAR fatal: ' . $e->getMessage() . ' @ ' . $e->getFile() . ':' . $e->getLine());
-    fail('Server error: ' . $e->getMessage(), 500);
+    fail('Server error. Please try again.', 500);
 }
