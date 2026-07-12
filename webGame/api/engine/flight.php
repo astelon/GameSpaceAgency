@@ -7,7 +7,11 @@
 // surface relaunches; a failed roll can pause into a pending Launch Abort
 // System reroll decision.
 
-require_once __DIR__ . '/engine.php';
+require_once __DIR__ . '/constants.php';
+require_once __DIR__ . '/state.php';
+require_once __DIR__ . '/lobby.php';
+require_once __DIR__ . '/phases.php';
+require_once __DIR__ . '/actions.php';
 require_once __DIR__ . '/missions.php';
 
 const SAR_EARTH_ONLY_REENTRY = ['S02', 'S04']; // parachute-type: too thin air on Mars
@@ -92,7 +96,7 @@ function sar_action_activate(array &$g, int $seat, array $a): void {
     $plan = $a['plan'] ?? [];
     $plan['path'] = $plan['path'] ?? [$craft['node']];
     if (($plan['path'][0] ?? '') !== $craft['node']) throw new SarError('Path must start at the craft\'s current node');
-    if (count($plan['path']) > 1 && !sar_craft_engine($craft) && empty($craft['stagedEngineFlight'])) {
+    if (count($plan['path']) > 1 && !sar_craft_engine($craft) && !$craft['stagedEngineFlight']) {
         throw new SarError('A craft without an Engine cannot maneuver');
     }
 
@@ -135,7 +139,7 @@ function sar_run_flight(array &$g, string $craftId, array $plan, int $fromStep, 
             $isFuelDepot = (bool)array_filter($depot['cards'], fn($u) => explode('#', $u)[0] === 'P11');
             if (!$depot['deployed'] || !$isFuelDepot) throw new SarError('That asset is not a deployed Fuel Depot');
             if ($depot['node'] !== $g['crafts'][$craftId]['node']) throw new SarError('The Fuel Depot is not at this node');
-            if (($depot['depotUsedRound'] ?? 0) === $g['round']) throw new SarError('That Fuel Depot was already used this round');
+            if ($depot['depotUsedRound'] === $g['round']) throw new SarError('That Fuel Depot was already used this round');
             if ($depot['energy'] < 1) throw new SarError('The Fuel Depot has no Energy');
             $g['crafts'][$depotId]['energy'] -= 1;
             $g['crafts'][$depotId]['depotUsedRound'] = $g['round'];
@@ -352,7 +356,7 @@ function sar_aerobrake(array &$g, string $craftId, string $uid, string $from, st
         && array_search($to, $marsChain, true) > array_search($from, $marsChain, true);
     if (!$descEarth && !$descMars) throw new SarError('Aerobraking only works while descending toward Earth or Mars');
     $cid = explode('#', $uid)[0];
-    $keep = $cid === 'S03' && empty($craft['ceramicAeroUsed']); // Ceramic Tile Shield survives once per flight
+    $keep = $cid === 'S03' && !$craft['ceramicAeroUsed']; // Ceramic Tile Shield survives once per flight
     if ($keep) {
         $craft['ceramicAeroUsed'] = true;
     } else {
@@ -372,7 +376,7 @@ function sar_validate_landing(array &$g, string $craftId, string $to, array $cho
     $uid = $choice['card'] ?? null;
     $hasLegs = false;
     foreach ($craft['cards'] as $u) if (explode('#', $u)[0] === 'S14') $hasLegs = true;
-    $engine = sar_craft_engine($craft) || !empty($craft['stagedEngineFlight']);
+    $engine = sar_craft_engine($craft) || $craft['stagedEngineFlight'];
 
     if ($to === 'moon') {
         // No atmosphere: always propulsive. A Lander payload or the rocket itself serves as lander.
@@ -589,7 +593,7 @@ function sar_operate_abilities(array &$g, string $craftId, array $plan, bool $dr
         $seat = $craft['owner'];
         switch ($cid) {
             case 'P03': // Science Module
-                if (($craft['p03Round'] ?? 0) === $g['round']) throw new SarError('Science Module already ran this round');
+                if ($craft['p03Round'] === $g['round']) throw new SarError('Science Module already ran this round');
                 if (!sar_beyond_zoi($craft['node'])) throw new SarError('The Science Module needs Moon Orbit or beyond');
                 if (!sar_spend_energy($g, $craftId, 2, 'Science Module research')) throw new SarError('The Science Module needs 2 Energy');
                 $g['crafts'][$craftId]['p03Round'] = $g['round'];
@@ -598,7 +602,7 @@ function sar_operate_abilities(array &$g, string $craftId, array $plan, bool $dr
                 if (!$dry) sar_log($g, 'ability', sar_pname($g, $seat) . "'s Science Module returns data: +$vp VP.", ['seat' => $seat, 'vp' => $vp]);
                 break;
             case 'S11': // Sensor Array
-                if (($craft['s11Round'] ?? 0) === $g['round']) throw new SarError('Sensor Array already ran this round');
+                if ($craft['s11Round'] === $g['round']) throw new SarError('Sensor Array already ran this round');
                 $deep = in_array($craft['node'], ['sunOrbit', 'marsZoi', 'marsHigh', 'marsLow', 'subMars', 'mars'], true);
                 if (!sar_storm_active($g) && !$deep) throw new SarError('The Sensor Array pays out during a storm Event or at Sun Orbit and beyond');
                 if (!sar_spend_energy($g, $craftId, 1, 'Sensor Array sweep')) throw new SarError('The Sensor Array needs 1 Energy');
@@ -641,7 +645,7 @@ function sar_on_arrival(array &$g, string $craftId, string $node): void {
             $g['crafts'][$craftId]['visitedLeoAfterStranded'] = true;
             sar_log($g, 'event', $craft['name'] . ' takes the stranded crew aboard at LEO — bring them home!');
         }
-        if ($node === 'earth' && !empty($g['crafts'][$craftId]['visitedLeoAfterStranded'])) {
+        if ($node === 'earth' && $g['crafts'][$craftId]['visitedLeoAfterStranded']) {
             $g['strandedCrew'] = 'claimed';
             $g['players'][$seat]['vp'] += 5;
             sar_log($g, 'milestone', sar_pname($g, $seat) . ' rescues the stranded crew: +5 VP!', ['seat' => $seat, 'vp' => 5]);
@@ -651,7 +655,7 @@ function sar_on_arrival(array &$g, string $craftId, string $node): void {
     // Rival Comm Satellites relay traffic when a craft moves beyond Earth ZOI.
     if (sar_beyond_zoi($node)) {
         foreach ($g['crafts'] as $sid => $sat) {
-            if ($sat['owner'] === $seat || !$sat['deployed'] || !empty($sat['relayUsedRound'])) continue;
+            if ($sat['owner'] === $seat || !$sat['deployed'] || $sat['relayUsedRound']) continue;
             $isComm = (bool)array_filter($sat['cards'], fn($u) => explode('#', $u)[0] === 'P01');
             if (!$isComm || $sat['energy'] < 1) continue;
             $g['crafts'][$sid]['energy'] -= 1;

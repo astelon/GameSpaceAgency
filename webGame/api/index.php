@@ -5,7 +5,7 @@ error_reporting(E_ALL & ~E_DEPRECATED);
 ini_set('display_errors', '0');
 
 require_once __DIR__ . '/storage.php';
-require_once __DIR__ . '/engine/engine.php';
+require_once __DIR__ . '/engine/bootstrap.php';
 
 header('Content-Type: application/json; charset=utf-8');
 header('Cache-Control: no-store');
