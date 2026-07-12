@@ -29,7 +29,7 @@ jobs:
         with:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
-          password: ${{ secrets.PASSWORD }}
+          password: ${{ secrets.FTP_PASSWORD }}
           local-dir: ./webGame/
           server-dir: htdocs/
           exclude: |
