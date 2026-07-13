@@ -17,11 +17,14 @@ Current balance focus (v0.3 — after the design-review rebalance, see docs/desi
 - Component deck scaling (155/123/99 for 4/3/2 players). Watch whether 2p games still surface Station Hubs and Hydrogen Cores often enough.
 
 New watch items (v0.5 pacing pass — see docs/design_review_pacing.md):
-- Shakedown recovery on the Suborbital Test Flight: does round 1 feel like real progress, and do some players still (viably) skip it to race LEO Deployment?
+- Starter Events: does each opening (Recovery Trials / Founding Grant / Crash Program) produce a good round 1, and do games actually diverge from turn one?
 - Flight Data (1 Credit on a failed Reliability check): do failures feel fair now, and does Raptor-X get bought?
 - Jury-Rigging: how often is a card played sideways, which mode dominates (booster / drop tank / mass simulator), and do mass simulators crowd out Basic payloads?
 - Round-1 TW skip: confirm rounds 1–8 play the printed 3-2-1-0-1-2-3-4 cycle and Mars timing is plannable from turn one.
-- Lander ride-along payload slot: are Lander + Cargo Return Capsule builds (Lunar Sample Return) actually flown?
+- Engine Clusters (Thrust adds, Reliability = lowest −1): is the −1 the right tax — do clusters coexist with premium engines instead of replacing them?
+- Uncapped tanks: does any degenerate mega-stack emerge, or do Thrust and card flow self-limit as intended?
+- Rideshare payloads (0–2): are double-satellite launches too efficient (asset spam), and are Lander + Cargo Return Capsule builds (Lunar Sample Return) actually flown?
+- Deadweight (Range −1 on Science Module / Heavy Payload / Fuel Depot): noticeable but not punishing? Does regaining Range on deploy/stage create the intended drop-the-cargo moments?
 - If LEO probe-parking still feels solitaire, trial the orbital-congestion slot cap from the review doc in a later session.
 
 Suggested metrics to record:

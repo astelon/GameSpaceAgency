@@ -22,7 +22,13 @@ v0.4 did a lot of good work here: the **Suborbital Test Flight** standing contra
 
 The starting kit (Sterling Booster, Standard Tank, Heat Shield) contains **no Reusable card**. Per the Recovery rules, non-Reusable parts are discarded even after a safe Earth return. So the intended round-1 beat — fly the Suborbital Test Flight — pays 2 Credits + 1 VP but **destroys ~6 Credits of hardware**, leaving the player with an empty hangar and 7–10 Credits. Round 2 begins by re-buying the rocket you just had. That is the opposite of "real progress every round," and it punishes the player who did the thematic thing.
 
-**Fix (adopted): Shakedown recovery.** Completing the Suborbital Test Flight returns **all unstaged parts of that craft to hand, Reusable or not** — the test articles are recovered and rebuilt. Round 1 becomes pure gain (2 CR + 1 VP + a proven rocket still in hand), it teaches the recovery rules by exception, and because the contract is once-per-agency it cannot be farmed. It also sets up the arc: *disposable era → buy Reusable hardware → true program*.
+**Fix (adopted, revised after feedback): Starter Events.** The first proposal (Shakedown recovery — the test flight returns all parts) was rejected as too much of a mission-specific exception. Instead, round 1's Event is drawn from a dedicated pool of three benign **Starter Events** and revealed **at setup**, so the opening is planned with full information and can never be wrecked by a Solar Storm draw:
+
+* **Recovery Trials** — craft that land safely on Earth this round return all unstaged parts (the hardware start; the original Shakedown idea survives here as one of three openings).
+* **Founding Grant** — each player gains 3 Credits (the funding start).
+* **Crash Program** — each player has 1 extra Command Turn this round (the tempo start).
+
+Each gives round 1 a different texture, so games diverge from turn one. Alternatives considered and set aside: *Salvage* (recover one non-Reusable part on every safe Earth landing — game-wide, but permanently devalues the Reusable tag) and simply raising M21's payout (fixes the math, not the mood).
 
 ### Problem 1.2 — A failed round-1 launch is a pure feel-bad (fixed)
 
@@ -37,7 +43,7 @@ The Planning Phase advances the TW marker every round, including round 1 — but
 ### Observations (no change, watch in playtest)
 
 * **Hand-limit collision in round 1:** 3 starting components + 2 drawn = 5 = the hand limit. Any round-1 Acquire forces a discard unless components were attached first. This reads as intentional "build, don't hoard" pressure — keep, but confirm it doesn't confuse new players.
-* **Two Command Turns at Level 1** plus the combined Engineering+Launch action is a good floor; with Shakedown recovery the typical round 1 is now *fly the test flight + buy a part* — fast and forward-moving. No further change recommended before playtesting.
+* **Two Command Turns at Level 1** plus the combined Engineering+Launch action is a good floor; with a Starter Event boosting the opening, the typical round 1 is *fly the test flight + buy a part* — fast and forward-moving (and under Crash Program, three actions). No further change recommended before playtesting.
 
 ---
 
@@ -80,7 +86,7 @@ The requested "cards played sideways have a weaker effect" rule, tuned for this 
 >
 > * **Engine** → *strap-on booster*: **+1 Thrust** for the craft's launch/relaunch checks.
 > * **Fuel Tank** → *drop tank*: **+1 Range** when the craft launches.
-> * **Anything else** (Payload / Support / Tech) → *mass simulator*: a plain payload, **Mass 1**, no tags (Uncrewed). Occupies the payload slot.
+> * **Anything else** (Payload / Support / Tech) → *mass simulator*: a plain payload, **Mass 1**, no tags (Uncrewed). Occupies a payload slot.
 >
 > A jury-rigged card can never be staged, recovered, or targeted by effects; discard it when the craft is discarded or returns to Earth. Limit one per rocket.
 
@@ -101,7 +107,7 @@ The requested "cards played sideways have a weaker effect" rule, tuned for this 
 | --- | --- | --- |
 | 1 | **Flush the Market** said "discard all **five** … reveal **five**" but the market has been 7 cards since v0.4. | Now seven/seven. |
 | 2 | **Component-deck scaling counts stale** (~143/~114/~91 are v0.3 numbers). Actual v0.4 copies: 155 total; 3p removes 32 (→123); 2p removes 56 (→99). | Numbers corrected. |
-| 3 | **M12 Lunar Sample Return was illegal as written**: it wants a Lander payload *and* a Cargo Return Capsule, but rockets allow 0–1 payload. | New rule: one additional `Lander` payload may ride along with the mission payload (both Masses count). Dedicated landers now work the way the missions assume. |
+| 3 | **M12 Lunar Sample Return was illegal as written**: it wants a Lander payload *and* a Cargo Return Capsule, but rockets allow 0–1 payload. | Initially fixed with a special Lander ride-along slot; superseded by the general **0–2 rideshare payloads** rule (see §7). |
 | 4 | **Round-1 TW advance** made the 8-value printed cycle impossible to play in 8 rounds. | Advance skipped on round 1. |
 | 5 | **Maintenance discards every Event**, contradicting *Stranded Crew* ("persists until claimed"). | Maintenance line now carves out persistent Events. |
 | 6 | **Engineering referenced a "Launch Area"** that no rule defines (§3.2 defines the Rocket Assembly Area). | Renamed. |
@@ -122,7 +128,6 @@ These require editing `cards.csv` and regenerating `webGame/data/cards.json` + `
 | **M05 / M20** | Require "a Sensor Array" by card name; S11's own text says it's "required for any mission that requires Sensors". | Either keep the name consistently on both sides or introduce a requirement phrasing ("Sensors (Sensor Array)"). Low priority. |
 | **S14 Landing Legs** | Tagged `Lander` ("enables surface landing") but its text requires an Engine — the tag over-claims. | Drop the `Lander` tag (its text is the rule) or redefine the tag as "part of a landing system". Note: no exploit today — missions ask for Lander *payloads*, and S14/S16 are Supports. |
 | **EV04 Tech Breakthrough** | "First player to launch this round" — attempt or success? | "First player to attempt a launch (pass or fail)". |
-| **M21 Suborbital Test Flight** | Card text doesn't mention Shakedown recovery (rules-level exception added in v0.5). | Add a line to the card text at next CSV pass so the card teaches its own reward. |
 
 ### Verified clean
 
@@ -134,16 +139,47 @@ All 21 mission route Ranges check out against the node-distance table (M01–M21
 
 Skipped per request; queue for the next pass:
 
-1. Sync the v0.5 rules into the PHP engine (`webGame/api/engine/`): Flight Data credit, Shakedown recovery, round-1 TW skip, Lander ride-along slot, Jury-Rigging, persistent-event exception.
-2. Apply the §4 card-text fixes to `cards.csv`, then `python3 webGame/tools/build_data.py` and run the full test suite.
-3. Regenerate `docs/rulebook.html` from the updated ruleset.
+1. Sync the v0.5 rules into the PHP engine (`webGame/api/engine/`): Starter Events, Flight Data credit, round-1 TW skip, Engine Clusters, uncapped tanks, 0–2 payloads, Deadweight, Jury-Rigging, persistent-event exception.
+2. Add the three **Starter Event** cards (Recovery Trials, Founding Grant, Crash Program) to `cards.csv` (new EV rows + art via the AI pipeline).
+3. Encode **Deadweight** in `cards.csv` as a negative Range value on P03 / P14 / P11 (render as a "Range −1" badge; tanks keep positive Range).
+4. Apply the §4 card-text fixes to `cards.csv`, then `python3 webGame/tools/build_data.py` and run the full test suite.
+5. Regenerate `docs/rulebook.html` from the updated ruleset.
 
 ---
 
-## 6. Playtest Watch Items (added to `docs/playtest_notes.md`)
+## 6. Playtest Watch Items
 
-* Does round 1 now feel like progress (Shakedown recovery), and do players ever *skip* the test flight to race LEO Deployment instead? Both should be viable.
-* Jury-Rigging: frequency of use, which mode dominates, and whether mass simulators crowd out the Basic Light Payload (they shouldn't — equal stats, but cost a card and the sideways slot).
-* Flight Data: does 1 CR make failures feel fair? Does Raptor-X get bought now?
-* Lander ride-along: watch Moon/Mars builds — is M12 now completable in a real game?
-* If LEO probe-parking still feels solitaire, trial the §2 orbital-congestion cap in the second playtest.
+Maintained in `docs/playtest_notes.md` (v0.5 section) — Starter Event divergence, Flight Data, Jury-Rigging usage, Engine Cluster balance, uncapped-tank degeneracy, rideshare asset spam, Deadweight feel, and the orbital-congestion trigger condition.
+
+---
+
+## 7. Revision v0.5.1 — Feedback Pass
+
+Design-owner feedback on the first v0.5 draft produced three changes:
+
+### 7.1 Shakedown recovery → Starter Events
+
+See §1.1 (revised in place). Round 1's Event now comes from a benign three-card pool revealed at setup — a hardware, funding, or tempo opening instead of a guaranteed recovery exception.
+
+### 7.2 Stack limits relaxed (full package)
+
+The 0–1 engine / 1–3 tanks / 0–1 payload caps existed for readability only; the Thrust ≥ Mass gate is the real physical limit, so the caps now lean on it:
+
+* **Engines 0–2 (clusters):** Thrust adds; a two-engine cluster's Reliability is the **lowest engine's modified value −1**. The −1 is load-bearing: without it, two Sterling Boosters (10 Thrust, Rel 9, 6 CR) strictly outclass Raptor-X (9 Thrust, Rel 6, 6 CR). With it, clustering is the cheap-but-riskier route to heavy lift, and Kick Stage + sustainer becomes a genuine booster stack.
+* **Tanks: uncapped (min 1).** Thrust and card economy self-limit; monster stacks need a cluster to lift them, which is the fun part.
+* **Payloads 0–2 (rideshare):** deploy a satellite *and* carry the mission payload; supersedes the Lander ride-along special case (one general rule instead of an exception). Guardrail added: mission "payload Mass X+" requirements refer to a **single payload card**, so two Mass-1 payloads can't fake a Mass-2 contract.
+* **Support stays 0–3:** support cards are mostly mass-less, so Thrust doesn't gate them; unlimited Power/sensor stacking would break the Energy economy.
+
+### 7.3 Deadweight — mass affects Range (the light-touch rocket equation)
+
+Requested: total Range should respond to how much the rocket carries, embedded in card stats, simple numbers, **not** 1:1 with Mass.
+
+Adopted design:
+
+* A few heavy **non-tank** cards print **Range −1** (guideline: Mass 3+; a future Mass 5+ part would print −2). Currently exactly three cards: Science Module, Heavy Payload, Fuel Depot.
+* Subtract attached Deadweight from total Range at launch; when a Deadweight card **leaves the craft in flight** (deployed / staged / discarded) the craft **regains** that Range — dropping the heavy cargo before the trip home is the Tsiolkovsky moment the mechanic exists for.
+* **Tanks are exempt**: a tank's printed Range is already net of its own weight (this is why tank Range/Mass ratios differ by design).
+
+Rejected alternatives: a global threshold table ("Mass ≥ 5 → −1, ≥ 7 → −2") — not embedded in cards, adds a lookup; and per-Mass scaling — a Mass-8 Mars stack losing 8 Range would make long missions impossible and re-tune every mission budget. The sparse per-card stat leaves all existing mission Range math intact (verified: every current mission remains completable with Mass-2 payloads, and Heavy Payload builds still close M07 with the Standard Tank).
+
+**Balance note:** Deadweight slightly deepens the existing Science Module vs Rover/Telescope choice (P03 is now Mass 3 *and* −1 Range, but remains the only Mass-3 Scientific payload with the Moon-orbit activation). Watch it in playtest; if P03 stops getting flown, drop its Deadweight before weakening the rule.

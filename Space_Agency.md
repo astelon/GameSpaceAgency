@@ -180,6 +180,9 @@ Tracking note:
 
 3. Reveal:
 
+   * 1 **Starter Event** — draw one of the three Starter Event cards and reveal it face-up.
+     It is round 1's Event, known to every player before the game begins; the regular Event
+     deck is used from round 2 on. (See §7.1 *Starter Events*.)
    * 3 Tier 1 Mission cards in the Mission display. Ensure at least one **easy** Tier 1 mission
      (a payload-only or deploy mission such as *LEO Deployment*) is among the three, so round 1
      is never a dead hand — if none appears, set one of the three aside and draw replacements
@@ -213,12 +216,26 @@ The game ends after a fixed number of rounds (**8**). If the Mission deck is dep
 
 ### 7.1 Planning Phase
 
-1. **Reveal Event:** Flip the top card of the Event Deck. Its effect applies for the entire round. If the Event Deck is empty, skip this step.
+1. **Reveal Event:** Flip the top card of the Event Deck. Its effect applies for the entire round. If the Event Deck is empty, skip this step. *(Round 1 skips the flip: it uses the Starter Event already revealed during setup.)*
 2. **Advance Transfer Window:** Move the TW marker one step along its printed cycle: **3 → 2 → 1 → 0 → 1 → 2 → 3 → 4**, repeating. The full cycle is visible on the board so windows can be planned in advance. The marker starts on the first space at setup and **the advance is skipped on round 1**, so rounds 1–8 play the eight printed values in order.
 3. **Draw Cards:** Each player draws **2 cards** from the Component Deck into their hand (hand limit is **5**).
 4. **Emergency Sell:** Each player may discard up to 2 cards from hand to gain 1 Credit each. (This is the only way to sell cards — there is no Sell action.)
 
 > Design intent: The Event reveal creates round-to-round variety and timing pressure. Drawing 2 cards keeps hands flowing without flooding.
+
+#### Starter Events (Round 1)
+
+Round 1's Event is never drawn from the Event deck. Instead, the game includes three dedicated **Starter Event** cards; one is drawn and revealed **during setup**, so every player plans their opening with full information. All three open the program with a boost — round 1 is never wrecked by bad space weather:
+
+| Starter Event | Effect (round 1 only) |
+| --- | --- |
+| **Recovery Trials** | Any craft that lands safely on Earth this round returns **all its unstaged parts** to hand, Reusable or not (single-use landing devices actually expended are still discarded). |
+| **Founding Grant** | Each player immediately gains **3 Credits**. |
+| **Crash Program** | Each player has **1 additional Command Turn** this round. |
+
+Discard the Starter Event during round 1's Maintenance as usual. The unused Starter Events return to the box.
+
+> Design intent: the opening round should always feel like progress, but not the *same* progress every game — a hardware start, a funding start, or a tempo start each push round 1 in a different direction. Revealing the card at setup (instead of at the start of round 1) removes round-1 randomness from planning.
 
 ---
 
@@ -306,8 +323,8 @@ agency to *first* reach each frontier earns a scaled reward. Near-Earth frontier
 
 When a craft is launched or activated, resolve the flight immediately:
 
-1. **Launch Capability Check:** Verify Engine Thrust ≥ Total Rocket Mass (sum of all Fuel Tank Mass values + the Mass of every Payload). In design terms, this answers whether the stack can leave the surface; `Range` handles orbital travel after liftoff.
-2. **Reliability Check:** Roll a d10. If the result is **≤ the Engine's Reliability value** (after modifiers from Technology cards and Events), the launch succeeds. If the roll is **above** Reliability, the launch **fails** — the craft does not move, and any non-Reusable Engine is discarded. Reusable Engines survive a failed check but the craft still does not launch this action. **Flight Data:** whenever one of your launches fails its Reliability check, gain **1 Credit** — even a fireball returns telemetry, so a failed test still moves the program forward. *(Skip this step when activating a craft already in flight. A Rocket-as-Lander relaunching from a surface must pass a new Reliability Check.)*
+1. **Launch Capability Check:** Verify total Engine Thrust (all Engines combined) ≥ Total Rocket Mass (sum of all Fuel Tank Mass values + the Mass of every Payload). In design terms, this answers whether the stack can leave the surface; `Range` handles orbital travel after liftoff.
+2. **Reliability Check:** Roll a d10. If the result is **≤ the craft's Reliability value** (the Engine's printed Reliability after modifiers from Technology cards and Events; for a two-engine cluster, the lowest engine's modified value **−1**), the launch succeeds. If the roll is **above** Reliability, the launch **fails** — the craft does not move, and any non-Reusable Engine is discarded. Reusable Engines survive a failed check but the craft still does not launch this action. **Flight Data:** whenever one of your launches fails its Reliability check, gain **1 Credit** — even a fireball returns telemetry, so a failed test still moves the program forward. *(Skip this step when activating a craft already in flight. A Rocket-as-Lander relaunching from a surface must pass a new Reliability Check.)*
 3. Optionally **Stage** one card with the `Stageable` tag to gain its printed bonus Range for this launch (at most one card pre-flight).
 4. The player chooses a path on the orbital map. The craft moves along this path, spending **1 Range per node** crossed. The player may **stop at any node**, preserving unspent Range for future activations.
 5. **Mid-Flight Staging:** During movement, a player may stage `Stageable` cards (typically empty Fuel Tanks) to gain their stage bonus Range — each card may be staged only once, and at most one card per node crossing. The staged card is discarded. This also reduces the craft's Mass for future relaunch capability checks.
@@ -419,11 +436,6 @@ Mission economy note:
   Earth → Earth` and land safely (parachute or propulsive) — **no payload required** — for
   **2 Credits + 1 VP**. It guarantees every agency a productive first turn using only the
   starting kit, and teaches the launch-and-land loop.
-* **Shakedown recovery:** when an agency completes the Suborbital Test Flight, **all unstaged
-  parts of that craft return to its owner's hand, Reusable or not** — the test articles are
-  fished out of the desert and rebuilt. The first flight teaches the full loop without
-  consuming the starting kit, so round 1 is pure progress. (This exception applies only to
-  this standing contract.)
 * **Reward hierarchy:** simply lifting off (a no-payload standing contract) is the *floor* and
   pays the least. Carrying a payload is the real job and always pays more — e.g. *LEO
   Deployment* (payload → LEO) pays 5 Credits + 2 VP versus the test flight's 2 + 1. Longer and
@@ -447,26 +459,35 @@ Mission economy note:
 
 A rocket consists of:
 
-* **0–1 Engine**
-* **1–3 Fuel Tanks**
-* **0–1 Payload**, plus optionally **one additional `Lander` payload** — a dedicated lander may ride along with the mission payload (both Mass values count toward Total Rocket Mass)
+* **0–2 Engines** (two engines form a **cluster** — see *Engine Clusters* below)
+* **1+ Fuel Tanks** (no fixed cap — Thrust is the real limit, since every tank's Mass must be lifted)
+* **0–2 Payloads** — rideshare launches are allowed: a satellite plus the mission payload, or a lander plus a return capsule, can share one rocket; every payload's Mass counts toward Total Rocket Mass
 * **0–3 Support Cards**
 
-A rocket's **total Range** equals the sum of all its Fuel Tank Range values. Some rockets may also use **staging** effects printed on cards to discard part of the rocket mid-flight for extra Range.
+A rocket's **total Range** equals the sum of all its Fuel Tank Range values, **minus any Deadweight penalties** printed on attached cards (see *Deadweight* below). Some rockets may also use **staging** effects printed on cards to discard part of the rocket mid-flight for extra Range.
 
 A rocket launched from a planet must have an Engine.
 An Engine-free craft is only legal if it is already **in flight** or **in orbit** because of a mission, card, or ongoing asset effect.
+
+### Engine Clusters
+
+* A rocket may mount **up to 2 Engines**; their **Thrust adds**.
+* A two-engine cluster's **Reliability** is the **lowest** value among its engines (after per-engine modifiers) **minus 1** — more engines means more plumbing and more ways to fail. Roll one Reliability check per launch as usual.
+* Any single remaining Engine is enough to maneuver, land propulsively, and relaunch. Staging away a `Stageable` engine (Kick Stage) leaves the other engine flying the craft — the classic booster + sustainer stack.
+
+> Design intent: clustering cheap engines is the budget route to heavy lift (two Sterling Boosters: Thrust 10, Reliability 8) — Kerbal "moar boosters" — while premium engines buy similar lift in one reliable, often Reusable card.
 
 ### Qualification Rules
 
 * Every Fuel Tank and Payload card has a numeric **Mass** value (tanks 1–4, payloads 1–3).
 * Some Support cards also have printed **Mass**.
 * **Total Rocket Mass** = sum of all Fuel Tank Mass values + the Mass of every Payload + any printed Support Mass.
-* An Engine's **Thrust** must be **≥ Total Rocket Mass** for the rocket to launch.
+* The rocket's **total Thrust** (all Engines combined) must be **≥ Total Rocket Mass** for the rocket to launch.
+* Mission requirements that name a payload Mass (e.g., "payload Mass 2+") refer to a **single payload card** of that Mass — two Mass-1 payloads do not add up to satisfy them.
 * If your rocket has **no Engine**, it may not launch from a planet.
 * If your craft has **no Engine** but is already in flight or in orbit, its Total Rocket Mass must be **≤ 3**.
 * Engines have no Mass for lift purposes. Support cards count only if they print a Mass value.
-* **Range** measures remaining travel potential. A rocket's total Range = sum of all Fuel Tank Range values.
+* **Range** measures remaining travel potential. A rocket's total Range = sum of all Fuel Tank Range values, minus attached Deadweight penalties.
 * **Energy** powers activated systems such as docking hardware, advanced sensors, and computer assists. A craft refills Energy to its power output at the start of each Action Phase and spends it during that round; a Battery may be discarded for a one-time burst.
 * To **maneuver**, a craft must have an Engine to turn that Range into orbital changes.
 * Missions with the `Docking` tag require a `Docking`-tagged support card on the rocket (e.g., Docking Adapter or Orbital Tug).
@@ -478,6 +499,18 @@ An Engine-free craft is only legal if it is already **in flight** or **in orbit*
 * **Uncrewed** means any payload *without* the `Crewed` tag.
 * Card text is authoritative. When a card gives a more specific instruction than the general rules, resolve that card effect as written.
 
+### Deadweight (Range Penalties)
+
+Some heavy non-tank cards print a **Deadweight** value (shown as **Range −1**): hauling them costs delta-v. This is the game's light-touch rocket equation — mass that isn't fuel reduces how far the fuel takes you.
+
+* When a craft launches, subtract the **sum of all attached Deadweight values** from its total Range.
+* If a Deadweight card **permanently leaves a craft in flight** — deployed as an asset, staged, or discarded — the craft immediately **regains** that much Range. Dropping the heavy cargo before the trip home is exactly the right move.
+* **Fuel Tanks never carry Deadweight:** a tank's printed Range is already net of its own weight.
+* Most cards have **no** Deadweight — light parts fly free. Current guideline: **Mass 3+ non-tank cards print Range −1**; a future Mass 5+ monster part would print −2.
+* Cards with Deadweight in the current set: **Science Module (P03)**, **Heavy Payload (P14)**, and **Fuel Depot (P11)** — each **Range −1**.
+
+> Design intent: the penalty is deliberately **not 1:1 with Mass**. Thrust already taxes total weight at the launch gate; Deadweight only bites the few genuinely heavy items, so starter rockets and light probes keep their full printed Range and route math stays a simple sum of printed numbers.
+
 ### Jury-Rigging (Sideways Cards)
 
 Any card in hand can be strapped onto a rocket as improvised hardware instead of being played normally. During an **Engineering** (or combined Engineering + Launch) action, you may attach **at most one card sideways** to a rocket. A sideways card ignores its printed text, tags, Cost, and Mass — what it does depends only on its card type:
@@ -488,7 +521,7 @@ Any card in hand can be strapped onto a rocket as improvised hardware instead of
 | **Fuel Tank** | Drop tank | **+1 Range** added to the craft's Range when it launches |
 | **Any other card** | Mass simulator | A plain payload: **Mass 1**, no tags (counts as Uncrewed) |
 
-* A jury-rigged booster or drop tank does **not** occupy an engine/tank/support slot; the mass simulator **does** occupy the rocket's payload slot.
+* A jury-rigged booster or drop tank does **not** occupy an engine/tank/support slot; the mass simulator **does** occupy one of the rocket's two payload slots.
 * A jury-rigged card is never a real component: it can never be **staged**, **recovered**, or targeted by card effects. Discard it when its craft is discarded or returns to Earth.
 * Limit: **one sideways card per rocket**.
 
@@ -573,7 +606,7 @@ Design note:
 * A craft already in orbit does not need an Engine just to remain there. It needs one only if it must maneuver again.
 * Range is not a separate fuel mini-game. Players count node moves plus Transfer Window costs and propulsive landings.
 * Flights resolve immediately when launched or activated. Players choose how far to fly, and remaining Range is tracked on the board.
-* Multiple tanks let players build heavier rockets for longer missions, but each tank adds Mass that the Engine must lift.
+* Multiple tanks let players build heavier rockets for longer missions, but each tank adds Mass that the Engines must lift.
 
 ### Tags
 
@@ -716,13 +749,13 @@ Technologies should:
 * **Early-game dynamics (v0.4):** always-buyable Basic payloads (Light/Standard/Heavy) so a payload is never unavailable; a 7-card market; the Suborbital Test Flight standing contract; and the two-layer Exploration Bonuses (personal LEO Credit floor + the diminishing Exploration Race ladder)
 * **Landing model:** a heat shield is heat/aerobrake only — landing requires a parachute (Earth), airbags (uncrewed, Earth/Mars), a Lander, or a propulsive burn
 * **Sub-orbital decay:** sub-orbital arcs are not stable orbits — a craft still on one at round end auto-lands with a passive lander (parachute / airbags / Lander / Landing Legs + Engine) or crashes; a propulsive landing without legs costs a command turn during the round
-* **v0.5 pacing pass** (see `docs/design_review_pacing.md`): round-1 TW advance skipped so the printed 8-value cycle maps to rounds 1–8; **Flight Data** (1 Credit whenever a launch fails its Reliability check); **Shakedown recovery** (the Suborbital Test Flight returns all unstaged parts, so round 1 never consumes the starting kit); the **Lander ride-along** payload slot (makes Lander + Cargo Return Capsule builds like *Lunar Sample Return* legal); and the **Jury-Rigging** sideways-card rule
+* **v0.5 pacing pass** (see `docs/design_review_pacing.md`): **Starter Events** (round 1's event comes from a benign 3-card pool, revealed at setup); **Flight Data** (1 Credit whenever a launch fails its Reliability check); round-1 TW advance skipped so the printed 8-value cycle maps to rounds 1–8; relaxed stack limits (**Engine Clusters** 0–2 with Thrust adding and Reliability = lowest −1, **uncapped Fuel Tanks**, **0–2 rideshare Payloads** — which also makes Lander + Cargo Return Capsule builds like *Lunar Sample Return* legal); **Deadweight** Range penalties (−1) on Mass 3+ non-tank cards, regained when the card leaves the craft; and the **Jury-Rigging** sideways-card rule
 
 ### Under Evaluation
 
 * Player asymmetry (agency specialization or starting bonuses)
 * Whether second players completing a mission should get a reduced reward
-* **Orbital congestion:** cap the number of income-paying `Satellite` assets per node (e.g., 3 slots each at LEO and GEO; first deployed keep them) so near-Earth real estate becomes a race that one player can lock other players out of — see `docs/design_review_pacing.md` §3
+* **Orbital congestion:** cap the number of income-paying `Satellite` assets per node (e.g., 3 slots each at LEO and GEO; first deployed keep them) so near-Earth real estate becomes a race that one player can lock other players out of — see `docs/design_review_pacing.md` §2
 * **Jury-Rigging free-choice variant:** let the player pick any of the three sideways effects regardless of card type (simpler to abuse, but even easier to teach)
 * Additional standing contracts at higher tiers (e.g., a once-per-agency "GEO comm license") so every agency always has a fallback job
 
