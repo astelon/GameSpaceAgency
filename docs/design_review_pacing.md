@@ -137,13 +137,12 @@ All 21 mission route Ranges check out against the node-distance table (M01–M21
 
 ## 5. Deferred Work (webGame)
 
-Skipped per request; queue for the next pass:
+Card **data** for the new mechanics has landed (Starter Events EV14–EV16 with the `Starter` tag; Deadweight encoded as Range −1 on P03 / P14 / P11; data files regenerated and the full test suite passing). A one-line guard in `lobby.php` keeps `Starter`-tagged events out of the engine's round event deck so current webGame behavior is unchanged. Still queued for the next PR:
 
-1. Sync the v0.5 rules into the PHP engine (`webGame/api/engine/`): Starter Events, Flight Data credit, round-1 TW skip, Engine Clusters, uncapped tanks, 0–2 payloads, Deadweight, Jury-Rigging, persistent-event exception.
-2. Add the three **Starter Event** cards (Recovery Trials, Founding Grant, Crash Program) to `cards.csv` (new EV rows + art via the AI pipeline).
-3. Encode **Deadweight** in `cards.csv` as a negative Range value on P03 / P14 / P11 (render as a "Range −1" badge; tanks keep positive Range).
-4. Apply the §4 card-text fixes to `cards.csv`, then `python3 webGame/tools/build_data.py` and run the full test suite.
-5. Regenerate `docs/rulebook.html` from the updated ruleset.
+1. Sync the v0.5 rules into the PHP engine (`webGame/api/engine/`): Starter Event reveal at setup, Flight Data credit, round-1 TW skip, Engine Clusters, uncapped tanks, 0–2 payloads, Deadweight math, Jury-Rigging, persistent-event exception.
+2. Generate art for EV14–EV16 via the AI pipeline and re-export the nanDECK templates.
+3. Apply the §4 card-text fixes to `cards.csv`, then `python3 webGame/tools/build_data.py` and run the full test suite.
+4. Regenerate `docs/rulebook.html` from the updated ruleset.
 
 ---
 

@@ -334,7 +334,7 @@
   "name": "Science Module",
   "cost": 3,
   "thrust": null,
-  "range": null,
+  "range": -1,
   "mass": 3,
   "energy": -2,
   "energyMode": "Use",
@@ -343,7 +343,7 @@
   "tags": [
    "Scientific"
   ],
-  "text": "Spend 2 Energy at Moon Orbit or beyond (once per round): gain 1 VP from research data, or 2 VP while a storm Event is active.",
+  "text": "Spend 2 Energy at Moon Orbit or beyond (once per round): gain 1 VP from research data, or 2 VP while a storm Event is active. Deadweight: Range -1 while attached.",
   "flavor": "Complex science package.",
   "tier": "",
   "rewardCredits": 0,
@@ -1726,7 +1726,7 @@
   "name": "Fuel Depot",
   "cost": 4,
   "thrust": null,
-  "range": null,
+  "range": -1,
   "mass": 3,
   "energy": null,
   "energyMode": "",
@@ -1735,7 +1735,7 @@
   "tags": [
    "Station"
   ],
-  "text": "Deploy in orbit. Once per round, a craft at the same node may spend 1 of this depot's Energy to gain +2 Range.",
+  "text": "Deploy in orbit. Once per round, a craft at the same node may spend 1 of this depot's Energy to gain +2 Range. Deadweight: Range -1 while attached.",
   "flavor": "Fill up before the long haul.",
   "tier": "",
   "rewardCredits": 0,
@@ -1837,7 +1837,7 @@
   "name": "Heavy Payload",
   "cost": 2,
   "thrust": null,
-  "range": null,
+  "range": -1,
   "mass": 3,
   "energy": null,
   "energyMode": "",
@@ -1846,7 +1846,7 @@
   "tags": [
    "Basic"
   ],
-  "text": "A plain heavy payload. Satisfies payload Mass 3 requirements and stresses your Thrust budget. Always available for purchase.",
+  "text": "A plain heavy payload. Satisfies payload Mass 3 requirements and stresses your Thrust budget. Deadweight: Range -1 while attached. Always available for purchase.",
   "flavor": "Somebody has to lift the big one.",
   "tier": "",
   "rewardCredits": 0,
@@ -1920,6 +1920,72 @@
   "tier": "",
   "rewardCredits": 0,
   "copies": 3,
+  "art": null
+ },
+ "EV14": {
+  "id": "EV14",
+  "type": "Event",
+  "name": "Recovery Trials",
+  "cost": 0,
+  "thrust": null,
+  "range": null,
+  "mass": null,
+  "energy": null,
+  "energyMode": "",
+  "reliability": null,
+  "vp": 0,
+  "tags": [
+   "Starter"
+  ],
+  "text": "Starter Event: revealed at setup as round 1's Event. This round, any craft that lands safely on Earth returns all its unstaged parts to hand, Reusable or not (single-use landing devices actually expended are still discarded).",
+  "flavor": "Every test article comes home in a truck.",
+  "tier": "",
+  "rewardCredits": 0,
+  "copies": 1,
+  "art": null
+ },
+ "EV15": {
+  "id": "EV15",
+  "type": "Event",
+  "name": "Founding Grant",
+  "cost": 0,
+  "thrust": null,
+  "range": null,
+  "mass": null,
+  "energy": null,
+  "energyMode": "",
+  "reliability": null,
+  "vp": 0,
+  "tags": [
+   "Starter"
+  ],
+  "text": "Starter Event: revealed at setup as round 1's Event. Each player immediately gains 3 Credits.",
+  "flavor": "The committee liked the brochure.",
+  "tier": "",
+  "rewardCredits": 0,
+  "copies": 1,
+  "art": null
+ },
+ "EV16": {
+  "id": "EV16",
+  "type": "Event",
+  "name": "Crash Program",
+  "cost": 0,
+  "thrust": null,
+  "range": null,
+  "mass": null,
+  "energy": null,
+  "energyMode": "",
+  "reliability": null,
+  "vp": 0,
+  "tags": [
+   "Starter"
+  ],
+  "text": "Starter Event: revealed at setup as round 1's Event. Each player has 1 additional Command Turn this round.",
+  "flavor": "Sleep is for after orbit.",
+  "tier": "",
+  "rewardCredits": 0,
+  "copies": 1,
   "art": null
  }
 }

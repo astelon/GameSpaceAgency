@@ -634,6 +634,8 @@ Component tags:
 
 Mission tags: `Commercial`, `Prestige`, `Infrastructure` (contract class), `Surface`, `Docking`, `Maneuver`, `In-Space`, plus requirement tags (`Crewed`, `Scientific`).
 
+Event tags: `Starter` — a Starter Event; one is revealed at setup as round 1's Event, and Starter cards are never shuffled into the Event deck.
+
 > Tags allow flexible design space and future expansions.
 
 ---
@@ -761,7 +763,7 @@ Technologies should:
 
 ### Playtest Readiness
 
-* Card list v0.4 (88 unique / 189 with copies): 21 missions — 8 Tier 1 (incl. the Suborbital Test Flight standing contract) / 8 Tier 2 / 5 Tier 3 — 13 events, plus the Basic payload set (P12–P14) and the new landing devices (Airbag Shell, Splashdown Kit)
+* Card list v0.5 (91 unique / 192 with copies): 21 missions — 8 Tier 1 (incl. the Suborbital Test Flight standing contract) / 8 Tier 2 / 5 Tier 3 — 13 events plus the 3 Starter Events (EV14–EV16), the Basic payload set (P12–P14), the landing devices (Airbag Shell, Splashdown Kit), and Deadweight (Range −1) printed on the Science Module, Heavy Payload, and Fuel Depot
 * Economy rebalanced — see `docs/playtest_notes.md` for balance targets
 * First blind playtest scheduled
 
