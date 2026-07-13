@@ -98,12 +98,13 @@ function sar_action_develop(array &$g, int $seat, array $a): void {
     $p['tableau'][] = $uid;
     sar_log($g, 'tech', $p['name'] . ' develops ' . $card['name'] . '.', ['card' => $uid, 'seat' => $seat]);
 
-    // Technology milestones
+    // Technology milestones. The second-tech bonus is per-player (v0.5):
+    // every agency gains +1 VP the first time it reaches two Technologies.
     $n = count($p['tableau']);
-    if ($n === 2 && $g['milestones']['secondTech'] === null) {
-        $g['milestones']['secondTech'] = $seat;
+    if ($n === 2) {
+        if ($g['milestones']['secondTech'] === null) $g['milestones']['secondTech'] = $seat;
         $p['vp'] += 1;
-        sar_log($g, 'milestone', $p['name'] . ' is first to a second Technology: +1 VP.', ['seat' => $seat, 'vp' => 1]);
+        sar_log($g, 'milestone', $p['name'] . ' develops a second Technology: +1 VP.', ['seat' => $seat, 'vp' => 1]);
     }
     if ($n === 4 && $g['milestones']['fourthTech'] === null) {
         $g['milestones']['fourthTech'] = $seat;

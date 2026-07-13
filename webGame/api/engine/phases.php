@@ -30,23 +30,31 @@ function sar_begin_planning(array &$g): void {
 
     sar_log($g, 'phase', "Round {$g['round']} — Planning Phase.", ['phase' => 'planning', 'round' => $g['round']]);
 
-    // 1. Reveal Event
-    if ($g['decks']['event']) {
+    // 1. Reveal Event. Round 1 uses the Starter Event revealed at setup
+    // (v0.5.1); the round event deck is drawn from round 2 on.
+    if ($g['round'] === 1 && !empty($g['starterEvent'])) {
+        $g['event'] = $g['starterEvent'];
+    } elseif ($g['decks']['event']) {
         $g['event'] = array_shift($g['decks']['event']);
+    } else {
+        $g['event'] = null;
+    }
+    if ($g['event']) {
         $ev = sar_event_id($g);
         $card = sar_card($g['event']);
         sar_log($g, 'event', "Event: {$card['name']} — {$card['text']}", ['card' => $g['event']]);
-        if ($ev === 'EV02') { // Funding Boost: +3 Credits to everyone, immediately
+        if ($ev === 'EV02' || $ev === 'EV15') { // Funding Boost / Founding Grant: +3 Credits, immediately
             foreach ($g['players'] as &$p) $p['credits'] += 3;
             unset($p);
-            sar_log($g, 'gain', 'Funding Boost: every agency gains 3 Credits.');
+            sar_log($g, 'gain', "{$card['name']}: every agency gains 3 Credits.");
+        }
+        if ($ev === 'EV16') { // Crash Program: +1 command turn this round
+            sar_log($g, 'event', 'Crash Program: every agency has 1 additional command turn this round.');
         }
         if ($ev === 'EV13' && $g['strandedCrew'] === null) {
             $g['strandedCrew'] = 'unclaimed';
             sar_log($g, 'event', 'A crew is stranded at LEO! First Crewed craft to visit LEO and then return to Earth rescues them for 5 VP.');
         }
-    } else {
-        $g['event'] = null;
     }
 
     // 2. Advance Transfer Window (not on round 1 — marker starts on the first space).
@@ -169,27 +177,31 @@ function sar_maintenance(array &$g): void {
     require_once __DIR__ . '/flight.php';
     sar_suborbital_decay($g);
 
-    // 1. Recover craft that returned to Earth.
+    // 1. Recover craft that returned to Earth. Under Recovery Trials (EV14,
+    // Starter Event) every unstaged part comes home, Reusable or not —
+    // single-use landing devices actually expended already left the craft.
+    $ev14 = sar_event_id($g) === 'EV14';
     foreach ($g['crafts'] as $id => $craft) {
         if ($craft['node'] !== 'earth' || $craft['deployed']) continue;
         if ($craft['launchRound'] === null) continue; // never launched
         $seat = $craft['owner'];
         $p = &$g['players'][$seat];
-        $recovered = []; $lost = [];
+        $recovered = []; $lost = []; $refurb = 0;
         foreach ($craft['cards'] as $uid) {
-            if (sar_has_tag($uid, 'Reusable')) {
+            if ($ev14 || sar_has_tag($uid, 'Reusable')) {
                 $p['hand'][] = $uid;
                 $recovered[] = sar_card($uid)['name'];
-                if (sar_has_tech($g, $seat, 'C01')) { $p['credits'] += 1; }
+                // The refurb credit stays tied to genuinely Reusable parts.
+                if (sar_has_tech($g, $seat, 'C01') && sar_has_tag($uid, 'Reusable')) { $p['credits'] += 1; $refurb++; }
             } else {
                 $g['decks']['componentDiscard'][] = $uid;
                 $lost[] = sar_card($uid)['name'];
             }
         }
         $msg = $p['name'] . "'s {$craft['name']} is recovered on Earth.";
-        if ($recovered) $msg .= ' Returned to hand: ' . implode(', ', $recovered) . '.';
+        if ($recovered) $msg .= ' Returned to hand: ' . implode(', ', $recovered) . ($ev14 ? ' (Recovery Trials)' : '') . '.';
         if ($lost) $msg .= ' Expended: ' . implode(', ', $lost) . '.';
-        if ($recovered && sar_has_tech($g, $seat, 'C01')) $msg .= ' Reusable Refurb pays ' . count($recovered) . ' Credit(s).';
+        if ($refurb) $msg .= " Reusable Refurb pays $refurb Credit(s).";
         sar_log($g, 'recover', $msg, ['seat' => $seat]);
         unset($p);
         unset($g['crafts'][$id]);

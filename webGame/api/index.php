@@ -113,6 +113,8 @@ function filter_state(array $g, array $mySeats): array {
     foreach ($v['players'] as $i => &$p) {
         $p['handCount'] = count($p['hand']);
         $p['isYou'] = in_array($p['seat'], $mySeats, true);
+        // Derived server-side so events (Crash Program) are reflected in the UI.
+        $p['commandTurns'] = sar_command_turns($g, $p['seat']);
         unset($p['token']);
         if (!in_array($p['seat'], $mySeats, true)) $p['hand'] = null;
     }

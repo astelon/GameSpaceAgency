@@ -19,6 +19,7 @@ function sar_new_game(string $room, string $mode, string $hostToken): array {
         'standing' => [],       // standing contract ids in play (set at start)
         'crafts' => [], 'craftSeq' => 0,
         'turnSeat' => 0,
+        'starterEvent' => null, // round 1's Event, drawn from the Starter pool at setup
         'missionDoneThisRound' => false,
         'ev04Used' => false,
         'strandedCrew' => null, // null | 'unclaimed' | 'claimed'
@@ -153,9 +154,16 @@ function sar_start_game(array &$g): void {
         }
     }
 
+    // Starter Event (v0.5.1): reveal round 1's Event from the benign 3-card
+    // pool at setup, so every player plans the opening with full information.
+    $starter = SAR_STARTER_EVENTS[random_int(0, count(SAR_STARTER_EVENTS) - 1)];
+    $g['starterEvent'] = "$starter#1";
+
     $g['status'] = 'playing';
     $g['round'] = 1;
     sar_log($g, 'setup', 'Game started with ' . $np . ' agencies. ' .
         sar_pname($g, $g['firstSeat']) . ' is the first player.');
+    $sc = sar_card($g['starterEvent']);
+    sar_log($g, 'setup', "Starter Event revealed: {$sc['name']} — round 1's Event is known from the start.");
     sar_begin_planning($g);
 }

@@ -349,5 +349,93 @@ try {
 ok($threw, 'the malformed launch plan is rejected with "Invalid route"');
 ok($g == $before, 'state is byte-for-byte identical to before the rejected action — no half-launched craft leaked (§2.3)');
 
+echo "— Scenario 12: Starter Events (v0.5.1) — setup reveal, round-1 use, effects\n";
+// Keep starting games until the wanted starter comes up (uniform 1-in-3).
+function fresh_with_starter(string $cid): array {
+    for ($i = 0; $i < 300; $i++) {
+        $g = sar_new_game('SCN', 'hotseat', 'tok');
+        sar_add_player($g, 'Ada', 'tok');
+        sar_add_player($g, 'Bo', 'tok');
+        sar_start_game($g);
+        if (sar_event_id($g) === $cid) return $g;
+    }
+    throw new RuntimeException("Starter $cid never drawn in 300 tries");
+}
+
+$g = fresh_with_starter('EV15'); // Founding Grant
+ok(in_array(sar_event_id($g), SAR_STARTER_EVENTS, true), "round 1's event is a Starter Event");
+$starterInDeck = false;
+foreach ($g['decks']['event'] as $eu) if (sar_has_tag($eu, 'Starter')) $starterInDeck = true;
+ok(!$starterInDeck && count($g['decks']['event']) === 13, 'the 13-card round event deck contains no Starter Events');
+ok(array_sum(array_column($g['players'], 'credits')) === SAR_START_CREDITS[0] + SAR_START_CREDITS[1] + 6,
+    'Founding Grant pays every agency +3 Credits at the round 1 reveal');
+
+$g = fresh_with_starter('EV16'); // Crash Program
+ok(sar_command_turns($g, 0) === SAR_LEVEL_TURNS[1] + 1, 'Crash Program grants +1 command turn while active');
+$g['event'] = null;
+ok(sar_command_turns($g, 0) === SAR_LEVEL_TURNS[1], 'the extra turn disappears once the event is discarded');
+
+// Round 2 must draw from the regular event deck.
+$g = fresh_with_starter('EV14');
+foreach ($g['players'] as $p) {
+    sar_apply($g, $p['seat'], ['type' => 'planning_done', 'sell' => [],
+        'discard' => array_slice($g['players'][$p['seat']]['hand'], 0, max(0, count($g['players'][$p['seat']]['hand']) - 5))]);
+}
+foreach ($g['players'] as &$pp) { $pp['passed'] = true; }
+unset($pp);
+sar_maintenance($g);
+ok($g['round'] === 2 && !in_array(sar_event_id($g), SAR_STARTER_EVENTS, true),
+    "round 2's event is drawn from the regular deck");
+ok(in_array('EV14#1', $g['decks']['eventDiscard'], true), 'the used Starter Event was discarded during Maintenance');
+
+// EV14 Recovery Trials: everything unstaged comes home, expended devices don't.
+$g = fresh();
+$g['players'][0]['standingDone'] = ['M21']; // isolate from the standing contract
+[$eng, $tank, $probe, $chute] = give($g, 0, ['E02', 'T01', 'P05', 'S02']);
+$g['players'][0]['hand'] = [$eng, $tank, $probe, $chute];
+$flew = false; $tries = 0;
+do {
+    $snap = $g;
+    sar_apply($g, 0, ['type' => 'launch', 'components' => [$eng, $tank, $probe, $chute],
+        'plan' => ['path' => ['earth', 'subEarth', 'earth'],
+                   'landing' => [2 => ['method' => 'reentry', 'card' => $chute]]]]);
+    foreach ($g['crafts'] as $c) if ($c['node'] === 'earth' && $c['launchRound']) $flew = true;
+    if (!$flew) $g = $snap;
+} while (!$flew && ++$tries < 60);
+$g['event'] = 'EV14#1'; // Recovery Trials active during this round's Maintenance
+foreach ($g['players'] as &$pp) { $pp['passed'] = true; }
+unset($pp);
+sar_maintenance($g);
+$cids = array_map(fn($u) => explode('#', $u)[0], $g['players'][0]['hand']);
+ok(in_array('E02', $cids, true) && in_array('T01', $cids, true) && in_array('P05', $cids, true),
+    'Recovery Trials returns non-Reusable engine, tank and payload to hand');
+ok(!in_array('S02', $cids, true), 'the parachute expended during landing is still discarded');
+
+echo "— Scenario 13: Flight Data — a failed launch pays 1 Credit\n";
+$g = fresh();
+[$eng, $tank] = give($g, 0, ['E02', 'T01']);
+$g['players'][0]['hand'] = [$eng, $tank];
+sar_apply($g, 0, ['type' => 'engineering', 'add' => [$eng, $tank]]);
+$craftId = array_key_first($g['crafts']);
+$cr0 = $g['players'][0]['credits'];
+sar_launch_failure($g, $craftId);
+ok($g['players'][0]['credits'] === $cr0 + 1, 'launch failure banks +1 Credit of Flight Data');
+ok(sar_craft_engine($g['crafts'][$craftId]) === null, 'the non-Reusable engine is still destroyed');
+
+echo "— Scenario 14: second-Technology VP is per-player (v0.5)\n";
+$g = fresh();
+foreach ($g['players'] as &$pp) { $pp['level'] = 3; $pp['credits'] = 60; }
+unset($pp);
+[$cA1, $cA2] = give($g, 0, ['C03', 'C05']);
+[$cB1, $cB2] = give($g, 1, ['C04', 'C07']);
+$vpA = $g['players'][0]['vp']; $vpB = $g['players'][1]['vp'];
+sar_apply($g, 0, ['type' => 'develop', 'card' => $cA1]);
+sar_apply($g, 1, ['type' => 'develop', 'card' => $cB1]);
+sar_apply($g, 0, ['type' => 'develop', 'card' => $cA2]);
+sar_apply($g, 1, ['type' => 'develop', 'card' => $cB2]);
+ok($g['players'][0]['vp'] === $vpA + 1, 'first player to a 2nd Technology gains +1 VP');
+ok($g['players'][1]['vp'] === $vpB + 1, 'the second player ALSO gains +1 VP at their own 2nd Technology');
+ok($g['milestones']['secondTech'] === 0, 'the milestone still records who got there first');
+
 echo "\n$pass passed, $fail failed\n";
 exit($fail ? 1 : 0);

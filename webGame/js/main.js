@@ -373,7 +373,7 @@ function renderLeft() {
       el('span', {}, 'Hand ', el('b', {}, String(p.handCount))),
       el('span', {}, 'Missions ', el('b', {}, String(p.missionsCompleted)))));
     if (g.phase === 'action') {
-      const total = { 1: 2, 2: 3, 3: 4 }[p.level];
+      const total = p.commandTurns;
       const turns = el('div', { class: 'turns', title: `Command turns: ${total - p.turnsUsed} of ${total} left` });
       for (let i = 0; i < total; i++) turns.append(el('div', { class: 'turn-pip' + (i >= p.turnsUsed && !p.passed ? ' free' : '') }));
       pp.append(turns);
@@ -511,7 +511,7 @@ function renderBottom() {
       const cur = g.players[g.turnSeat];
       bar.append(el('div', { class: 'info' }, `Waiting: `, el('b', {}, cur?.name || ''), ` is taking a command turn…`));
     } else {
-      const total = { 1: 2, 2: 3, 3: 4 }[p.level];
+      const total = p.commandTurns;
       bar.append(el('div', { class: 'info' }, el('b', {}, `${p.name}`), ` — command turn ${p.turnsUsed + 1}/${total} · ${p.credits} Cr`));
       bar.append(
         el('button', { class: 'btn', title: 'Assemble a rocket from hand cards, then optionally launch it in the same turn.',

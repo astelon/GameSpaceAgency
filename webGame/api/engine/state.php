@@ -43,7 +43,9 @@ function sar_tw_cost(array $g, int $seat): int {
 }
 
 function sar_command_turns(array $g, int $seat): int {
-    return SAR_LEVEL_TURNS[$g['players'][$seat]['level']];
+    // Crash Program (Starter Event): +1 command turn while it is the round's event.
+    return SAR_LEVEL_TURNS[$g['players'][$seat]['level']]
+        + (sar_event_id($g) === 'EV16' ? 1 : 0);
 }
 
 // Craft helpers -------------------------------------------------------------

@@ -276,6 +276,11 @@ function sar_launch_checks(array &$g, string $craftId, array $plan, int $step, b
 
 function sar_launch_failure(array &$g, string $craftId): void {
     $craft = &$g['crafts'][$craftId];
+    // Flight Data (v0.5): even a fireball returns telemetry — a failed
+    // reliability check still moves the program forward.
+    $g['players'][$craft['owner']]['credits'] += 1;
+    sar_log($g, 'gain', sar_pname($g, $craft['owner']) . ' banks the telemetry: +1 Credit of Flight Data.',
+        ['seat' => $craft['owner'], 'credits' => 1]);
     $eng = sar_craft_engine($craft);
     if ($eng && !sar_has_tag($eng, 'Reusable')) {
         $craft['cards'] = array_values(array_diff($craft['cards'], [$eng]));
