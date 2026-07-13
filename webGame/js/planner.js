@@ -2,7 +2,7 @@
 import {
   cardOf, cidOf, hasTag, NODES, neighborsOf, isSurface, edgeBetween,
   craftEngine, craftCards, craftMass, craftThrust, craftReliability,
-  tankRange, simulatePlan, twCost, missionPreview, stageBonus, inSpace,
+  tankRange, deadweight, simulatePlan, twCost, missionPreview, stageBonus, inSpace,
 } from './data.js';
 import { el, clear, openModal, closeModal } from './ui.js';
 import { renderCard, zoomCard } from './cards.js';
@@ -108,6 +108,8 @@ export function openBuilder(g, seat, craftId, { onEngineering, onLaunch }) {
     if (craftCards(fake, 'Payload', 'Crewed').length && !craftCards(fake, 'Tank', 'Pressurized').length)
       notes.push('⚠ Crewed payloads need a Pressurized Tank for crewed missions.');
     if (!craftCards(fake, 'Tank').length) notes.push('⚠ No fuel tank: Range 0.');
+    const dw = deadweight(fake);
+    if (dw) notes.push(`⚠ Deadweight −${dw} Range while the heavy cargo stays attached (regained when it is deployed or dropped in flight).`);
     if (mods.length > 1) notes.push('Reliability: ' + mods.join(', '));
     if (notes.length) statsPanel.append(el('div', { class: 'hint-box', style: 'margin-top:8px;' }, notes.join(' ')));
     btnLaunch.disabled = !eng || thrust < mass || needsCryo;

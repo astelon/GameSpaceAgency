@@ -47,11 +47,9 @@ function sar_action_launch(array &$g, int $seat, array $a): void {
     $plan['path'] = $plan['path'] ?? ['earth'];
     if (($plan['path'][0] ?? '') !== 'earth') throw new SarError('Launch path must start at Earth');
 
-    // Move rocket to the pad: range = sum of tank Range values.
-    $range = 0;
-    foreach (sar_craft_cards($g['crafts'][$craftId], 'Tank') as $uid) $range += sar_card($uid)['range'];
+    // Move rocket to the pad: range = tank Range sum minus Deadweight (v0.5.1).
     $g['crafts'][$craftId]['node'] = 'earth';
-    $g['crafts'][$craftId]['range'] = $range;
+    $g['crafts'][$craftId]['range'] = sar_launch_range($g['crafts'][$craftId]);
     $g['crafts'][$craftId]['launchRound'] = $g['round'];
     $g['crafts'][$craftId]['history'] = ['earth'];
 
@@ -355,6 +353,7 @@ function sar_stage_card(array &$g, string $craftId, string $uid, bool $dry, stri
     if (!$dry) sar_log($g, 'stage', $craft['name'] . " stages {$card['name']} ($when): +$bonus Range.",
         ['craft' => $craftId, 'card' => $uid, 'bonus' => $bonus]);
     unset($craft);
+    sar_deadweight_regain($g, $craftId, [$uid], $dry);
 }
 
 function sar_aerobrake(array &$g, string $craftId, string $uid, string $from, string $to, bool $dry): void {
@@ -557,6 +556,8 @@ function sar_deploy(array &$g, string $craftId, string $payloadUid, array $suppo
     }
     $craft['cards'] = array_values(array_diff($craft['cards'], $assetCards));
     unset($craft);
+    // Dropping heavy cargo returns its Deadweight Range to the carrier.
+    sar_deadweight_regain($g, $craftId, $assetCards, $dry);
 
     $assetId = sar_new_craft($g, $seat, $assetCards, $node);
     $asset = &$g['crafts'][$assetId];

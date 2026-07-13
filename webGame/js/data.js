@@ -155,8 +155,24 @@ export function craftPower(g, craft) {
   if (p > 0 && craft.deployed && beyondZoi(craft.node) && hasTech(g, craft.owner, 'C10')) p++;
   return p;
 }
+// Launch Range: tank Range sum minus Deadweight penalties (negative printed
+// Range on non-tank cards — v0.5.1), never below 0. Mirrors sar_launch_range.
 export function tankRange(craft) {
-  return craftCards(craft, 'Tank').reduce((s, u) => s + (cardOf(u).range || 0), 0);
+  let r = 0;
+  for (const u of craft.cards) {
+    const c = cardOf(u);
+    if (c.range == null) continue;
+    if (c.type === 'Tank') r += c.range;
+    else if (c.range < 0) r += c.range;
+  }
+  return Math.max(0, r);
+}
+// Total Deadweight currently attached (positive number, 0 if none).
+export function deadweight(craft) {
+  return craft.cards.reduce((s, u) => {
+    const c = cardOf(u);
+    return s + (c.type !== 'Tank' && (c.range || 0) < 0 ? -c.range : 0);
+  }, 0);
 }
 export function stageBonus(g, seat, uid) {
   const bonus = { E07: 2, T03: 1, T04: 2 }[cidOf(uid)] ?? 0;
@@ -206,6 +222,15 @@ export function simulatePlan(g, craftIn, plan) {
     craft.energy -= n;
     res.energyUsed += n;
   };
+  const dwRegain = (uids) => {
+    for (const u of uids) {
+      const c = cardOf(u);
+      if (c.type !== 'Tank' && (c.range || 0) < 0) {
+        craft.range += -c.range;
+        res.steps.push({ note: `Deadweight dropped (${c.name}): +${-c.range} Range` });
+      }
+    }
+  };
   const stage = (uid, when) => {
     if (!craft.cards.includes(uid)) throw new RuleFail('Stage card not on craft');
     if (!cardOf(uid).tags.includes('Stageable')) throw new RuleFail(`${cardOf(uid).name} is not Stageable`);
@@ -214,6 +239,7 @@ export function simulatePlan(g, craftIn, plan) {
     craft.cards = craft.cards.filter(u => u !== uid);
     craft.range += bonus;
     res.steps.push({ note: `Stage ${cardOf(uid).name} (${when}): +${bonus} Range` });
+    dwRegain([uid]);
   };
 
   class RuleFail extends Error {}
@@ -372,6 +398,7 @@ export function simulatePlan(g, craftIn, plan) {
       else if (!inSpace(craft.node) || SUBORBITAL[craft.node]) throw new RuleFail(`${card.name} deploys at a stable orbital node — a sub-orbital arc decays by the end of the round`);
       const assetCards = [d.payload, ...(d.supports || [])];
       craft.cards = craft.cards.filter(u => !assetCards.includes(u));
+      dwRegain(assetCards);
       res.assets.push({ node: craft.node, cards: assetCards, deployed: true, owner: seat,
                         history: [craft.node], isStation: false });
       res.steps.push({ note: `Deploy ${card.name} at ${NODES[craft.node].name}` });

@@ -178,6 +178,38 @@ function sar_can_pay_energy(array $craft, int $n): bool {
     return $potential >= $n;
 }
 
+// Launch Range (v0.5.1): the sum of all Fuel Tank Range values minus attached
+// Deadweight penalties (a negative printed Range on non-tank cards: Science
+// Module, Fuel Depot, Heavy Payload). Tanks never carry Deadweight — their
+// printed Range is already net of their own weight. Never below 0.
+function sar_launch_range(array $craft): int {
+    $range = 0;
+    foreach ($craft['cards'] as $uid) {
+        $c = sar_card($uid);
+        if ($c['range'] === null) continue;
+        if ($c['type'] === 'Tank') $range += $c['range'];
+        elseif ($c['range'] < 0) $range += $c['range']; // Deadweight
+    }
+    return max(0, $range);
+}
+
+// Deadweight regain (v0.5.1): when a card with a printed Range penalty
+// permanently leaves a craft in flight (deployed, staged, discarded), the
+// craft immediately gets that much Range back.
+function sar_deadweight_regain(array &$g, string $craftId, array $uids, bool $dry): void {
+    if (!isset($g['crafts'][$craftId])) return;
+    $craft = &$g['crafts'][$craftId];
+    if ($craft['node'] === 'assembly') { unset($craft); return; }
+    foreach ($uids as $uid) {
+        $c = sar_card($uid);
+        if ($c['type'] === 'Tank' || $c['range'] === null || $c['range'] >= 0) continue;
+        $craft['range'] += -$c['range'];
+        if (!$dry) sar_log($g, 'ability', "{$craft['name']} drops the deadweight of {$c['name']}: +" . (-$c['range']) . ' Range.',
+            ['craft' => $craftId]);
+    }
+    unset($craft);
+}
+
 function sar_new_craft(array &$g, int $seat, array $cards, string $node): string {
     $g['craftSeq']++;
     $id = 'c' . $g['craftSeq'];

@@ -528,5 +528,50 @@ ok($rocket && in_array('P13', array_map(fn($u) => explode('#', $u)[0], $rocket['
     'the Mass-2 payload stays aboard the carrier');
 ok(!in_array('M01#1', $g['missions'], true), 'M01 claimed by the rideshare launch');
 
+echo "— Scenario 17: Deadweight (v0.5.1) — launch penalty, regain on deploy, clamp at 0\n";
+$g = fresh();
+$g['missions'] = []; // keep the flight from claiming anything
+[$eng, $tank, $heavy] = give($g, 0, ['E06', 'T01', 'P14']); // Thrust 9 ≥ 2+3; T01 Range 5; P14 −1
+$g['players'][0]['hand'] = [$eng, $tank, $heavy];
+$flew = false; $tries = 0;
+do {
+    $snap = $g;
+    sar_apply($g, 0, ['type' => 'launch', 'components' => [$eng, $tank, $heavy],
+        'plan' => ['path' => ['earth', 'subEarth', 'leo']]]);
+    foreach ($g['crafts'] as $c) if ($c['node'] === 'leo') $flew = true;
+    if (!$flew) $g = $snap;
+} while (!$flew && ++$tries < 60);
+$rocket = null;
+foreach ($g['crafts'] as $c) if ($c['node'] === 'leo') $rocket = $c;
+ok($rocket && $rocket['range'] === 5 - 1 - 2, 'launch Range is tank 5 − Deadweight 1 − 2 hops = 2');
+
+// Deploying the Deadweight card gives the Range back.
+$g = fresh();
+$g['missions'] = [];
+[$eng, $tank, $depot, $solar] = give($g, 0, ['E06', 'T01', 'P11', 'S07']); // Fuel Depot: Station tag, −1
+$g['players'][0]['hand'] = [$eng, $tank, $depot, $solar];
+$flew = false; $tries = 0;
+do {
+    $snap = $g;
+    sar_apply($g, 0, ['type' => 'launch', 'components' => [$eng, $tank, $depot, $solar],
+        'plan' => ['path' => ['earth', 'subEarth', 'leo'],
+                   'deploys' => [['step' => 2, 'payload' => $depot, 'supports' => [$solar]]]]]);
+    foreach ($g['crafts'] as $c) if (!$c['deployed'] && $c['node'] === 'leo') $flew = true;
+    if (!$flew) $g = $snap;
+} while (!$flew && ++$tries < 60);
+$rocket = null;
+foreach ($g['crafts'] as $c) if (!$c['deployed'] && $c['node'] === 'leo') $rocket = $c;
+ok($rocket && $rocket['range'] === 5 - 1 - 2 + 1, 'deploying the Fuel Depot regains its Deadweight (5−1−2+1 = 3)');
+
+// Clamp: Deadweight can never push launch Range below 0.
+$g = fresh();
+[$eng, $heavy] = give($g, 0, ['E06', 'P14']);
+$g['players'][0]['hand'] = [$eng, $heavy];
+sar_apply($g, 0, ['type' => 'launch', 'components' => [$eng, $heavy],
+    'plan' => ['path' => ['earth']]]); // no movement: stays on the pad at Earth
+$rocket = null;
+foreach ($g['crafts'] as $c) if ($c['owner'] === 0) $rocket = $c;
+ok($rocket && $rocket['range'] === 0, 'a tankless heavy stack launches with Range 0, not −1');
+
 echo "\n$pass passed, $fail failed\n";
 exit($fail ? 1 : 0);
