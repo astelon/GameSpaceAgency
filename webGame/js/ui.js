@@ -22,17 +22,26 @@ export function openModal(content, { onClose = null, closable = true } = {}) {
   const root = document.getElementById('modal-root');
   const overlay = el('div', { class: 'overlay' });
   const box = el('div', { class: 'modal' });
+  if (closable) {
+    box.append(el('button', { class: 'modal-close', type: 'button', 'aria-label': 'Close',
+      onclick: () => close() }, '✕'));
+  }
   box.append(content);
   overlay.append(box);
   if (closable) {
-    overlay.addEventListener('mousedown', e => { if (e.target === overlay) close(); });
+    overlay.addEventListener('pointerdown', e => { if (e.target === overlay) close(); });
   }
   root.append(overlay);
-  const entry = { overlay, onClose };
+  const entry = { overlay, onClose, closable };
   modalStack.push(entry);
   function close() { closeModal(entry); }
   return { close, box };
 }
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Escape') return;
+  const top = modalStack[modalStack.length - 1];
+  if (top?.closable) closeModal(top);
+});
 export function closeModal(entry = null) {
   if (!entry) entry = modalStack[modalStack.length - 1];
   if (!entry) return;
