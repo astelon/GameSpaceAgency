@@ -12,7 +12,16 @@ header('Cache-Control: no-store');
 
 function out(array $data, int $code = 200): void {
     http_response_code($code);
-    echo json_encode($data, JSON_UNESCAPED_UNICODE);
+    // JSON_INVALID_UTF8_SUBSTITUTE: a stray invalid byte anywhere in the state
+    // must degrade to U+FFFD, not turn every response into an empty body
+    // (the client would report "Server returned an invalid response" forever).
+    $json = json_encode($data, JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE);
+    if ($json === false) {
+        error_log('SAR json_encode failed: ' . json_last_error_msg());
+        http_response_code(500);
+        $json = '{"error":"Server error. Please try again."}';
+    }
+    echo $json;
     exit;
 }
 
@@ -70,8 +79,11 @@ function room_code(): string {
 function make_token(): string { return bin2hex(random_bytes(16)); }
 
 // UTF-8-safe name truncation that works without the mbstring extension.
+// Invalid UTF-8 is rejected outright: once inside the state it would poison
+// json_encode() for every future response of the room (see out()).
 function clip_name($raw, int $max = 20): string {
     $name = trim((string)$raw);
+    if (!preg_match('//u', $name)) fail('Name contains invalid characters', 400);
     if (function_exists('mb_substr')) return mb_substr($name, 0, $max);
     if (preg_match('/^.{0,' . $max . '}/us', $name, $m)) return $m[0]; // PCRE UTF-8 mode
     return substr($name, 0, $max);
@@ -229,6 +241,8 @@ try {
     }
 } catch (SarError $e) {
     fail($e->getMessage());
+} catch (SarStorageBusy $e) {
+    fail('The room is busy right now — please try again', 503);
 } catch (Throwable $e) {
     error_log('SAR fatal: ' . $e->getMessage() . ' @ ' . $e->getFile() . ':' . $e->getLine());
     fail('Server error. Please try again.', 500);

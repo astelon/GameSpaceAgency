@@ -178,8 +178,14 @@ async function enterGame() {
   keepAwake();
   st.version = 0; st.lastLogSeq = 0; st.gameOverShown = false; st.autoFsDone = false;
   try { await poll(true); } catch (e) {
-    toast(e.message, 'bad');
-    if (e instanceof ApiError) { session.clear(); showLobby(); return; }
+    // Only a definitive rejection ends the session (bad room code, room gone,
+    // not a member). A busy or briefly broken server must never log the
+    // player out — in hot-seat mode that would lose the host token for good.
+    if (e instanceof ApiError && [400, 401, 403, 404].includes(e.status)) {
+      toast(e.message, 'bad');
+      session.clear(); showLobby(); return;
+    }
+    toast(`${e.message} — retrying…`, 'bad');
   }
   st.pollBusy = false; st.pollFails = 0; st.pollSkip = 0;
   st.polling = setInterval(pollTick, 2200);

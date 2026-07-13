@@ -40,6 +40,25 @@ seats — so the rules behave identically in both modes.
 
 Idle rooms are cleaned up automatically after 3 days.
 
+### Troubleshooting: "Server returned an invalid response"
+
+The client shows this whenever the API answers with something that is not
+JSON — which the game API itself never does. It means the *hosting layer*
+answered instead of PHP. To find the cause:
+
+1. Open the browser devtools **Network** tab, repeat the action, and inspect
+   the failing `api/index.php` POST:
+   * `508`/`503` + HTML page → the shared host's process/resource limit was
+     hit (LiteSpeed shows "508 Resource Limit Is Reached"). The game backs
+     off automatically; if it happens often, reduce concurrent games or
+     upgrade the plan.
+   * `500` + a generic Apache/LiteSpeed error page → the server refused
+     `api/.htaccess` (needs Apache-2.4 authz support in `AllowOverride`).
+   * A `200` with an empty body, or a `504` → a PHP request was killed
+     mid-flight; check the host's error log for fatals at that time.
+2. Open `api/index.php?op=health` in a browser — it self-checks the PHP
+   version, storage backend, and `api/data` writability.
+
 ## Local development
 
 ```bash
