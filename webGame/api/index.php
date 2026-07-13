@@ -21,6 +21,12 @@ function out(array $data, int $code = 200): void {
         http_response_code(500);
         $json = '{"error":"Server error. Please try again."}';
     }
+    // Content-Length lets the browser detect a truncated body as a network
+    // error instead of handing the client half a JSON document. Skip it when
+    // PHP itself compresses the output (the length would then be wrong).
+    if (!ini_get('zlib.output_compression')) {
+        header('Content-Length: ' . strlen($json));
+    }
     echo $json;
     exit;
 }
@@ -109,7 +115,11 @@ function seats_for(array $g, string $token): array {
 // Strip secrets: other players' hands and the deck contents.
 function filter_state(array $g, array $mySeats): array {
     $v = $g;
-    unset($v['hostToken']);
+    unset($v['hostToken'], $v['lastAid']);
+    // The client renders at most the last 120 log lines; sending the whole
+    // capped log (400 entries) triples the payload for nothing and makes a
+    // truncated response on a flaky mobile connection more likely.
+    if (count($v['log'] ?? []) > 150) $v['log'] = array_slice($v['log'], -150);
     foreach ($v['players'] as $i => &$p) {
         $p['handCount'] = count($p['hand']);
         $p['isYou'] = in_array($p['seat'], $mySeats, true);
@@ -228,12 +238,24 @@ try {
             if (!$seats) { $store->unlock(); fail('You are not in this game', 403); }
             $seat = isset($req['seat']) ? (int)$req['seat'] : $seats[0];
             if (!in_array($seat, $seats, true)) { $store->unlock(); fail('You do not control that seat', 403); }
+            // Idempotency: the client sends a random id (aid) with every
+            // action and retries with the same aid when the response is lost
+            // (timeout, truncated body). If this seat's previous action
+            // carried the same aid it has already been applied — answer with
+            // the current state instead of a spurious rule error such as
+            // "Not your command turn".
+            $aid = substr((string)($req['aid'] ?? ''), 0, 64);
+            if ($aid !== '' && ($g['lastAid'][$seat] ?? null) === $aid) {
+                $store->unlock();
+                out(['version' => $g['version'], 'state' => filter_state($g, $seats), 'replayed' => true]);
+            }
             try {
                 sar_apply($g, $seat, $action);
             } catch (SarError $e) {
                 $store->unlock();
                 fail($e->getMessage());
             }
+            if ($aid !== '') $g['lastAid'][$seat] = $aid;
             $store->save($g);
             $store->unlock();
             out(['version' => $g['version'], 'state' => filter_state($g, $seats)]);

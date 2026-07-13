@@ -483,5 +483,7 @@ export function openPlanner(g, seat, { mode, cards = null, engDiff = null, craft
   });
 
   refresh();
-  openModal(wrap, { closable: false });
+  // ✕/Escape cancel the plan (same as the Cancel button), but a stray tap on
+  // the backdrop must not throw away a half-built flight plan.
+  openModal(wrap, { dismiss: false });
 }
