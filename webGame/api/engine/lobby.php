@@ -110,6 +110,7 @@ function sar_start_game(array &$g): void {
             $tier = (int)substr($c['tier'], -1);
             $missionT[$tier][] = "$cid#1";
         } elseif ($c['type'] === 'Event') {
+            if (in_array('Starter', $c['tags'], true)) continue; // Starter Events are setup-only, not in the round deck
             $events[] = "$cid#1";
         }
     }
