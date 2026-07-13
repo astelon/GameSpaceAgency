@@ -1,13 +1,16 @@
 # Space Agency Race — Web Edition
 
 A complete, playable web version of the board game defined in
-[`Space_Agency.md`](../Space_Agency.md) (ruleset v0.2 / card list v0.3).
+[`Space_Agency.md`](../Space_Agency.md) (ruleset **v0.5.1** / card list v0.5,
+91 unique / 192 copies).
 
 * **2–4 players**, online (room codes) or hot-seat on one device
-* Full rules enforcement: rocket assembly, Thrust/Mass launch checks, d10
-  reliability rolls, Range/orbital travel, Transfer Window cycle, staging,
-  aerobraking, landings, deploys, docking, stations, Energy, all **20
-  missions**, **13 events** and **10 technologies** scripted
+* Full rules enforcement: rocket assembly (engine clusters, rideshare
+  payloads, jury-rigged sideways cards), Thrust/Mass launch checks, d10
+  reliability rolls, Range/orbital travel with Deadweight penalties,
+  Transfer Window cycle, staging, aerobraking, landings, deploys, docking,
+  stations, Energy, all **21 missions**, **13 events + 3 Starter Events**
+  and **10 technologies** scripted
 * Teaching hints everywhere: every card explains what the engine will do with
   it, and the flight planner previews costs, success odds and which missions
   a flight will complete before you commit
@@ -109,6 +112,15 @@ these calls (all in one place so they're easy to revisit):
   deploy time) so a satellite deployed in round N earns income in round N's
   Maintenance.
 * **Crewed missions** require a Pressurized tank on the craft (per §9).
+* **Flight Data** (v0.5) pays its 1 Credit when a launch *ultimately* fails:
+  a first roll rescued by a paid Launch-Abort-System reroll pays nothing, a
+  failed reroll pays once.
+* **Jury-rigged mass simulators** satisfy plain "payload" / "payload Mass 1+"
+  mission requirements (they are a Mass-1 Uncrewed payload) but never tagged
+  or Mass-2+ ones. A sideways card can be taken back to hand while the rocket
+  is still in the assembly area; once launched it flies until the craft is
+  discarded or recovered, and is then always scrapped.
+* **Deadweight** can never push a craft's launch Range below 0.
 * **Solar Panels** are lost when *entering* an atmosphere node from space, not
   during ascent from Earth (otherwise they could never be launched).
 * **Transfer Window modifiers** apply in the order: event (EV06/EV07), then

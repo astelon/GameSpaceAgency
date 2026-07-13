@@ -4,6 +4,14 @@ Review of `webGame/` at `9a8d65f` (post board-game v0.5.1, post code-review
 Phases 0–3). All five backend suites (`test_cards_data`, `test_engine 30`,
 `test_scenarios`, `test_suborbital`, `test_api`) pass at this commit.
 
+> **Status update:** everything below is now **implemented** on this branch —
+> the Part 1 P0/P1 fixes and all five Part 2 phases (V1–V5), including the
+> new scenario coverage (Scenarios 12–18), the API malformed-input contract
+> test, and the fuzzer's cluster/rideshare/jury-rig action generation. The
+> §1.5 P2 ops note landed in `webGame/README.md`. Deferred: delta-log poll
+> payload reduction and hidden-tab pause (tracked as code-review §3.2/Phase 4
+> work), and the §2.2-I optional setup-procedure alignment.
+
 This document has two independent parts:
 
 * **Part 1** diagnoses the "Server returned an invalid response" reports and
