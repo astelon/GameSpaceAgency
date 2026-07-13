@@ -27,6 +27,12 @@ export class ApiError extends Error {
     super(message);
     this.status = status;
   }
+  // True for failures where the request may in fact have been applied by the
+  // server (network drop, timeout, truncated/unparseable body, 5xx) — safe to
+  // retry only with an idempotency id, and the client must resync afterwards.
+  get maybeApplied() {
+    return this.status === 0 || this.status >= 500 || this.invalidBody === true;
+  }
 }
 
 const API_TIMEOUT_MS = 20000;
@@ -53,10 +59,13 @@ export async function api(op, payload = {}) {
   try { data = await res.json(); }
   catch {
     // A non-JSON body never comes from the game API itself — it is the
-    // hosting layer answering (overload/error page) or a killed request.
-    throw new ApiError(res.ok
+    // hosting layer answering (overload/error page) or a truncated/killed
+    // response whose action may still have been applied server-side.
+    const err = new ApiError(res.ok
       ? 'Server returned an invalid response'
       : `Server error (HTTP ${res.status}) — the host looks busy or misconfigured`, res.status);
+    err.invalidBody = true;
+    throw err;
   }
   if (!res.ok || data.error) throw new ApiError(data.error || `HTTP ${res.status}`, res.status);
   return data;

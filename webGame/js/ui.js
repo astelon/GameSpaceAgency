@@ -18,7 +18,10 @@ export function el(tag, attrs = {}, ...children) {
 export function clear(node) { while (node.firstChild) node.removeChild(node.firstChild); return node; }
 
 let modalStack = [];
-export function openModal(content, { onClose = null, closable = true } = {}) {
+// closable: show the ✕ button and close on Escape.
+// dismiss: also close on a backdrop tap (off for modals holding unsaved work,
+// like the flight planner, where a stray tap must not throw the plan away).
+export function openModal(content, { onClose = null, closable = true, dismiss = closable } = {}) {
   const root = document.getElementById('modal-root');
   const overlay = el('div', { class: 'overlay' });
   const box = el('div', { class: 'modal' });
@@ -28,7 +31,7 @@ export function openModal(content, { onClose = null, closable = true } = {}) {
   }
   box.append(content);
   overlay.append(box);
-  if (closable) {
+  if (closable && dismiss) {
     overlay.addEventListener('pointerdown', e => { if (e.target === overlay) close(); });
   }
   root.append(overlay);

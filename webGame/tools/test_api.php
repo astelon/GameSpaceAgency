@@ -173,6 +173,22 @@ $wrongSeat = api_call($port, ['op' => 'action', 'room' => $room, 'token' => $bob
     'action' => ['type' => 'planning_done', 'sell' => [], 'discard' => []]]);
 ok($wrongSeat['code'] === 403, "Bob cannot submit an action for Alice's seat (403)");
 
+echo "— API: idempotent action replay (lost-response retry)\n";
+
+// The client retries an action with the same aid when the response is lost.
+// The replay must answer with the current state, not a rule error.
+$act = ['op' => 'action', 'room' => $room, 'token' => $hostToken, 'seat' => 0, 'aid' => 'retry-aid-1',
+    'action' => ['type' => 'planning_done', 'sell' => [], 'discard' => []]];
+$first = api_call($port, $act);
+ok($first['code'] === 200, 'action carrying an aid succeeds');
+$replay = api_call($port, $act);
+ok($replay['code'] === 200 && ($replay['data']['replayed'] ?? null) === true
+    && ($replay['data']['version'] ?? null) === ($first['data']['version'] ?? -1),
+    'replaying the same aid returns the current state (same version) instead of a rule error');
+ok(!array_key_exists('lastAid', $replay['data']['state']), 'lastAid bookkeeping is stripped from the response');
+$again = api_call($port, array_merge($act, ['aid' => 'retry-aid-2']));
+ok($again['code'] === 400, 'the same action under a fresh aid is validated normally (400 Already ready)');
+
 echo "— API: malformed input never breaks the JSON response contract\n";
 
 // The form-encoded fallback path works for well-formed input…

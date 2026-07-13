@@ -564,11 +564,31 @@ $('log-head').addEventListener('click', () => {
 async function doAction(action, seat = null) {
   if (st.busy) return;
   st.busy = true;
+  // Pin the seat and an idempotency id up front: if the response is lost the
+  // retry must describe the exact same action, and the server answers a
+  // replayed aid with the current state instead of a rule error.
+  const actSeat = seat ?? viewSeat();
+  const aid = crypto.randomUUID?.() ?? `${Date.now()}-${Math.random().toString(16).slice(2)}`;
   try {
-    const r = await gameCall('action', { seat: seat ?? viewSeat(), action });
+    let r;
+    for (let attempt = 0; ; attempt++) {
+      try {
+        r = await gameCall('action', { seat: actSeat, action, aid });
+        break;
+      } catch (e) {
+        if (!(e instanceof ApiError) || !e.maybeApplied || attempt >= 2) throw e;
+        toast('Connection hiccup — retrying…');
+        await new Promise(res => setTimeout(res, 700 * (attempt + 1)));
+      }
+    }
     applyState(r);
   } catch (e) {
     toast(e.message, 'bad');
+    // The action may have reached the server even though the response did
+    // not come back. Resync immediately so the UI never keeps showing a
+    // stale turn (acting on stale state is what produces the confusing
+    // "Not your command turn" rejections in hot-seat games).
+    try { await poll(true); } catch { /* the poll loop keeps retrying */ }
   } finally {
     st.busy = false;
     renderGame();
