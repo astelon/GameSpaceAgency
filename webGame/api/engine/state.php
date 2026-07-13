@@ -85,30 +85,45 @@ function sar_craft_mass(array $g, array $craft): int {
     return $mass;
 }
 
+// Total Thrust of all mounted Engines (v0.5: up to 2 engines cluster,
+// their Thrust adds).
 function sar_craft_thrust(array $g, array $craft): int {
-    $eng = sar_craft_engine($craft);
-    if (!$eng) return 0;
-    $t = sar_card($eng)['thrust'] ?? 0;
-    // Hybrid Cycle: +1 Thrust while the rocket includes a Cryogenic tank
-    if (explode('#', $eng)[0] === 'E05' && sar_craft_cards($craft, null, 'Cryogenic')) $t += 1;
+    $t = 0;
+    foreach (sar_craft_cards($craft, 'Engine') as $eng) {
+        $et = sar_card($eng)['thrust'] ?? 0;
+        // Hybrid Cycle: +1 Thrust while the rocket includes a Cryogenic tank
+        if (explode('#', $eng)[0] === 'E05' && sar_craft_cards($craft, null, 'Cryogenic')) $et += 1;
+        $t += $et;
+    }
     return $t;
 }
 
 // Effective reliability for a launch/relaunch check (before d10 roll).
+// v0.5 Engine Clusters: each engine's value is computed with all modifiers
+// (per-engine: Reusable Refurb; craft-wide: techs, Flight Computer, events);
+// a two-engine cluster uses the LOWEST engine's value minus 1.
 function sar_craft_reliability(array $g, array $craft, bool $useFlightComputer): array {
-    $eng = sar_craft_engine($craft);
-    if (!$eng) return [0, ['no engine']];
-    $c = sar_card($eng);
-    $rel = $c['reliability'] ?? 5;
-    $mods = ["base {$rel}"];
+    $engines = sar_craft_cards($craft, 'Engine');
+    if (!$engines) return [0, ['no engine']];
     $seat = $craft['owner'];
-    if (sar_has_tech($g, $seat, 'C01') && in_array('Reusable', $c['tags'], true)) { $rel += 1; $mods[] = 'Reusable Refurb +1'; }
-    if (sar_has_tech($g, $seat, 'C02') && sar_craft_cards($craft, null, 'Cryogenic')) { $rel += 1; $mods[] = 'Cryo Handling +1'; }
-    if (sar_has_tech($g, $seat, 'C03')) { $rel += 1; $mods[] = 'Precision Guidance +1'; }
-    if ($useFlightComputer) { $rel += 1; $mods[] = 'Flight Computer +1'; }
+    $craftMod = 0; $craftMods = [];
+    if (sar_has_tech($g, $seat, 'C02') && sar_craft_cards($craft, null, 'Cryogenic')) { $craftMod += 1; $craftMods[] = 'Cryo Handling +1'; }
+    if (sar_has_tech($g, $seat, 'C03')) { $craftMod += 1; $craftMods[] = 'Precision Guidance +1'; }
+    if ($useFlightComputer) { $craftMod += 1; $craftMods[] = 'Flight Computer +1'; }
     $ev = sar_event_id($g);
-    if ($ev === 'EV01') { $rel -= 2; $mods[] = 'Solar Storm -2'; }
-    if ($ev === 'EV09') { $rel -= 1; $mods[] = 'Solar Flare Watch -1'; }
+    if ($ev === 'EV01') { $craftMod -= 2; $craftMods[] = 'Solar Storm -2'; }
+    if ($ev === 'EV09') { $craftMod -= 1; $craftMods[] = 'Solar Flare Watch -1'; }
+    $worst = null; $worstMods = [];
+    foreach ($engines as $eng) {
+        $c = sar_card($eng);
+        $rel = $c['reliability'] ?? 5;
+        $mods = [(count($engines) > 1 ? "{$c['name']} base {$rel}" : "base {$rel}")];
+        if (sar_has_tech($g, $seat, 'C01') && in_array('Reusable', $c['tags'], true)) { $rel += 1; $mods[] = 'Reusable Refurb +1'; }
+        if ($worst === null || $rel < $worst) { $worst = $rel; $worstMods = $mods; }
+    }
+    $rel = $worst + $craftMod;
+    $mods = array_merge($worstMods, $craftMods);
+    if (count($engines) === 2) { $rel -= 1; $mods[] = 'engine cluster -1'; }
     return [$rel, $mods];
 }
 

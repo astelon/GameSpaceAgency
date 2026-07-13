@@ -209,12 +209,12 @@ function sar_apply_engineering(array &$g, int $seat, array $a, bool $asAction): 
         $cards = array_values(array_diff($cards, [$uid]));
     }
     $cards = array_merge($cards, $add);
-    // composition limits
+    // composition limits (v0.5: 0-2 engine cluster, uncapped tanks — Thrust
+    // is the real limit — and 0-2 rideshare payloads)
     $count = ['Engine' => 0, 'Tank' => 0, 'Payload' => 0, 'Support' => 0];
     foreach ($cards as $uid) $count[sar_card($uid)['type']]++;
-    if ($count['Engine'] > 1) throw new SarError('A rocket may have at most 1 Engine');
-    if ($count['Tank'] > 3) throw new SarError('A rocket may have at most 3 Fuel Tanks');
-    if ($count['Payload'] > 1) throw new SarError('A rocket may have at most 1 Payload');
+    if ($count['Engine'] > 2) throw new SarError('A rocket may mount at most 2 Engines (a cluster)');
+    if ($count['Payload'] > 2) throw new SarError('A rocket may carry at most 2 Payloads (rideshare)');
     if ($count['Support'] > 3) throw new SarError('A rocket may have at most 3 Support cards');
 
     if (count($p['hand']) - count($add) + count($remove) > sar_hand_limit($g)) {

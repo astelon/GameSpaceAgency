@@ -225,9 +225,10 @@ function sar_launch_checks(array &$g, string $craftId, array $plan, int $step, b
     $surface = $craft['node'];
 
     if (!sar_craft_engine($craft)) throw new SarError('No Engine — the craft cannot launch from ' . SAR_NODES[$surface]['name']);
-    $eng = sar_craft_engine($craft);
-    if (explode('#', $eng)[0] === 'E03' && !sar_craft_cards($craft, 'Tank', 'Cryogenic')) {
-        throw new SarError('The Hydrogen Core engine requires at least one Cryo Tank');
+    foreach (sar_craft_cards($craft, 'Engine') as $eng) {
+        if (explode('#', $eng)[0] === 'E03' && !sar_craft_cards($craft, 'Tank', 'Cryogenic')) {
+            throw new SarError('The Hydrogen Core engine requires at least one Cryo Tank');
+        }
     }
     $thrust = sar_craft_thrust($g, $craft);
     $mass = sar_craft_mass($g, $craft);
@@ -281,12 +282,18 @@ function sar_launch_failure(array &$g, string $craftId): void {
     $g['players'][$craft['owner']]['credits'] += 1;
     sar_log($g, 'gain', sar_pname($g, $craft['owner']) . ' banks the telemetry: +1 Credit of Flight Data.',
         ['seat' => $craft['owner'], 'credits' => 1]);
-    $eng = sar_craft_engine($craft);
-    if ($eng && !sar_has_tag($eng, 'Reusable')) {
-        $craft['cards'] = array_values(array_diff($craft['cards'], [$eng]));
-        $g['decks']['componentDiscard'][] = $eng;
-        sar_log($g, 'fail', $craft['name'] . ' fails to launch — the ' . sar_card($eng)['name'] . ' is destroyed.',
-            ['craft' => $craftId]);
+    // Every non-Reusable engine in the (possibly clustered) stack is lost.
+    $destroyed = [];
+    foreach (sar_craft_cards($craft, 'Engine') as $eng) {
+        if (!sar_has_tag($eng, 'Reusable')) {
+            $craft['cards'] = array_values(array_diff($craft['cards'], [$eng]));
+            $g['decks']['componentDiscard'][] = $eng;
+            $destroyed[] = sar_card($eng)['name'];
+        }
+    }
+    if ($destroyed) {
+        sar_log($g, 'fail', $craft['name'] . ' fails to launch — the ' . implode(' and ', $destroyed) .
+            (count($destroyed) > 1 ? ' are' : ' is') . ' destroyed.', ['craft' => $craftId]);
     } else {
         sar_log($g, 'fail', $craft['name'] . ' aborts the launch — the Reusable engine survives intact.', ['craft' => $craftId]);
     }

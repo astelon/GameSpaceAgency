@@ -1,7 +1,7 @@
 // Rocket Builder + Flight Planner modals.
 import {
   cardOf, cidOf, hasTag, NODES, neighborsOf, isSurface, edgeBetween,
-  craftEngine, craftPayload, craftCards, craftMass, craftThrust, craftReliability,
+  craftEngine, craftCards, craftMass, craftThrust, craftReliability,
   tankRange, simulatePlan, twCost, missionPreview, stageBonus, inSpace,
 } from './data.js';
 import { el, clear, openModal, closeModal } from './ui.js';
@@ -19,7 +19,7 @@ export function openBuilder(g, seat, craftId, { onEngineering, onLaunch }) {
   const wrap = el('div', { style: 'min-width: min(880px, 90vw);' });
   wrap.append(el('h2', {}, craftId ? 'Modify Rocket' : 'Rocket Assembly'),
     el('div', { class: 'm-sub' },
-      'A rocket: 1 Engine · 1–3 Fuel Tanks · 0–1 Payload · 0–3 Support. The Engine\'s Thrust must cover the total Mass of tanks, payload and heavy support.'));
+      'A rocket: 0–2 Engines (a cluster: Thrust adds, Reliability = lowest −1) · 1+ Fuel Tanks · 0–2 Payloads (rideshare) · 0–3 Support. Total Thrust must cover the total Mass of tanks, payloads and heavy support.'));
 
   const body = el('div', { class: 'builder' });
   const slots = el('div', { class: 'slots' });
@@ -42,7 +42,7 @@ export function openBuilder(g, seat, craftId, { onEngineering, onLaunch }) {
   }
 
   const SLOT_DEFS = [
-    ['Engine', 'Engine', 1], ['Tank', 'Fuel Tanks', 3], ['Payload', 'Payload', 1], ['Support', 'Support', 3],
+    ['Engine', 'Engines', 2], ['Tank', 'Fuel Tanks', Infinity], ['Payload', 'Payloads', 2], ['Support', 'Support', 3],
   ];
 
   function handAvailable(type) {
@@ -54,7 +54,7 @@ export function openBuilder(g, seat, craftId, { onEngineering, onLaunch }) {
     for (const [type, label, max] of SLOT_DEFS) {
       const cur = mounted.filter(u => cardOf(u).type === type);
       const row = el('div', { class: 'slot-row' });
-      row.append(el('div', { class: 'slot-label' }, `${label} (${cur.length}/${max})`));
+      row.append(el('div', { class: 'slot-label' }, `${label} (${cur.length}${max === Infinity ? '' : `/${max}`})`));
       const box = el('div', { class: 'slot-box' });
       for (const uid of cur) {
         const c = cardOf(uid);
@@ -93,7 +93,6 @@ export function openBuilder(g, seat, craftId, { onEngineering, onLaunch }) {
     const range = tankRange(fake);
     const [rel, mods] = craftReliability(g, fake, false);
     const eng = craftEngine(fake);
-    const pl = craftPayload(fake);
     const row = (k, v, cls = '') => el('div', { class: 'row' }, el('span', {}, k), el('b', { class: cls }, v));
     statsPanel.append(
       row('Total Mass', String(mass)),
@@ -103,14 +102,15 @@ export function openBuilder(g, seat, craftId, { onEngineering, onLaunch }) {
       row('Reliability', eng ? `${Math.max(0, Math.min(10, rel))}0%` : '—', rel >= 8 ? 'ok' : rel <= 5 ? 'no' : ''),
     );
     const notes = [];
-    if (eng && cidOf(eng) === 'E03' && !craftCards(fake, 'Tank', 'Cryogenic').length)
-      notes.push('⚠ Hydrogen Core needs a Cryo Tank.');
-    if (pl && cardOf(pl).tags.includes('Crewed') && !craftCards(fake, 'Tank', 'Pressurized').length)
+    const needsCryo = craftCards(fake, 'Engine').some(u => cidOf(u) === 'E03')
+      && !craftCards(fake, 'Tank', 'Cryogenic').length;
+    if (needsCryo) notes.push('⚠ Hydrogen Core needs a Cryo Tank.');
+    if (craftCards(fake, 'Payload', 'Crewed').length && !craftCards(fake, 'Tank', 'Pressurized').length)
       notes.push('⚠ Crewed payloads need a Pressurized Tank for crewed missions.');
     if (!craftCards(fake, 'Tank').length) notes.push('⚠ No fuel tank: Range 0.');
     if (mods.length > 1) notes.push('Reliability: ' + mods.join(', '));
     if (notes.length) statsPanel.append(el('div', { class: 'hint-box', style: 'margin-top:8px;' }, notes.join(' ')));
-    btnLaunch.disabled = !eng || thrust < mass || (eng && cidOf(eng) === 'E03' && !craftCards(fake, 'Tank', 'Cryogenic').length);
+    btnLaunch.disabled = !eng || thrust < mass || needsCryo;
     btnEng.disabled = mounted.length === 0 && !craftId;
   }
 

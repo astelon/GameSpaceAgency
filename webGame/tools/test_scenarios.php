@@ -406,10 +406,10 @@ $g['event'] = 'EV14#1'; // Recovery Trials active during this round's Maintenanc
 foreach ($g['players'] as &$pp) { $pp['passed'] = true; }
 unset($pp);
 sar_maintenance($g);
-$cids = array_map(fn($u) => explode('#', $u)[0], $g['players'][0]['hand']);
-ok(in_array('E02', $cids, true) && in_array('T01', $cids, true) && in_array('P05', $cids, true),
+$hand = $g['players'][0]['hand']; // compare exact uids — the round-2 draw adds unrelated cards
+ok(in_array($eng, $hand, true) && in_array($tank, $hand, true) && in_array($probe, $hand, true),
     'Recovery Trials returns non-Reusable engine, tank and payload to hand');
-ok(!in_array('S02', $cids, true), 'the parachute expended during landing is still discarded');
+ok(!in_array($chute, $hand, true), 'the parachute expended during landing is still discarded');
 
 echo "— Scenario 13: Flight Data — a failed launch pays 1 Credit\n";
 $g = fresh();
@@ -436,6 +436,97 @@ sar_apply($g, 1, ['type' => 'develop', 'card' => $cB2]);
 ok($g['players'][0]['vp'] === $vpA + 1, 'first player to a 2nd Technology gains +1 VP');
 ok($g['players'][1]['vp'] === $vpB + 1, 'the second player ALSO gains +1 VP at their own 2nd Technology');
 ok($g['milestones']['secondTech'] === 0, 'the milestone still records who got there first');
+
+echo "— Scenario 15: Engine Clusters (v0.5) — thrust adds, reliability = lowest −1, both engines at risk\n";
+$g = fresh();
+[$e1, $e2, $tank] = give($g, 0, ['E02', 'E06', 'T01']); // Sterling (T5 R9) + Raptor-X (T9 R6, Reusable)
+$g['players'][0]['hand'] = [$e1, $e2, $tank];
+sar_apply($g, 0, ['type' => 'engineering', 'add' => [$e1, $e2, $tank]]);
+$craftId = array_key_first($g['crafts']);
+$craft = $g['crafts'][$craftId];
+ok(sar_craft_thrust($g, $craft) === 5 + 9, 'cluster Thrust adds (5 + 9 = 14)');
+[$rel, $mods] = sar_craft_reliability($g, $craft, false);
+ok($rel === 6 - 1, 'cluster Reliability is the lowest engine (6) minus 1');
+ok(in_array('engine cluster -1', $mods, true), 'the −1 is itemized in the modifier list');
+$cr0 = $g['players'][0]['credits'];
+sar_launch_failure($g, $craftId);
+$left = array_map(fn($u) => explode('#', $u)[0], $g['crafts'][$craftId]['cards']);
+ok(!in_array('E02', $left, true), 'launch failure destroys the non-Reusable Sterling Booster');
+ok(in_array('E06', $left, true), 'the Reusable Raptor-X survives the failed launch');
+ok($g['players'][0]['credits'] === $cr0 + 1, 'Flight Data still pays on the cluster failure');
+
+// Composition limits: 3 engines rejected, 4 tanks now fine, 3 payloads rejected.
+$g = fresh();
+$uids = give($g, 0, ['E02', 'E02', 'E02', 'T01']);
+$g['players'][0]['hand'] = $uids;
+$threw = false;
+try { sar_apply($g, 0, ['type' => 'engineering', 'add' => $uids]); }
+catch (SarError $e) { $threw = str_contains($e->getMessage(), '2 Engines'); }
+ok($threw, 'a third Engine is rejected');
+$g = fresh();
+$uids = give($g, 0, ['T01', 'T01', 'T01', 'T01']);
+$g['players'][0]['hand'] = $uids;
+sar_apply($g, 0, ['type' => 'engineering', 'add' => $uids]);
+ok(count($g['crafts']) === 1, 'four Fuel Tanks are legal now (no cap — Thrust is the limit)');
+$g2 = fresh();
+$uids = give($g2, 0, ['P12', 'P12', 'P12', 'T01']);
+$g2['players'][0]['hand'] = $uids;
+$threw = false;
+try { sar_apply($g2, 0, ['type' => 'engineering', 'add' => $uids]); }
+catch (SarError $e) { $threw = str_contains($e->getMessage(), '2 Payloads'); }
+ok($threw, 'a third Payload is rejected (rideshare is 0–2)');
+
+// A Hydrogen Core anywhere in the cluster still demands a Cryo Tank.
+$g3 = fresh();
+[$h, $s, $t] = give($g3, 0, ['E03', 'E02', 'T01']);
+$g3['players'][0]['hand'] = [$h, $s, $t];
+$threw = false;
+try {
+    sar_apply($g3, 0, ['type' => 'launch', 'components' => [$h, $s, $t],
+        'plan' => ['path' => ['earth', 'subEarth']]]);
+} catch (SarError $e) { $threw = str_contains($e->getMessage(), 'Cryo'); }
+ok($threw, 'Hydrogen Core in a cluster still requires a Cryo Tank');
+
+echo "— Scenario 16: rideshare payloads — Mass requirements are single-card (v0.5.1)\n";
+$g = fresh();
+$mk = fn(array $cards, array $extra = []) => array_merge([
+    'owner' => 0, 'node' => 'earth', 'history' => ['earth', 'subEarth', 'leo', 'subEarth', 'earth'],
+    'cards' => $cards, 'docked' => false, 'usedReentry' => true, 'usedReusableReentry' => false,
+    'deployed' => false, 'isStation' => false, 'energy' => 5, 'stagedEngineFlight' => false,
+], $extra);
+ok(sar_mission_check($g, 'M07', $mk(['P12#x1', 'P12#x2'])) === null,
+    'two Mass-1 payloads do NOT add up to "payload Mass 2+" (M07)');
+ok(sar_mission_check($g, 'M07', $mk(['P13#x1', 'P12#x2'])) !== null,
+    'a single Mass-2 payload (with a Mass-1 rideshare) satisfies M07');
+ok(sar_mission_check($g, 'M05', $mk(['P14#x1', 'P05#x2'], ['history' => ['earth', 'marsZoi'], 'node' => 'marsZoi'])) === null,
+    'M05: Scientific and Mass 2+ must be the SAME card (Mass-3 plain + Mass-1 Scientific fails)');
+ok(sar_mission_check($g, 'M05', $mk(['P03#x1', 'S11#x2'], ['history' => ['earth', 'marsZoi'], 'node' => 'marsZoi'])) !== null,
+    'M05: a Mass-3 Scientific payload with the Sensor Array qualifies');
+ok(sar_mission_check($g, 'M01', $mk(['P04#x1', 'P12#x2'], ['node' => 'leo'])) !== null,
+    'M01: an uncrewed rideshare payload qualifies even with a Crew Capsule aboard');
+ok(sar_mission_check($g, 'M01', $mk(['P04#x1'], ['node' => 'leo'])) === null,
+    'M01: a Crewed-only stack does not count as an uncrewed payload');
+
+// End-to-end: rideshare launch deploys one payload and flies on with the other.
+$g = fresh();
+$g['missions'] = ['M01#1', 'M07#1', 'M02#1'];
+[$eng, $t1, $t2, $sat, $box] = give($g, 0, ['E06', 'T01', 'T01', 'P05', 'P13']); // Thrust 9 ≥ 2+2+1+2
+$g['players'][0]['hand'] = [$eng, $t1, $t2, $sat, $box];
+$flew = false; $tries = 0;
+do {
+    $snap = $g;
+    sar_apply($g, 0, ['type' => 'launch', 'components' => [$eng, $t1, $t2, $sat, $box],
+        'plan' => ['path' => ['earth', 'subEarth', 'leo'],
+                   'deploys' => [['step' => 2, 'payload' => $sat, 'supports' => []]]]]);
+    foreach ($g['crafts'] as $c) if (!$c['deployed'] && $c['node'] === 'leo') $flew = true;
+    if (!$flew) $g = $snap;
+} while (!$flew && ++$tries < 60);
+$asset = null; $rocket = null;
+foreach ($g['crafts'] as $c) { if ($c['deployed']) $asset = $c; elseif ($c['node'] === 'leo') $rocket = $c; }
+ok($asset !== null && $rocket !== null, 'rideshare: satellite deployed at LEO, carrier flies on');
+ok($rocket && in_array('P13', array_map(fn($u) => explode('#', $u)[0], $rocket['cards']), true),
+    'the Mass-2 payload stays aboard the carrier');
+ok(!in_array('M01#1', $g['missions'], true), 'M01 claimed by the rideshare launch');
 
 echo "\n$pass passed, $fail failed\n";
 exit($fail ? 1 : 0);
