@@ -178,8 +178,14 @@ async function enterGame() {
   keepAwake();
   st.version = 0; st.lastLogSeq = 0; st.gameOverShown = false; st.autoFsDone = false;
   try { await poll(true); } catch (e) {
-    toast(e.message, 'bad');
-    if (e instanceof ApiError) { session.clear(); showLobby(); return; }
+    // Only a definitive rejection ends the session (bad room code, room gone,
+    // not a member). A busy or briefly broken server must never log the
+    // player out — in hot-seat mode that would lose the host token for good.
+    if (e instanceof ApiError && [400, 401, 403, 404].includes(e.status)) {
+      toast(e.message, 'bad');
+      session.clear(); showLobby(); return;
+    }
+    toast(`${e.message} — retrying…`, 'bad');
   }
   st.pollBusy = false; st.pollFails = 0; st.pollSkip = 0;
   st.polling = setInterval(pollTick, 2200);
@@ -367,7 +373,7 @@ function renderLeft() {
       el('span', {}, 'Hand ', el('b', {}, String(p.handCount))),
       el('span', {}, 'Missions ', el('b', {}, String(p.missionsCompleted)))));
     if (g.phase === 'action') {
-      const total = { 1: 2, 2: 3, 3: 4 }[p.level];
+      const total = p.commandTurns;
       const turns = el('div', { class: 'turns', title: `Command turns: ${total - p.turnsUsed} of ${total} left` });
       for (let i = 0; i < total; i++) turns.append(el('div', { class: 'turn-pip' + (i >= p.turnsUsed && !p.passed ? ' free' : '') }));
       pp.append(turns);
@@ -505,7 +511,7 @@ function renderBottom() {
       const cur = g.players[g.turnSeat];
       bar.append(el('div', { class: 'info' }, `Waiting: `, el('b', {}, cur?.name || ''), ` is taking a command turn…`));
     } else {
-      const total = { 1: 2, 2: 3, 3: 4 }[p.level];
+      const total = p.commandTurns;
       bar.append(el('div', { class: 'info' }, el('b', {}, `${p.name}`), ` — command turn ${p.turnsUsed + 1}/${total} · ${p.credits} Cr`));
       bar.append(
         el('button', { class: 'btn', title: 'Assemble a rocket from hand cards, then optionally launch it in the same turn.',
@@ -581,6 +587,10 @@ function handCardMenu(uid) {
     }
     if (['Engine', 'Tank', 'Payload', 'Support'].includes(c.type)) {
       acts.push(el('button', { class: 'btn', onclick: () => { closeAllModals(); openBuilderFlow(null); } }, 'Open Rocket Builder'));
+    } else {
+      // Any card can still fly as jury-rigged hardware (v0.5.1 §9).
+      acts.push(el('button', { class: 'btn ghost', onclick: () => { closeAllModals(); openBuilderFlow(null); } },
+        'Open Rocket Builder (jury-rig)'));
     }
   }
   zoomCard(uid, acts);
@@ -645,17 +655,19 @@ function openBuilderFlow(craftId) {
   if (!canAct()) return toast('Wait for your command turn.', '');
   openBuilder(g, seat, craftId, {
     onEngineering(diff) {
-      if (!diff.add.length && !diff.remove.length) return toast('No changes made.', '');
-      doAction({ type: 'engineering', craft: diff.craft, add: diff.add, remove: diff.remove });
+      if (!diff.add.length && !diff.remove.length && !diff.sideways && !diff.unrig) return toast('No changes made.', '');
+      doAction({ type: 'engineering', craft: diff.craft, add: diff.add, remove: diff.remove,
+                 sideways: diff.sideways, unrig: diff.unrig });
     },
-    onLaunch(diff, mounted) {
+    onLaunch(diff, mounted, sideways) {
       openPlanner(g, seat, {
-        mode: 'launch', cards: mounted, engDiff: diff,
+        mode: 'launch', cards: mounted, engDiff: diff, sideways,
         onSubmit(plan, engDiff) {
           if (engDiff.craft) {
-            doAction({ type: 'launch', craft: engDiff.craft, components: engDiff.add, remove: engDiff.remove, plan });
+            doAction({ type: 'launch', craft: engDiff.craft, components: engDiff.add, remove: engDiff.remove,
+                       sideways: engDiff.sideways, unrig: engDiff.unrig, plan });
           } else {
-            doAction({ type: 'launch', components: engDiff.add, plan });
+            doAction({ type: 'launch', components: engDiff.add, sideways: engDiff.sideways, plan });
           }
         },
       });
@@ -675,8 +687,15 @@ function craftMenu(craftId) {
       ` · Range ${c.range} · Energy ${c.energy}` +
       (c.isStation ? ' · ON-ORBIT STATION' : c.deployed ? ' · deployed asset' : '') +
       (c.activated && c.node !== 'assembly' ? ' · already activated this round' : '')));
-  content.append(el('div', { class: 'cardrow' },
-    c.cards.map(uid => renderCard(uid, { size: 'small-face' }))));
+  const cardrow = el('div', { class: 'cardrow' },
+    c.cards.map(uid => renderCard(uid, { size: 'small-face' })));
+  if (c.sideways) {
+    cardrow.append(el('div', { style: 'position:relative;' },
+      renderCard(c.sideways, { size: 'small-face' }),
+      el('div', { style: 'position:absolute; top:6px; left:6px; background:#000c; color:#ffd166; padding:2px 6px; border-radius:4px; font-size:11px; pointer-events:none;' },
+        '⚒ jury-rigged')));
+  }
+  content.append(cardrow);
   const acts = el('div', { class: 'modal-actions' });
   if (mineTurn && c.node === 'assembly') {
     acts.append(
@@ -685,6 +704,7 @@ function craftMenu(craftId) {
         closeModal();
         openPlanner(g, viewSeat(), {
           mode: 'launch', cards: [...c.cards], engDiff: { craft: craftId, add: [], remove: [] },
+          sideways: c.sideways,
           onSubmit(plan) { doAction({ type: 'launch', craft: craftId, plan }); },
         });
       } }, '🚀 Launch (1 turn)'));

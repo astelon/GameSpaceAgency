@@ -19,12 +19,33 @@ function sar_history_seq(array $history, array $needle): bool {
     return false;
 }
 
-function sar_payload_info(array $craft): array {
+// All payload cards mounted on the craft (v0.5: up to 2, rideshare).
+// A jury-rigged mass simulator counts as a plain Mass-1 payload with no tags
+// (v0.5.1 §9) — it satisfies "payload" / "payload Mass 1+" requirements but
+// never tagged or Mass-2+ ones.
+function sar_payload_cards(array $craft): array {
+    $out = [];
     foreach ($craft['cards'] as $uid) {
         $c = sar_card($uid);
-        if ($c['type'] === 'Payload') return ['uid' => $uid, 'card' => $c];
+        if ($c['type'] === 'Payload') $out[] = $c;
     }
-    return ['uid' => null, 'card' => null];
+    if (sar_sideways_mass_sim($craft)) {
+        $out[] = ['type' => 'Payload', 'mass' => 1, 'tags' => [], 'name' => 'Mass simulator (jury-rigged)'];
+    }
+    return $out;
+}
+
+// Does any SINGLE payload card meet the requirement? v0.5.1: payload-Mass
+// requirements are single-card — two Mass-1 payloads never add up, and a
+// tag + Mass requirement must be satisfied by the same card.
+function sar_payload_meets(array $craft, ?string $tag, int $minMass = 0, ?string $orTag = null): bool {
+    foreach (sar_payload_cards($craft) as $c) {
+        $tagOk = $tag === null
+            || in_array($tag, $c['tags'], true)
+            || ($orTag !== null && in_array($orTag, $c['tags'], true));
+        if ($tagOk && ($c['mass'] ?? 0) >= $minMass) return true;
+    }
+    return false;
 }
 
 function sar_craft_has_engine_or_staged(array $craft): bool {
@@ -48,48 +69,46 @@ function sar_mission_check(array $g, string $mid, array $craft): ?array {
     $seat = $craft['owner'];
     $node = $craft['node'];
     $hist = $craft['history'];
-    $pl = sar_payload_info($craft);
-    $pm = $pl['card']['mass'] ?? 0;                 // printed payload mass
+    $payloads = sar_payload_cards($craft);
     // Crewed missions also require a Pressurized tank on the craft.
-    $crewed = $pl['card'] && in_array('Crewed', $pl['card']['tags'], true)
+    $crewed = sar_payload_meets($craft, 'Crewed')
         && (bool)sar_craft_cards($craft, 'Tank', 'Pressurized');
     $atEarth = $node === 'earth';
 
     switch ($mid) {
         case 'M01': // LEO Deployment: reach LEO, uncrewed payload
-            return ($node === 'leo' && $pl['uid'] && !$crewed) ? ['energy' => 0] : null;
+            $uncrewed = (bool)array_filter($payloads, fn($c) => !in_array('Crewed', $c['tags'], true));
+            return ($node === 'leo' && $uncrewed) ? ['energy' => 0] : null;
         case 'M02': // Lunar Flyby: Moon Orbit + return to Earth
             return ($atEarth && in_array('moonOrbit', $hist, true)) ? ['energy' => 0] : null;
         case 'M03': // Lunar Landing (one-way): Moon surface, Lander or Rocket-as-Lander
             $lander = sar_craft_cards($craft, null, 'Lander') || sar_craft_has_engine_or_staged($craft);
             return ($node === 'moon' && $lander) ? ['energy' => 0] : null;
         case 'M04': // Mars Orbit Insertion: Mars High Orbit, payload Mass 2+
-            return ($node === 'marsHigh' && $pm >= 2) ? ['energy' => 0] : null;
+            return ($node === 'marsHigh' && sar_payload_meets($craft, null, 2)) ? ['energy' => 0] : null;
         case 'M05': // Deep Space Probe: Mars ZOI, Scientific payload Mass 2+, Sensor Array, 2 Energy
-            $sci = $pl['card'] && in_array('Scientific', $pl['card']['tags'], true) && $pm >= 2;
             $sensor = (bool)array_filter($craft['cards'], fn($u) => explode('#', $u)[0] === 'S11');
-            return (in_array('marsZoi', $hist, true) && $sci && $sensor && sar_can_pay_energy($craft, 2))
-                ? ['energy' => 2] : null;
+            return (in_array('marsZoi', $hist, true) && sar_payload_meets($craft, 'Scientific', 2)
+                && $sensor && sar_can_pay_energy($craft, 2)) ? ['energy' => 2] : null;
         case 'M06': // Crewed Station Visit: GEO, dock with station, return; Crewed + Docking + Engine
             $dockCard = (bool)sar_craft_cards($craft, null, 'Docking');
             return ($atEarth && $craft['docked'] && $crewed && $dockCard && sar_craft_has_engine_or_staged($craft))
                 ? ['energy' => 0] : null;
         case 'M07': // Emergency Resupply: LEO + return, payload Mass 2+
-            return ($atEarth && in_array('leo', $hist, true) && $pm >= 2) ? ['energy' => 0] : null;
+            return ($atEarth && in_array('leo', $hist, true) && sar_payload_meets($craft, null, 2)) ? ['energy' => 0] : null;
         case 'M08': // Science Relay: High Orbit + return, Scientific/Electronics payload, 1 Energy
-            $ok = $pl['card'] && (in_array('Scientific', $pl['card']['tags'], true) || in_array('Electronics', $pl['card']['tags'], true));
-            return ($atEarth && in_array('geo', $hist, true) && $ok && sar_can_pay_energy($craft, 1))
+            return ($atEarth && in_array('geo', $hist, true)
+                && sar_payload_meets($craft, 'Scientific', 0, 'Electronics') && sar_can_pay_energy($craft, 1))
                 ? ['energy' => 1] : null;
         case 'M09': // Orbital Service Check: LEO → GEO → LEO; deployed Satellite in orbit; Engine
             return ($node === 'leo' && sar_history_seq($hist, ['leo', 'geo', 'leo'])
                 && sar_craft_has_engine_or_staged($craft)
                 && sar_player_has_deployed($g, $seat, 'Satellite', true)) ? ['energy' => 0] : null;
         case 'M10': // Capsule Recovery: land at Earth from Sub-Orbital, payload Mass 1+, Reentry support
-            return ($atEarth && $craft['usedReentry'] && $pm >= 1) ? ['energy' => 0] : null;
+            return ($atEarth && $craft['usedReentry'] && sar_payload_meets($craft, null, 1)) ? ['energy' => 0] : null;
         case 'M11': // Reusable Flight Test: Earth→Sub-Orbital→Earth, Reusable payload + Reusable Reentry
-            $reusablePayload = $pl['uid'] && in_array('Reusable', $pl['card']['tags'], true);
             return ($atEarth && sar_history_seq($hist, ['earth', 'subEarth', 'earth'])
-                && $reusablePayload && $craft['usedReusableReentry']) ? ['energy' => 0] : null;
+                && sar_payload_meets($craft, 'Reusable') && $craft['usedReusableReentry']) ? ['energy' => 0] : null;
         case 'M12': // Lunar Sample Return: Moon surface + return; Cargo Return Capsule; Reentry for Earth
             $cargo = (bool)array_filter($craft['cards'], fn($u) => explode('#', $u)[0] === 'P07');
             return ($atEarth && in_array('moon', $hist, true) && $cargo && $craft['usedReentry'])
@@ -98,14 +117,13 @@ function sar_mission_check(array $g, string $mid, array $craft): ?array {
             return ($atEarth && sar_history_seq($hist, ['earth', 'subEarth', 'earth'])
                 && $crewed && $craft['usedReentry']) ? ['energy' => 0] : null;
         case 'M14': // Weather Satellite: deploy a Satellite payload at High Orbit (GEO)
-            return ($craft['deployed'] && $node === 'geo' && $pl['uid'] && in_array('Satellite', $pl['card']['tags'], true))
+            return ($craft['deployed'] && $node === 'geo' && sar_payload_meets($craft, 'Satellite'))
                 ? ['energy' => 0] : null;
         case 'M15': // Sounding Flight: Earth→Sub-Orbital→Earth, Scientific payload, 1 Energy
-            $sci = $pl['card'] && in_array('Scientific', $pl['card']['tags'], true);
-            return ($atEarth && sar_history_seq($hist, ['earth', 'subEarth', 'earth']) && $sci
-                && sar_can_pay_energy($craft, 1)) ? ['energy' => 1] : null;
+            return ($atEarth && sar_history_seq($hist, ['earth', 'subEarth', 'earth'])
+                && sar_payload_meets($craft, 'Scientific') && sar_can_pay_energy($craft, 1)) ? ['energy' => 1] : null;
         case 'M16': // Lunar Orbiter: deploy a Satellite payload at Moon Orbit
-            return ($craft['deployed'] && $node === 'moonOrbit' && $pl['uid'] && in_array('Satellite', $pl['card']['tags'], true))
+            return ($craft['deployed'] && $node === 'moonOrbit' && sar_payload_meets($craft, 'Satellite'))
                 ? ['energy' => 0] : null;
         case 'M17': // Crewed Lunar Flyby: Moon Orbit + return, Crewed + Reentry support
             return ($atEarth && in_array('moonOrbit', $hist, true) && $crewed && $craft['usedReentry'])
@@ -116,10 +134,9 @@ function sar_mission_check(array $g, string $mid, array $craft): ?array {
             $lander = sar_craft_cards($craft, null, 'Lander') || sar_craft_has_engine_or_staged($craft);
             return ($node === 'mars' && $lander) ? ['energy' => 0] : null;
         case 'M20': // Asteroid Rendezvous: Sun Orbit, Scientific payload Mass 2+, Sensor Array, 2 Energy
-            $sci = $pl['card'] && in_array('Scientific', $pl['card']['tags'], true) && $pm >= 2;
             $sensor = (bool)array_filter($craft['cards'], fn($u) => explode('#', $u)[0] === 'S11');
-            return (in_array('sunOrbit', $hist, true) && $sci && $sensor && sar_can_pay_energy($craft, 2))
-                ? ['energy' => 2] : null;
+            return (in_array('sunOrbit', $hist, true) && sar_payload_meets($craft, 'Scientific', 2)
+                && $sensor && sar_can_pay_energy($craft, 2)) ? ['energy' => 2] : null;
         case 'M21': // Suborbital Test Flight (standing contract): Earth -> Sub-Orbital -> Earth, land safely
             return ($atEarth && sar_history_seq($hist, ['earth', 'subEarth', 'earth'])) ? ['energy' => 0] : null;
     }

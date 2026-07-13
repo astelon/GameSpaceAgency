@@ -349,5 +349,335 @@ try {
 ok($threw, 'the malformed launch plan is rejected with "Invalid route"');
 ok($g == $before, 'state is byte-for-byte identical to before the rejected action — no half-launched craft leaked (§2.3)');
 
+echo "— Scenario 12: Starter Events (v0.5.1) — setup reveal, round-1 use, effects\n";
+// Keep starting games until the wanted starter comes up (uniform 1-in-3).
+function fresh_with_starter(string $cid): array {
+    for ($i = 0; $i < 300; $i++) {
+        $g = sar_new_game('SCN', 'hotseat', 'tok');
+        sar_add_player($g, 'Ada', 'tok');
+        sar_add_player($g, 'Bo', 'tok');
+        sar_start_game($g);
+        if (sar_event_id($g) === $cid) return $g;
+    }
+    throw new RuntimeException("Starter $cid never drawn in 300 tries");
+}
+
+$g = fresh_with_starter('EV15'); // Founding Grant
+ok(in_array(sar_event_id($g), SAR_STARTER_EVENTS, true), "round 1's event is a Starter Event");
+$starterInDeck = false;
+foreach ($g['decks']['event'] as $eu) if (sar_has_tag($eu, 'Starter')) $starterInDeck = true;
+ok(!$starterInDeck && count($g['decks']['event']) === 13, 'the 13-card round event deck contains no Starter Events');
+ok(array_sum(array_column($g['players'], 'credits')) === SAR_START_CREDITS[0] + SAR_START_CREDITS[1] + 6,
+    'Founding Grant pays every agency +3 Credits at the round 1 reveal');
+
+$g = fresh_with_starter('EV16'); // Crash Program
+ok(sar_command_turns($g, 0) === SAR_LEVEL_TURNS[1] + 1, 'Crash Program grants +1 command turn while active');
+$g['event'] = null;
+ok(sar_command_turns($g, 0) === SAR_LEVEL_TURNS[1], 'the extra turn disappears once the event is discarded');
+
+// Round 2 must draw from the regular event deck.
+$g = fresh_with_starter('EV14');
+foreach ($g['players'] as $p) {
+    sar_apply($g, $p['seat'], ['type' => 'planning_done', 'sell' => [],
+        'discard' => array_slice($g['players'][$p['seat']]['hand'], 0, max(0, count($g['players'][$p['seat']]['hand']) - 5))]);
+}
+foreach ($g['players'] as &$pp) { $pp['passed'] = true; }
+unset($pp);
+sar_maintenance($g);
+ok($g['round'] === 2 && !in_array(sar_event_id($g), SAR_STARTER_EVENTS, true),
+    "round 2's event is drawn from the regular deck");
+ok(in_array('EV14#1', $g['decks']['eventDiscard'], true), 'the used Starter Event was discarded during Maintenance');
+
+// EV14 Recovery Trials: everything unstaged comes home, expended devices don't.
+$g = fresh();
+$g['players'][0]['standingDone'] = ['M21']; // isolate from the standing contract
+[$eng, $tank, $probe, $chute] = give($g, 0, ['E02', 'T01', 'P05', 'S02']);
+$g['players'][0]['hand'] = [$eng, $tank, $probe, $chute];
+$flew = false; $tries = 0;
+do {
+    $snap = $g;
+    sar_apply($g, 0, ['type' => 'launch', 'components' => [$eng, $tank, $probe, $chute],
+        'plan' => ['path' => ['earth', 'subEarth', 'earth'],
+                   'landing' => [2 => ['method' => 'reentry', 'card' => $chute]]]]);
+    foreach ($g['crafts'] as $c) if ($c['node'] === 'earth' && $c['launchRound']) $flew = true;
+    if (!$flew) $g = $snap;
+} while (!$flew && ++$tries < 60);
+$g['event'] = 'EV14#1'; // Recovery Trials active during this round's Maintenance
+foreach ($g['players'] as &$pp) { $pp['passed'] = true; }
+unset($pp);
+sar_maintenance($g);
+$hand = $g['players'][0]['hand']; // compare exact uids — the round-2 draw adds unrelated cards
+ok(in_array($eng, $hand, true) && in_array($tank, $hand, true) && in_array($probe, $hand, true),
+    'Recovery Trials returns non-Reusable engine, tank and payload to hand');
+ok(!in_array($chute, $hand, true), 'the parachute expended during landing is still discarded');
+
+echo "— Scenario 13: Flight Data — a failed launch pays 1 Credit\n";
+$g = fresh();
+[$eng, $tank] = give($g, 0, ['E02', 'T01']);
+$g['players'][0]['hand'] = [$eng, $tank];
+sar_apply($g, 0, ['type' => 'engineering', 'add' => [$eng, $tank]]);
+$craftId = array_key_first($g['crafts']);
+$cr0 = $g['players'][0]['credits'];
+sar_launch_failure($g, $craftId);
+ok($g['players'][0]['credits'] === $cr0 + 1, 'launch failure banks +1 Credit of Flight Data');
+ok(sar_craft_engine($g['crafts'][$craftId]) === null, 'the non-Reusable engine is still destroyed');
+
+echo "— Scenario 14: second-Technology VP is per-player (v0.5)\n";
+$g = fresh();
+foreach ($g['players'] as &$pp) { $pp['level'] = 3; $pp['credits'] = 60; }
+unset($pp);
+[$cA1, $cA2] = give($g, 0, ['C03', 'C05']);
+[$cB1, $cB2] = give($g, 1, ['C04', 'C07']);
+$vpA = $g['players'][0]['vp']; $vpB = $g['players'][1]['vp'];
+sar_apply($g, 0, ['type' => 'develop', 'card' => $cA1]);
+sar_apply($g, 1, ['type' => 'develop', 'card' => $cB1]);
+sar_apply($g, 0, ['type' => 'develop', 'card' => $cA2]);
+sar_apply($g, 1, ['type' => 'develop', 'card' => $cB2]);
+ok($g['players'][0]['vp'] === $vpA + 1, 'first player to a 2nd Technology gains +1 VP');
+ok($g['players'][1]['vp'] === $vpB + 1, 'the second player ALSO gains +1 VP at their own 2nd Technology');
+ok($g['milestones']['secondTech'] === 0, 'the milestone still records who got there first');
+
+echo "— Scenario 15: Engine Clusters (v0.5) — thrust adds, reliability = lowest −1, both engines at risk\n";
+$g = fresh();
+[$e1, $e2, $tank] = give($g, 0, ['E02', 'E06', 'T01']); // Sterling (T5 R9) + Raptor-X (T9 R6, Reusable)
+$g['players'][0]['hand'] = [$e1, $e2, $tank];
+sar_apply($g, 0, ['type' => 'engineering', 'add' => [$e1, $e2, $tank]]);
+$craftId = array_key_first($g['crafts']);
+$craft = $g['crafts'][$craftId];
+ok(sar_craft_thrust($g, $craft) === 5 + 9, 'cluster Thrust adds (5 + 9 = 14)');
+[$rel, $mods] = sar_craft_reliability($g, $craft, false);
+ok($rel === 6 - 1, 'cluster Reliability is the lowest engine (6) minus 1');
+ok(in_array('engine cluster -1', $mods, true), 'the −1 is itemized in the modifier list');
+$cr0 = $g['players'][0]['credits'];
+sar_launch_failure($g, $craftId);
+$left = array_map(fn($u) => explode('#', $u)[0], $g['crafts'][$craftId]['cards']);
+ok(!in_array('E02', $left, true), 'launch failure destroys the non-Reusable Sterling Booster');
+ok(in_array('E06', $left, true), 'the Reusable Raptor-X survives the failed launch');
+ok($g['players'][0]['credits'] === $cr0 + 1, 'Flight Data still pays on the cluster failure');
+
+// Composition limits: 3 engines rejected, 4 tanks now fine, 3 payloads rejected.
+$g = fresh();
+$uids = give($g, 0, ['E02', 'E02', 'E02', 'T01']);
+$g['players'][0]['hand'] = $uids;
+$threw = false;
+try { sar_apply($g, 0, ['type' => 'engineering', 'add' => $uids]); }
+catch (SarError $e) { $threw = str_contains($e->getMessage(), '2 Engines'); }
+ok($threw, 'a third Engine is rejected');
+$g = fresh();
+$uids = give($g, 0, ['T01', 'T01', 'T01', 'T01']);
+$g['players'][0]['hand'] = $uids;
+sar_apply($g, 0, ['type' => 'engineering', 'add' => $uids]);
+ok(count($g['crafts']) === 1, 'four Fuel Tanks are legal now (no cap — Thrust is the limit)');
+$g2 = fresh();
+$uids = give($g2, 0, ['P12', 'P12', 'P12', 'T01']);
+$g2['players'][0]['hand'] = $uids;
+$threw = false;
+try { sar_apply($g2, 0, ['type' => 'engineering', 'add' => $uids]); }
+catch (SarError $e) { $threw = str_contains($e->getMessage(), '2 Payloads'); }
+ok($threw, 'a third Payload is rejected (rideshare is 0–2)');
+
+// A Hydrogen Core anywhere in the cluster still demands a Cryo Tank.
+$g3 = fresh();
+[$h, $s, $t] = give($g3, 0, ['E03', 'E02', 'T01']);
+$g3['players'][0]['hand'] = [$h, $s, $t];
+$threw = false;
+try {
+    sar_apply($g3, 0, ['type' => 'launch', 'components' => [$h, $s, $t],
+        'plan' => ['path' => ['earth', 'subEarth']]]);
+} catch (SarError $e) { $threw = str_contains($e->getMessage(), 'Cryo'); }
+ok($threw, 'Hydrogen Core in a cluster still requires a Cryo Tank');
+
+echo "— Scenario 16: rideshare payloads — Mass requirements are single-card (v0.5.1)\n";
+$g = fresh();
+$mk = fn(array $cards, array $extra = []) => array_merge([
+    'owner' => 0, 'node' => 'earth', 'history' => ['earth', 'subEarth', 'leo', 'subEarth', 'earth'],
+    'cards' => $cards, 'docked' => false, 'usedReentry' => true, 'usedReusableReentry' => false,
+    'deployed' => false, 'isStation' => false, 'energy' => 5, 'stagedEngineFlight' => false,
+], $extra);
+ok(sar_mission_check($g, 'M07', $mk(['P12#x1', 'P12#x2'])) === null,
+    'two Mass-1 payloads do NOT add up to "payload Mass 2+" (M07)');
+ok(sar_mission_check($g, 'M07', $mk(['P13#x1', 'P12#x2'])) !== null,
+    'a single Mass-2 payload (with a Mass-1 rideshare) satisfies M07');
+ok(sar_mission_check($g, 'M05', $mk(['P14#x1', 'P05#x2'], ['history' => ['earth', 'marsZoi'], 'node' => 'marsZoi'])) === null,
+    'M05: Scientific and Mass 2+ must be the SAME card (Mass-3 plain + Mass-1 Scientific fails)');
+ok(sar_mission_check($g, 'M05', $mk(['P03#x1', 'S11#x2'], ['history' => ['earth', 'marsZoi'], 'node' => 'marsZoi'])) !== null,
+    'M05: a Mass-3 Scientific payload with the Sensor Array qualifies');
+ok(sar_mission_check($g, 'M01', $mk(['P04#x1', 'P12#x2'], ['node' => 'leo'])) !== null,
+    'M01: an uncrewed rideshare payload qualifies even with a Crew Capsule aboard');
+ok(sar_mission_check($g, 'M01', $mk(['P04#x1'], ['node' => 'leo'])) === null,
+    'M01: a Crewed-only stack does not count as an uncrewed payload');
+
+// End-to-end: rideshare launch deploys one payload and flies on with the other.
+$g = fresh();
+$g['missions'] = ['M01#1', 'M07#1', 'M02#1'];
+[$eng, $t1, $t2, $sat, $box] = give($g, 0, ['E06', 'T01', 'T01', 'P05', 'P13']); // Thrust 9 ≥ 2+2+1+2
+$g['players'][0]['hand'] = [$eng, $t1, $t2, $sat, $box];
+$flew = false; $tries = 0;
+do {
+    $snap = $g;
+    sar_apply($g, 0, ['type' => 'launch', 'components' => [$eng, $t1, $t2, $sat, $box],
+        'plan' => ['path' => ['earth', 'subEarth', 'leo'],
+                   'deploys' => [['step' => 2, 'payload' => $sat, 'supports' => []]]]]);
+    foreach ($g['crafts'] as $c) if (!$c['deployed'] && $c['node'] === 'leo') $flew = true;
+    if (!$flew) $g = $snap;
+} while (!$flew && ++$tries < 60);
+$asset = null; $rocket = null;
+foreach ($g['crafts'] as $c) { if ($c['deployed']) $asset = $c; elseif ($c['node'] === 'leo') $rocket = $c; }
+ok($asset !== null && $rocket !== null, 'rideshare: satellite deployed at LEO, carrier flies on');
+ok($rocket && in_array('P13', array_map(fn($u) => explode('#', $u)[0], $rocket['cards']), true),
+    'the Mass-2 payload stays aboard the carrier');
+ok(!in_array('M01#1', $g['missions'], true), 'M01 claimed by the rideshare launch');
+
+echo "— Scenario 17: Deadweight (v0.5.1) — launch penalty, regain on deploy, clamp at 0\n";
+$g = fresh();
+$g['missions'] = []; // keep the flight from claiming anything
+[$eng, $tank, $heavy] = give($g, 0, ['E06', 'T01', 'P14']); // Thrust 9 ≥ 2+3; T01 Range 5; P14 −1
+$g['players'][0]['hand'] = [$eng, $tank, $heavy];
+$flew = false; $tries = 0;
+do {
+    $snap = $g;
+    sar_apply($g, 0, ['type' => 'launch', 'components' => [$eng, $tank, $heavy],
+        'plan' => ['path' => ['earth', 'subEarth', 'leo']]]);
+    foreach ($g['crafts'] as $c) if ($c['node'] === 'leo') $flew = true;
+    if (!$flew) $g = $snap;
+} while (!$flew && ++$tries < 60);
+$rocket = null;
+foreach ($g['crafts'] as $c) if ($c['node'] === 'leo') $rocket = $c;
+ok($rocket && $rocket['range'] === 5 - 1 - 2, 'launch Range is tank 5 − Deadweight 1 − 2 hops = 2');
+
+// Deploying the Deadweight card gives the Range back.
+$g = fresh();
+$g['missions'] = [];
+[$eng, $tank, $depot, $solar] = give($g, 0, ['E06', 'T01', 'P11', 'S07']); // Fuel Depot: Station tag, −1
+$g['players'][0]['hand'] = [$eng, $tank, $depot, $solar];
+$flew = false; $tries = 0;
+do {
+    $snap = $g;
+    sar_apply($g, 0, ['type' => 'launch', 'components' => [$eng, $tank, $depot, $solar],
+        'plan' => ['path' => ['earth', 'subEarth', 'leo'],
+                   'deploys' => [['step' => 2, 'payload' => $depot, 'supports' => [$solar]]]]]);
+    foreach ($g['crafts'] as $c) if (!$c['deployed'] && $c['node'] === 'leo') $flew = true;
+    if (!$flew) $g = $snap;
+} while (!$flew && ++$tries < 60);
+$rocket = null;
+foreach ($g['crafts'] as $c) if (!$c['deployed'] && $c['node'] === 'leo') $rocket = $c;
+ok($rocket && $rocket['range'] === 5 - 1 - 2 + 1, 'deploying the Fuel Depot regains its Deadweight (5−1−2+1 = 3)');
+
+// Clamp: Deadweight can never push launch Range below 0.
+$g = fresh();
+[$eng, $heavy] = give($g, 0, ['E06', 'P14']);
+$g['players'][0]['hand'] = [$eng, $heavy];
+sar_apply($g, 0, ['type' => 'launch', 'components' => [$eng, $heavy],
+    'plan' => ['path' => ['earth']]]); // no movement: stays on the pad at Earth
+$rocket = null;
+foreach ($g['crafts'] as $c) if ($c['owner'] === 0) $rocket = $c;
+ok($rocket && $rocket['range'] === 0, 'a tankless heavy stack launches with Range 0, not −1');
+
+echo "— Scenario 18: Jury-Rigging (v0.5.1 §9) — sideways card effects and lifecycle\n";
+// Strap-on booster: a sideways Engine is +1 Thrust and nothing else.
+$g = fresh();
+[$eng, $tank, $spare] = give($g, 0, ['E01', 'T01', 'E02']); // Merlin T7 R7; Sterling sideways
+$g['players'][0]['hand'] = [$eng, $tank, $spare];
+sar_apply($g, 0, ['type' => 'engineering', 'add' => [$eng, $tank], 'sideways' => $spare]);
+$craftId = array_key_first($g['crafts']);
+$craft = $g['crafts'][$craftId];
+ok($craft['sideways'] === $spare, 'the sideways card is recorded on the craft');
+ok(sar_craft_thrust($g, $craft) === 7 + 1, 'a sideways Engine adds +1 Thrust (7+1)');
+[$rel, $mods] = sar_craft_reliability($g, $craft, false);
+ok($rel === 7 && !in_array('engine cluster -1', $mods, true),
+    'a sideways Engine is NOT a cluster engine — no −1, reliability stays 7');
+ok(!in_array($spare, $g['players'][0]['hand'], true), 'the sideways card left the hand');
+
+// Unrig in assembly returns it to hand.
+$g['turnSeat'] = 0; $g['players'][0]['turnsUsed'] = 0; // hand the turn back for the follow-up action
+sar_apply($g, 0, ['type' => 'engineering', 'craft' => $craftId, 'unrig' => true]);
+ok($g['crafts'][$craftId]['sideways'] === null && in_array($spare, $g['players'][0]['hand'], true),
+    'unrigging in the assembly area returns the card to hand');
+
+// Drop tank: a sideways Tank is +1 Range at launch (its printed Range ignored).
+$g = fresh();
+$g['missions'] = [];
+[$eng, $tank, $spareTank] = give($g, 0, ['E06', 'T01', 'T02']); // T02 prints Range 8 — must count as +1
+$g['players'][0]['hand'] = [$eng, $tank, $spareTank];
+$flew = false; $tries = 0;
+do {
+    $snap = $g;
+    sar_apply($g, 0, ['type' => 'launch', 'components' => [$eng, $tank], 'sideways' => $spareTank,
+        'plan' => ['path' => ['earth', 'subEarth', 'leo']]]);
+    foreach ($g['crafts'] as $c) if ($c['node'] === 'leo') $flew = true;
+    if (!$flew) $g = $snap;
+} while (!$flew && ++$tries < 60);
+$rocket = null;
+foreach ($g['crafts'] as $c) if ($c['node'] === 'leo') $rocket = $c;
+ok($rocket && $rocket['range'] === 5 + 1 - 2, 'a sideways Cryo Tank adds +1 Range at launch, not its printed 8');
+// A sideways tank is not a real tank: it cannot satisfy the Cryogenic gate.
+$g2 = fresh();
+[$h, $t, $cryo] = give($g2, 0, ['E03', 'T01', 'T02']);
+$g2['players'][0]['hand'] = [$h, $t, $cryo];
+$threw = false;
+try {
+    sar_apply($g2, 0, ['type' => 'launch', 'components' => [$h, $t], 'sideways' => $cryo,
+        'plan' => ['path' => ['earth', 'subEarth']]]);
+} catch (SarError $e) { $threw = str_contains($e->getMessage(), 'Cryo'); }
+ok($threw, 'a sideways Cryo Tank does NOT satisfy the Hydrogen Core cryo requirement (printed tags ignored)');
+
+// Mass simulator: any other card acts as a Mass-1, tagless, Uncrewed payload.
+$g = fresh();
+$mkJr = fn(?string $sideways, array $cards = []) => [
+    'owner' => 0, 'node' => 'leo', 'history' => ['earth', 'subEarth', 'leo'],
+    'cards' => $cards, 'sideways' => $sideways, 'docked' => false, 'usedReentry' => false,
+    'usedReusableReentry' => false, 'deployed' => false, 'isStation' => false, 'energy' => 5,
+    'stagedEngineFlight' => false,
+];
+ok(sar_mission_check($g, 'M01', $mkJr('C03#j1')) !== null,
+    'a jury-rigged mass simulator satisfies M01 (an uncrewed payload at LEO)');
+ok(sar_mission_check($g, 'M07', $mkJr('C03#j1', []) + ['node' => 'earth', 'history' => ['earth', 'subEarth', 'leo', 'subEarth', 'earth']]) === null,
+    'the mass simulator is Mass 1 — it never satisfies Mass 2+ requirements');
+$simCraft = ['cards' => ['T01#j2'], 'sideways' => 'C03#j1', 'owner' => 0];
+ok(sar_craft_mass($g, $simCraft) === 2 + 1, 'the mass simulator adds 1 to Total Rocket Mass');
+
+// The mass simulator occupies a payload slot.
+$g = fresh();
+$uids = give($g, 0, ['P12', 'P12', 'T01', 'C03']);
+$g['players'][0]['hand'] = $uids;
+$threw = false;
+try { sar_apply($g, 0, ['type' => 'engineering', 'add' => array_slice($uids, 0, 3), 'sideways' => $uids[3]]); }
+catch (SarError $e) { $threw = str_contains($e->getMessage(), '2 Payloads'); }
+ok($threw, 'two payloads + a mass simulator exceed the two payload slots');
+
+// One sideways card per rocket.
+$g = fresh();
+$uids = give($g, 0, ['E02', 'T01', 'C03', 'C05']);
+$g['players'][0]['hand'] = $uids;
+sar_apply($g, 0, ['type' => 'engineering', 'add' => [$uids[0], $uids[1]], 'sideways' => $uids[2]]);
+$craftId = array_key_first($g['crafts']);
+$g['turnSeat'] = 0; $g['players'][0]['turnsUsed'] = 0;
+$threw = false;
+try { sar_apply($g, 0, ['type' => 'engineering', 'craft' => $craftId, 'sideways' => $uids[3]]); }
+catch (SarError $e) { $threw = str_contains($e->getMessage(), 'one jury-rigged'); }
+ok($threw, 'a second sideways card is rejected');
+
+// Lifecycle: never recovered, even under Recovery Trials.
+$g = fresh();
+$g['players'][0]['standingDone'] = ['M21'];
+$g['missions'] = [];
+[$eng, $tank, $chute, $jr] = give($g, 0, ['E02', 'T01', 'S04', 'C03']); // S04 reusable parafoil
+$g['players'][0]['hand'] = [$eng, $tank, $chute, $jr];
+$flew = false; $tries = 0;
+do {
+    $snap = $g;
+    sar_apply($g, 0, ['type' => 'launch', 'components' => [$eng, $tank, $chute], 'sideways' => $jr,
+        'plan' => ['path' => ['earth', 'subEarth', 'earth'],
+                   'landing' => [2 => ['method' => 'reentry', 'card' => $chute]]]]);
+    foreach ($g['crafts'] as $c) if ($c['node'] === 'earth' && $c['launchRound']) $flew = true;
+    if (!$flew) $g = $snap;
+} while (!$flew && ++$tries < 60);
+$g['event'] = 'EV14#1'; // Recovery Trials — still must not return the jury-rigged card
+foreach ($g['players'] as &$pp) { $pp['passed'] = true; }
+unset($pp);
+sar_maintenance($g);
+ok(!in_array($jr, $g['players'][0]['hand'], true), 'the jury-rigged card is never recovered (even under Recovery Trials)');
+ok(in_array($jr, $g['decks']['componentDiscard'], true), 'it is scrapped to the component discard pile');
+
 echo "\n$pass passed, $fail failed\n";
 exit($fail ? 1 : 0);

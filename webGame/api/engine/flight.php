@@ -24,9 +24,10 @@ function sar_action_launch(array &$g, int $seat, array $a): void {
     $p = &$g['players'][$seat];
 
     // Optionally combine Engineering + Launch in one command turn.
-    if (!empty($a['components'])) {
+    if (!empty($a['components']) || !empty($a['sideways']) || !empty($a['unrig'])) {
         $craftId = sar_apply_engineering($g, $seat, ['craft' => $a['craft'] ?? null,
-            'add' => $a['components'], 'remove' => $a['remove'] ?? []], false);
+            'add' => $a['components'] ?? [], 'remove' => $a['remove'] ?? [],
+            'sideways' => $a['sideways'] ?? null, 'unrig' => !empty($a['unrig'])], false);
     } else {
         $craftId = $a['craft'] ?? '';
     }
@@ -47,11 +48,9 @@ function sar_action_launch(array &$g, int $seat, array $a): void {
     $plan['path'] = $plan['path'] ?? ['earth'];
     if (($plan['path'][0] ?? '') !== 'earth') throw new SarError('Launch path must start at Earth');
 
-    // Move rocket to the pad: range = sum of tank Range values.
-    $range = 0;
-    foreach (sar_craft_cards($g['crafts'][$craftId], 'Tank') as $uid) $range += sar_card($uid)['range'];
+    // Move rocket to the pad: range = tank Range sum minus Deadweight (v0.5.1).
     $g['crafts'][$craftId]['node'] = 'earth';
-    $g['crafts'][$craftId]['range'] = $range;
+    $g['crafts'][$craftId]['range'] = sar_launch_range($g['crafts'][$craftId]);
     $g['crafts'][$craftId]['launchRound'] = $g['round'];
     $g['crafts'][$craftId]['history'] = ['earth'];
 
@@ -225,9 +224,10 @@ function sar_launch_checks(array &$g, string $craftId, array $plan, int $step, b
     $surface = $craft['node'];
 
     if (!sar_craft_engine($craft)) throw new SarError('No Engine — the craft cannot launch from ' . SAR_NODES[$surface]['name']);
-    $eng = sar_craft_engine($craft);
-    if (explode('#', $eng)[0] === 'E03' && !sar_craft_cards($craft, 'Tank', 'Cryogenic')) {
-        throw new SarError('The Hydrogen Core engine requires at least one Cryo Tank');
+    foreach (sar_craft_cards($craft, 'Engine') as $eng) {
+        if (explode('#', $eng)[0] === 'E03' && !sar_craft_cards($craft, 'Tank', 'Cryogenic')) {
+            throw new SarError('The Hydrogen Core engine requires at least one Cryo Tank');
+        }
     }
     $thrust = sar_craft_thrust($g, $craft);
     $mass = sar_craft_mass($g, $craft);
@@ -276,12 +276,23 @@ function sar_launch_checks(array &$g, string $craftId, array $plan, int $step, b
 
 function sar_launch_failure(array &$g, string $craftId): void {
     $craft = &$g['crafts'][$craftId];
-    $eng = sar_craft_engine($craft);
-    if ($eng && !sar_has_tag($eng, 'Reusable')) {
-        $craft['cards'] = array_values(array_diff($craft['cards'], [$eng]));
-        $g['decks']['componentDiscard'][] = $eng;
-        sar_log($g, 'fail', $craft['name'] . ' fails to launch — the ' . sar_card($eng)['name'] . ' is destroyed.',
-            ['craft' => $craftId]);
+    // Flight Data (v0.5): even a fireball returns telemetry — a failed
+    // reliability check still moves the program forward.
+    $g['players'][$craft['owner']]['credits'] += 1;
+    sar_log($g, 'gain', sar_pname($g, $craft['owner']) . ' banks the telemetry: +1 Credit of Flight Data.',
+        ['seat' => $craft['owner'], 'credits' => 1]);
+    // Every non-Reusable engine in the (possibly clustered) stack is lost.
+    $destroyed = [];
+    foreach (sar_craft_cards($craft, 'Engine') as $eng) {
+        if (!sar_has_tag($eng, 'Reusable')) {
+            $craft['cards'] = array_values(array_diff($craft['cards'], [$eng]));
+            $g['decks']['componentDiscard'][] = $eng;
+            $destroyed[] = sar_card($eng)['name'];
+        }
+    }
+    if ($destroyed) {
+        sar_log($g, 'fail', $craft['name'] . ' fails to launch — the ' . implode(' and ', $destroyed) .
+            (count($destroyed) > 1 ? ' are' : ' is') . ' destroyed.', ['craft' => $craftId]);
     } else {
         sar_log($g, 'fail', $craft['name'] . ' aborts the launch — the Reusable engine survives intact.', ['craft' => $craftId]);
     }
@@ -343,6 +354,7 @@ function sar_stage_card(array &$g, string $craftId, string $uid, bool $dry, stri
     if (!$dry) sar_log($g, 'stage', $craft['name'] . " stages {$card['name']} ($when): +$bonus Range.",
         ['craft' => $craftId, 'card' => $uid, 'bonus' => $bonus]);
     unset($craft);
+    sar_deadweight_regain($g, $craftId, [$uid], $dry);
 }
 
 function sar_aerobrake(array &$g, string $craftId, string $uid, string $from, string $to, bool $dry): void {
@@ -459,6 +471,7 @@ function sar_suborbital_decay(array &$g): void {
         $landing = sar_passive_landing($craft, $surface);
         if ($landing === null) {
             foreach ($craft['cards'] as $uid) $g['decks']['componentDiscard'][] = $uid;
+            if ($craft['sideways'] !== null) $g['decks']['componentDiscard'][] = $craft['sideways'];
             unset($g['crafts'][$id]);
             sar_log($g, 'fail', $craft['name'] . "'s arc over " . SAR_NODES[$surface]['name'] .
                 ' decays with no way to brake — it crashes and is destroyed. (Land during the round with a command turn, or carry a parachute, airbags, a Lander, or Landing Legs.)',
@@ -545,6 +558,8 @@ function sar_deploy(array &$g, string $craftId, string $payloadUid, array $suppo
     }
     $craft['cards'] = array_values(array_diff($craft['cards'], $assetCards));
     unset($craft);
+    // Dropping heavy cargo returns its Deadweight Range to the carrier.
+    sar_deadweight_regain($g, $craftId, $assetCards, $dry);
 
     $assetId = sar_new_craft($g, $seat, $assetCards, $node);
     $asset = &$g['crafts'][$assetId];

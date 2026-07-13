@@ -41,6 +41,9 @@ const SAR_EXPLORE_LADDER = [
 const SAR_FLUSH_COST = 2;
 const SAR_ROUNDS = 8;
 const SAR_STORM_EVENTS = ['EV01', 'EV06', 'EV09'];
+// Starter Events (v0.5.1): one is revealed at setup as round 1's Event;
+// they are never shuffled into the round event deck.
+const SAR_STARTER_EVENTS = ['EV14', 'EV15', 'EV16'];
 
 // ---------------------------------------------------------------------------
 // Logging / animation events. Client animates entries that carry `data`.

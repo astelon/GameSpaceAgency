@@ -1,13 +1,16 @@
 # Space Agency Race — Web Edition
 
 A complete, playable web version of the board game defined in
-[`Space_Agency.md`](../Space_Agency.md) (ruleset v0.2 / card list v0.3).
+[`Space_Agency.md`](../Space_Agency.md) (ruleset **v0.5.1** / card list v0.5,
+91 unique / 192 copies).
 
 * **2–4 players**, online (room codes) or hot-seat on one device
-* Full rules enforcement: rocket assembly, Thrust/Mass launch checks, d10
-  reliability rolls, Range/orbital travel, Transfer Window cycle, staging,
-  aerobraking, landings, deploys, docking, stations, Energy, all **20
-  missions**, **13 events** and **10 technologies** scripted
+* Full rules enforcement: rocket assembly (engine clusters, rideshare
+  payloads, jury-rigged sideways cards), Thrust/Mass launch checks, d10
+  reliability rolls, Range/orbital travel with Deadweight penalties,
+  Transfer Window cycle, staging, aerobraking, landings, deploys, docking,
+  stations, Energy, all **21 missions**, **13 events + 3 Starter Events**
+  and **10 technologies** scripted
 * Teaching hints everywhere: every card explains what the engine will do with
   it, and the flight planner previews costs, success odds and which missions
   a flight will complete before you commit
@@ -39,6 +42,25 @@ seats — so the rules behave identically in both modes.
    SQLite file is created automatically at `api/data/games.db`.
 
 Idle rooms are cleaned up automatically after 3 days.
+
+### Troubleshooting: "Server returned an invalid response"
+
+The client shows this whenever the API answers with something that is not
+JSON — which the game API itself never does. It means the *hosting layer*
+answered instead of PHP. To find the cause:
+
+1. Open the browser devtools **Network** tab, repeat the action, and inspect
+   the failing `api/index.php` POST:
+   * `508`/`503` + HTML page → the shared host's process/resource limit was
+     hit (LiteSpeed shows "508 Resource Limit Is Reached"). The game backs
+     off automatically; if it happens often, reduce concurrent games or
+     upgrade the plan.
+   * `500` + a generic Apache/LiteSpeed error page → the server refused
+     `api/.htaccess` (needs Apache-2.4 authz support in `AllowOverride`).
+   * A `200` with an empty body, or a `504` → a PHP request was killed
+     mid-flight; check the host's error log for fatals at that time.
+2. Open `api/index.php?op=health` in a browser — it self-checks the PHP
+   version, storage backend, and `api/data` writability.
 
 ## Local development
 
@@ -90,6 +112,15 @@ these calls (all in one place so they're easy to revisit):
   deploy time) so a satellite deployed in round N earns income in round N's
   Maintenance.
 * **Crewed missions** require a Pressurized tank on the craft (per §9).
+* **Flight Data** (v0.5) pays its 1 Credit when a launch *ultimately* fails:
+  a first roll rescued by a paid Launch-Abort-System reroll pays nothing, a
+  failed reroll pays once.
+* **Jury-rigged mass simulators** satisfy plain "payload" / "payload Mass 1+"
+  mission requirements (they are a Mass-1 Uncrewed payload) but never tagged
+  or Mass-2+ ones. A sideways card can be taken back to hand while the rocket
+  is still in the assembly area; once launched it flies until the craft is
+  discarded or recovered, and is then always scrapped.
+* **Deadweight** can never push a craft's launch Range below 0.
 * **Solar Panels** are lost when *entering* an atmosphere node from space, not
   during ascent from Earth (otherwise they could never be launched).
 * **Transfer Window modifiers** apply in the order: event (EV06/EV07), then

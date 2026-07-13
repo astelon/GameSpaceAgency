@@ -73,6 +73,22 @@ function api_call(int $port, array $payload): array {
     return ['code' => $code, 'data' => json_decode($body, true)];
 }
 
+// Form-encoded POST (the $_POST fallback path used when the body is not JSON).
+function api_call_form(int $port, array $fields): array {
+    $ch = curl_init("http://127.0.0.1:$port/index.php");
+    curl_setopt_array($ch, [
+        CURLOPT_POST => true,
+        CURLOPT_POSTFIELDS => http_build_query($fields),
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_TIMEOUT => 10,
+    ]);
+    $body = curl_exec($ch);
+    if ($body === false) throw new RuntimeException('curl error: ' . curl_error($ch));
+    $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+    return ['code' => $code, 'body' => $body, 'data' => json_decode($body, true)];
+}
+
 // Fire several requests truly concurrently via curl_multi.
 function api_call_concurrent(int $port, array $payloads): array {
     $mh = curl_multi_init();
@@ -156,6 +172,30 @@ ok(!array_key_exists('hostToken', $aliceView), 'hostToken is stripped from the r
 $wrongSeat = api_call($port, ['op' => 'action', 'room' => $room, 'token' => $bobToken, 'seat' => 0,
     'action' => ['type' => 'planning_done', 'sell' => [], 'discard' => []]]);
 ok($wrongSeat['code'] === 403, "Bob cannot submit an action for Alice's seat (403)");
+
+echo "— API: malformed input never breaks the JSON response contract\n";
+
+// The form-encoded fallback path works for well-formed input…
+$formOk = api_call_form($port, ['op' => 'create', 'mode' => 'online', 'name' => 'Carol']);
+ok($formOk['code'] === 200 && is_string($formOk['data']['room'] ?? null),
+    'form-encoded create (the $_POST fallback) still works');
+
+// …but invalid UTF-8 in a name must be rejected with a JSON 400, not stored.
+// (Stored, it would make json_encode() fail on every later response of the
+// room — the "Server returned an invalid response" brick.)
+$badName = "Ev\xC3\x28l"; // \xC3 starts a 2-byte sequence, \x28 cannot finish it
+$bad = api_call_form($port, ['op' => 'create', 'mode' => 'online', 'name' => $badName]);
+ok($bad['code'] === 400 && is_array($bad['data']) && isset($bad['data']['error']),
+    'invalid-UTF-8 name is rejected with a JSON 400 body');
+
+$badJoin = api_call_form($port, ['op' => 'join', 'room' => $room, 'name' => $badName]);
+ok($badJoin['code'] === 400 && is_array($badJoin['data']) && isset($badJoin['data']['error']),
+    'invalid-UTF-8 join name is rejected with a JSON 400 body');
+
+// The room the bad join targeted must still serve parseable state.
+$afterBad = api_call($port, ['op' => 'state', 'room' => $room, 'token' => $hostToken]);
+ok($afterBad['code'] === 200 && is_array($afterBad['data']['state'] ?? null),
+    'room state still parses as JSON after the rejected join');
 
 echo "— API: two racing actions to one room serialize correctly\n";
 

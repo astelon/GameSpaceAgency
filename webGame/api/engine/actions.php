@@ -98,12 +98,13 @@ function sar_action_develop(array &$g, int $seat, array $a): void {
     $p['tableau'][] = $uid;
     sar_log($g, 'tech', $p['name'] . ' develops ' . $card['name'] . '.', ['card' => $uid, 'seat' => $seat]);
 
-    // Technology milestones
+    // Technology milestones. The second-tech bonus is per-player (v0.5):
+    // every agency gains +1 VP the first time it reaches two Technologies.
     $n = count($p['tableau']);
-    if ($n === 2 && $g['milestones']['secondTech'] === null) {
-        $g['milestones']['secondTech'] = $seat;
+    if ($n === 2) {
+        if ($g['milestones']['secondTech'] === null) $g['milestones']['secondTech'] = $seat;
         $p['vp'] += 1;
-        sar_log($g, 'milestone', $p['name'] . ' is first to a second Technology: +1 VP.', ['seat' => $seat, 'vp' => 1]);
+        sar_log($g, 'milestone', $p['name'] . ' develops a second Technology: +1 VP.', ['seat' => $seat, 'vp' => 1]);
     }
     if ($n === 4 && $g['milestones']['fourthTech'] === null) {
         $g['milestones']['fourthTech'] = $seat;
@@ -181,11 +182,17 @@ function sar_catchup_grant(array &$g, int $amount): void {
 }
 
 // Engineering: build or modify an assembly-area rocket from hand cards.
+// Jury-Rigging (v0.5.1 §9): 'sideways' straps one card from hand onto the
+// rocket as improvised hardware; 'unrig' takes the current sideways card back
+// to hand (assembly only — once launched it flies until the craft is
+// discarded or recovered, and it is then always scrapped).
 function sar_apply_engineering(array &$g, int $seat, array $a, bool $asAction): ?string {
     $p = &$g['players'][$seat];
     $craftId = $a['craft'] ?? null;
     $add = $a['add'] ?? [];
     $remove = $a['remove'] ?? [];
+    $sidewaysAdd = $a['sideways'] ?? null;
+    $unrig = !empty($a['unrig']);
     if ($craftId !== null) {
         if (!isset($g['crafts'][$craftId])) throw new SarError('No such craft');
         $craft = $g['crafts'][$craftId];
@@ -202,25 +209,44 @@ function sar_apply_engineering(array &$g, int $seat, array $a, bool $asAction): 
             throw new SarError(sar_card($uid)['name'] . ' cannot be mounted on a rocket');
         }
     }
+    // Resolve the jury-rig slot (any card type is allowed sideways).
+    $curSideways = $craftId !== null ? $g['crafts'][$craftId]['sideways'] : null;
+    if ($unrig && $curSideways === null) throw new SarError('No jury-rigged card on this rocket');
+    if ($sidewaysAdd !== null) {
+        if (!in_array($sidewaysAdd, $p['hand'], true)) throw new SarError('Card not in hand: ' . $sidewaysAdd);
+        if (in_array($sidewaysAdd, $add, true)) throw new SarError('A card cannot be mounted and jury-rigged at once');
+        if ($curSideways !== null && !$unrig) throw new SarError('Only one jury-rigged card per rocket');
+    }
+    $sideways = $sidewaysAdd ?? ($unrig ? null : $curSideways);
+
     $cards = $craftId !== null ? $g['crafts'][$craftId]['cards'] : [];
     foreach ($remove as $uid) {
         if (!in_array($uid, $cards, true)) throw new SarError('Component not on craft');
         $cards = array_values(array_diff($cards, [$uid]));
     }
     $cards = array_merge($cards, $add);
-    // composition limits
+    // composition limits (v0.5: 0-2 engine cluster, uncapped tanks — Thrust
+    // is the real limit — and 0-2 rideshare payloads; a jury-rigged mass
+    // simulator occupies one of the two payload slots)
     $count = ['Engine' => 0, 'Tank' => 0, 'Payload' => 0, 'Support' => 0];
     foreach ($cards as $uid) $count[sar_card($uid)['type']]++;
-    if ($count['Engine'] > 1) throw new SarError('A rocket may have at most 1 Engine');
-    if ($count['Tank'] > 3) throw new SarError('A rocket may have at most 3 Fuel Tanks');
-    if ($count['Payload'] > 1) throw new SarError('A rocket may have at most 1 Payload');
+    if ($sideways !== null && !in_array(sar_card($sideways)['type'], ['Engine', 'Tank'], true)) $count['Payload']++;
+    if ($count['Engine'] > 2) throw new SarError('A rocket may mount at most 2 Engines (a cluster)');
+    if ($count['Payload'] > 2) throw new SarError('A rocket may carry at most 2 Payloads (rideshare)');
     if ($count['Support'] > 3) throw new SarError('A rocket may have at most 3 Support cards');
 
-    if (count($p['hand']) - count($add) + count($remove) > sar_hand_limit($g)) {
+    $toHand = count($remove) + ($unrig ? 1 : 0);
+    $fromHand = count($add) + ($sidewaysAdd !== null ? 1 : 0);
+    if (count($p['hand']) - $fromHand + $toHand > sar_hand_limit($g)) {
         throw new SarError('Removing those components would exceed your hand limit');
     }
+    if (!$cards && $sideways !== null) {
+        throw new SarError('A jury-rigged card cannot fly alone — keep at least one real component or remove it too');
+    }
     $p['hand'] = array_values(array_diff($p['hand'], $add));
+    if ($sidewaysAdd !== null) $p['hand'] = array_values(array_diff($p['hand'], [$sidewaysAdd]));
     $p['hand'] = array_merge($p['hand'], $remove);
+    if ($unrig) $p['hand'][] = $curSideways;
     if ($craftId !== null) {
         if (!$cards) { // fully disassembled
             unset($g['crafts'][$craftId]);
@@ -229,10 +255,13 @@ function sar_apply_engineering(array &$g, int $seat, array $a, bool $asAction): 
             return null;
         }
         $g['crafts'][$craftId]['cards'] = $cards;
+        $g['crafts'][$craftId]['sideways'] = $sideways;
     } else {
         $craftId = sar_new_craft($g, $seat, $cards, 'assembly');
+        $g['crafts'][$craftId]['sideways'] = $sideways;
     }
     $names = implode(' + ', array_map(fn($u) => sar_card($u)['name'], $cards));
+    if ($sideways !== null) $names .= ' + ' . sar_card($sideways)['name'] . ' (jury-rigged)';
     sar_log($g, 'engineering', $p['name'] . " configures a rocket: $names.", ['seat' => $seat, 'craft' => $craftId]);
     unset($p);
     return $craftId;

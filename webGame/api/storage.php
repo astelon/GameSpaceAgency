@@ -2,6 +2,11 @@
 // Game state persistence. Prefers SQLite (pdo_sqlite); falls back to plain
 // JSON files with flock() if SQLite is unavailable on the host.
 
+// A room's lock could not be acquired within the deadline. The API layer maps
+// this to a 503 so the client retries instead of the host killing a request
+// that blocked forever (an HTML error page the client cannot parse).
+class SarStorageBusy extends RuntimeException {}
+
 class SarStorage {
     private ?PDO $db = null;
     private string $dir;
@@ -39,8 +44,17 @@ class SarStorage {
             // beginTransaction() opens a *deferred* SQLite transaction — no
             // lock is actually taken until the first write, so two
             // concurrent requests can both read, both mutate, and the last
-            // save() wins. BEGIN IMMEDIATE takes the write lock up front.
-            $this->db->exec('BEGIN IMMEDIATE');
+            // save() wins. BEGIN IMMEDIATE takes the write lock up front
+            // (bounded by PRAGMA busy_timeout, set in the constructor).
+            try {
+                $this->db->exec('BEGIN IMMEDIATE');
+            } catch (PDOException $e) {
+                if (stripos($e->getMessage(), 'locked') !== false
+                    || stripos($e->getMessage(), 'busy') !== false) {
+                    throw new SarStorageBusy('SQLite write lock timed out', 0, $e);
+                }
+                throw $e;
+            }
             $this->inTxn = true;
         } else {
             if (!preg_match('/^[A-Z0-9]{1,10}$/', $room)) {
@@ -53,7 +67,20 @@ class SarStorage {
                     'and that its permissions allow PHP to write (chmod 755 or 775).');
             }
             $this->lockHandle = $h;
-            flock($this->lockHandle, LOCK_EX);
+            // Never block indefinitely: on Linux max_execution_time counts CPU
+            // time, so a request stuck in a blocking flock() is only ever
+            // stopped by the web server killing it — which surfaces to the
+            // player as an unparseable HTML error page. Poll with LOCK_NB and
+            // give up cleanly after ~5s instead.
+            $deadline = microtime(true) + 5.0;
+            while (!flock($this->lockHandle, LOCK_EX | LOCK_NB)) {
+                if (microtime(true) >= $deadline) {
+                    fclose($this->lockHandle);
+                    $this->lockHandle = null;
+                    throw new SarStorageBusy("Lock on room $room timed out");
+                }
+                usleep(50_000);
+            }
         }
     }
 
@@ -95,7 +122,12 @@ class SarStorage {
 
     public function save(array $state): void {
         $room = $state['room'];
-        $json = json_encode($state, JSON_UNESCAPED_UNICODE);
+        // JSON_INVALID_UTF8_SUBSTITUTE: never let one bad byte persist an
+        // empty blob (json_encode() === false) that bricks the room forever.
+        $json = json_encode($state, JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE);
+        if ($json === false) {
+            throw new RuntimeException('Could not encode game state: ' . json_last_error_msg());
+        }
         if ($this->db) {
             $st = $this->db->prepare('INSERT INTO games (room, state, version, updated) VALUES (?,?,?,?)
                 ON CONFLICT(room) DO UPDATE SET state=excluded.state, version=excluded.version, updated=excluded.updated');

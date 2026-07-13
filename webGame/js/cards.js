@@ -26,7 +26,7 @@ const HINTS = {
   T06: 'Huge Range 12, but Mass 4 demands a powerful engine (Thrust ≥ 4 + payload).',
   P01: 'Deploy it at an orbital node: it becomes its own craft. Every Maintenance it automatically pays 1 Credit (at Earth ZOI or closer) or 1 VP (beyond) if it has 1 Energy — give it a Solar Panel. It also earns 1 Credit whenever a rival flies beyond Earth ZOI (once per round).',
   P02: 'Deploy in orbit or beyond: pays 1 Credit near Earth or 1 VP beyond Earth ZOI every Maintenance, automatically, as long as it has Energy (attach a Power card).',
-  P03: 'While at Moon Orbit or beyond, activate it (2 Energy, once per round) for 1 VP — 2 VP during a storm event.',
+  P03: 'While at Moon Orbit or beyond, activate it (2 Energy, once per round) for 1 VP — 2 VP during a storm event. Deadweight: the craft flies with −1 Range while it stays attached.',
   P04: 'Enables Crewed missions (needs a Pressurized Tank on the rocket). Spends 1 Energy at every launch/relaunch — pack a Battery. Returns to hand after Earth recovery.',
   P05: 'Cheap Mass-1 satellite. No income, but it counts as a deployed asset: +1 VP at game end and it satisfies satellite-deployment missions.',
   P06: 'Lets the craft land on a surface without burning extra Range for a propulsive landing. Satisfies "Lander" mission requirements.',
@@ -34,7 +34,7 @@ const HINTS = {
   P08: 'The station core. Park it at High Orbit (GEO) with a Power card, a LifeSupport card and one more Scientific/Electronics card attached, and it auto-designates as an On-Orbit Station (missions + docking target + 1 Credit per Maintenance).',
   P09: 'Deploy on the Moon or Mars surface. Pays 1 VP every Maintenance if it has Energy — pack an RTG (solar panels burn up entering Mars atmosphere).',
   P10: 'Deploy at GEO or beyond. Pays 1 VP per Maintenance (2 VP during storm events) while it has Energy.',
-  P11: 'Deploy in orbit. Once per round one of your craft at the same node may draw 1 of its Energy for +2 Range. Give it Solar Panels.',
+  P11: 'Deploy in orbit. Once per round one of your craft at the same node may draw 1 of its Energy for +2 Range. Give it Solar Panels. Deadweight: −1 Range while it rides on the carrier — regained the moment it is deployed.',
   S01: 'Reentry heat protection — survives atmospheric entry and can be jettisoned to aerobrake (+2 Range). It does NOT land the craft: pair it with a parachute, airbags, a Lander, or a propulsive landing. Basic — always purchasable.',
   S02: 'Parachute — Earth-only landing (needs thick air). Pays +1 Credit after touchdown. Single use.',
   S03: 'Reusable reentry heat shield (Earth or Mars). Survives one aerobrake per flight and returns to hand after Earth recovery. Not a landing device on its own.',
@@ -62,10 +62,13 @@ const HINTS = {
   C10: 'Your deployed assets beyond Earth ZOI get +1 Power — deep-space probes work every round.',
   P12: 'A plain payload with no abilities — just fills the "carry a payload" requirement. Basic: always purchasable for 1 Credit. Mass 1.',
   P13: 'A plain payload, Mass 2 — the cheap way to satisfy "payload Mass 2+" missions. Basic — always purchasable.',
-  P14: 'A plain heavy payload, Mass 3 — for Mass-3 requirements, but it stresses your Thrust budget. Basic — always purchasable.',
+  P14: 'A plain heavy payload, Mass 3 — for Mass-3 requirements, but it stresses your Thrust budget and adds Deadweight (−1 Range while attached). Basic — always purchasable.',
   M21: 'Standing contract, always available: fly Earth → Sub-Orbital → Earth and land (parachute or propulsive). No payload needed. Each agency may claim it once per game for 2 Credits + 1 VP — a guaranteed first job.',
   S16: 'Airbag landing for an Uncrewed craft, Earth or Mars — no parachute or engine needed. Single use. Also counts as a Lander for missions.',
   S17: 'Splashdown Kit — reusable Earth-only water landing; +1 Credit after recovery; returns to hand.',
+  EV14: 'Starter Event (round 1, revealed at setup): every craft that lands safely on Earth this round returns ALL its unstaged parts to hand during Maintenance, Reusable or not. Landing devices expended during touchdown stay discarded.',
+  EV15: 'Starter Event (round 1, revealed at setup): every agency immediately gains 3 Credits — a funding-first opening.',
+  EV16: 'Starter Event (round 1, revealed at setup): every agency has 1 extra command turn this round — a tempo opening.',
 };
 
 export function hintFor(uid) {
@@ -103,7 +106,9 @@ export function renderCard(uid, { size = '', onClick = null, zoomable = true } =
     el('div', { class: `stat ${cls}`, title },
       el('img', { src: `assets/icons/${iconName}.png`, alt: '' }), String(val)));
   if (c.thrust != null) stat('s-thrust', 'thrust', c.thrust, 'Thrust — must be ≥ total rocket Mass to launch');
-  if (c.range != null) stat('s-range', 'range', c.range, 'Range — travel budget (1 per node crossing)');
+  if (c.range != null) stat('s-range', 'range', c.range, c.range < 0
+    ? 'Deadweight — Range penalty while this card is attached; regained when it leaves the craft in flight'
+    : 'Range — travel budget (1 per node crossing)');
   if (c.mass != null) stat('s-mass', 'mass', c.mass, 'Mass — weighs against engine Thrust');
   if (c.reliability != null) stat('s-rel', 'reliability', c.reliability, `Reliability — launch succeeds on a d10 roll of ${c.reliability} or less`);
   if (c.energy != null) stat('s-energy', 'energy', (c.energyMode === 'Gen' ? '+' : '') + Math.abs(c.energy),

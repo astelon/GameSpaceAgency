@@ -94,6 +94,23 @@ function bot_action(array &$g, int $seat): void {
                 if ($chute) $components[] = $chute;
                 $power = hand_pick($g, $seat, 'Support', 'Power');
                 if ($power && $power !== $chute) $components[] = $power;
+                // v0.5 composition space: sometimes cluster a second engine,
+                // ride-share a second payload, or jury-rig a spare card.
+                foreach ([['Engine', $eng], ['Payload', $pl]] as [$type, $first]) {
+                    if ($first === null || random_int(0, 2) !== 0) continue;
+                    foreach ($g['players'][$seat]['hand'] as $uid) {
+                        if ($uid !== $first && !in_array($uid, $components, true) && sar_card($uid)['type'] === $type) {
+                            $components[] = $uid;
+                            break;
+                        }
+                    }
+                }
+                $sideways = null;
+                if (random_int(0, 2) === 0) {
+                    foreach ($g['players'][$seat]['hand'] as $uid) {
+                        if (!in_array($uid, $components, true)) { $sideways = $uid; break; }
+                    }
+                }
                 $range = sar_card($tank)['range'];
 
                 $plans = [];
@@ -119,7 +136,10 @@ function bot_action(array &$g, int $seat): void {
                 $plans[] = $plan;
                 shuffle($plans);
                 foreach ($plans as $pn) {
-                    if (try_apply($g, $seat, ['type' => 'launch', 'components' => $components, 'plan' => $pn])) return;
+                    $a = ['type' => 'launch', 'components' => $components, 'plan' => $pn];
+                    if ($sideways !== null) $a['sideways'] = $sideways;
+                    if (try_apply($g, $seat, $a)) return;
+                    if ($sideways !== null && try_apply($g, $seat, ['type' => 'launch', 'components' => $components, 'plan' => $pn])) return;
                 }
                 break;
             }
