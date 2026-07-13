@@ -573,5 +573,111 @@ $rocket = null;
 foreach ($g['crafts'] as $c) if ($c['owner'] === 0) $rocket = $c;
 ok($rocket && $rocket['range'] === 0, 'a tankless heavy stack launches with Range 0, not −1');
 
+echo "— Scenario 18: Jury-Rigging (v0.5.1 §9) — sideways card effects and lifecycle\n";
+// Strap-on booster: a sideways Engine is +1 Thrust and nothing else.
+$g = fresh();
+[$eng, $tank, $spare] = give($g, 0, ['E01', 'T01', 'E02']); // Merlin T7 R7; Sterling sideways
+$g['players'][0]['hand'] = [$eng, $tank, $spare];
+sar_apply($g, 0, ['type' => 'engineering', 'add' => [$eng, $tank], 'sideways' => $spare]);
+$craftId = array_key_first($g['crafts']);
+$craft = $g['crafts'][$craftId];
+ok($craft['sideways'] === $spare, 'the sideways card is recorded on the craft');
+ok(sar_craft_thrust($g, $craft) === 7 + 1, 'a sideways Engine adds +1 Thrust (7+1)');
+[$rel, $mods] = sar_craft_reliability($g, $craft, false);
+ok($rel === 7 && !in_array('engine cluster -1', $mods, true),
+    'a sideways Engine is NOT a cluster engine — no −1, reliability stays 7');
+ok(!in_array($spare, $g['players'][0]['hand'], true), 'the sideways card left the hand');
+
+// Unrig in assembly returns it to hand.
+$g['turnSeat'] = 0; $g['players'][0]['turnsUsed'] = 0; // hand the turn back for the follow-up action
+sar_apply($g, 0, ['type' => 'engineering', 'craft' => $craftId, 'unrig' => true]);
+ok($g['crafts'][$craftId]['sideways'] === null && in_array($spare, $g['players'][0]['hand'], true),
+    'unrigging in the assembly area returns the card to hand');
+
+// Drop tank: a sideways Tank is +1 Range at launch (its printed Range ignored).
+$g = fresh();
+$g['missions'] = [];
+[$eng, $tank, $spareTank] = give($g, 0, ['E06', 'T01', 'T02']); // T02 prints Range 8 — must count as +1
+$g['players'][0]['hand'] = [$eng, $tank, $spareTank];
+$flew = false; $tries = 0;
+do {
+    $snap = $g;
+    sar_apply($g, 0, ['type' => 'launch', 'components' => [$eng, $tank], 'sideways' => $spareTank,
+        'plan' => ['path' => ['earth', 'subEarth', 'leo']]]);
+    foreach ($g['crafts'] as $c) if ($c['node'] === 'leo') $flew = true;
+    if (!$flew) $g = $snap;
+} while (!$flew && ++$tries < 60);
+$rocket = null;
+foreach ($g['crafts'] as $c) if ($c['node'] === 'leo') $rocket = $c;
+ok($rocket && $rocket['range'] === 5 + 1 - 2, 'a sideways Cryo Tank adds +1 Range at launch, not its printed 8');
+// A sideways tank is not a real tank: it cannot satisfy the Cryogenic gate.
+$g2 = fresh();
+[$h, $t, $cryo] = give($g2, 0, ['E03', 'T01', 'T02']);
+$g2['players'][0]['hand'] = [$h, $t, $cryo];
+$threw = false;
+try {
+    sar_apply($g2, 0, ['type' => 'launch', 'components' => [$h, $t], 'sideways' => $cryo,
+        'plan' => ['path' => ['earth', 'subEarth']]]);
+} catch (SarError $e) { $threw = str_contains($e->getMessage(), 'Cryo'); }
+ok($threw, 'a sideways Cryo Tank does NOT satisfy the Hydrogen Core cryo requirement (printed tags ignored)');
+
+// Mass simulator: any other card acts as a Mass-1, tagless, Uncrewed payload.
+$g = fresh();
+$mkJr = fn(?string $sideways, array $cards = []) => [
+    'owner' => 0, 'node' => 'leo', 'history' => ['earth', 'subEarth', 'leo'],
+    'cards' => $cards, 'sideways' => $sideways, 'docked' => false, 'usedReentry' => false,
+    'usedReusableReentry' => false, 'deployed' => false, 'isStation' => false, 'energy' => 5,
+    'stagedEngineFlight' => false,
+];
+ok(sar_mission_check($g, 'M01', $mkJr('C03#j1')) !== null,
+    'a jury-rigged mass simulator satisfies M01 (an uncrewed payload at LEO)');
+ok(sar_mission_check($g, 'M07', $mkJr('C03#j1', []) + ['node' => 'earth', 'history' => ['earth', 'subEarth', 'leo', 'subEarth', 'earth']]) === null,
+    'the mass simulator is Mass 1 — it never satisfies Mass 2+ requirements');
+$simCraft = ['cards' => ['T01#j2'], 'sideways' => 'C03#j1', 'owner' => 0];
+ok(sar_craft_mass($g, $simCraft) === 2 + 1, 'the mass simulator adds 1 to Total Rocket Mass');
+
+// The mass simulator occupies a payload slot.
+$g = fresh();
+$uids = give($g, 0, ['P12', 'P12', 'T01', 'C03']);
+$g['players'][0]['hand'] = $uids;
+$threw = false;
+try { sar_apply($g, 0, ['type' => 'engineering', 'add' => array_slice($uids, 0, 3), 'sideways' => $uids[3]]); }
+catch (SarError $e) { $threw = str_contains($e->getMessage(), '2 Payloads'); }
+ok($threw, 'two payloads + a mass simulator exceed the two payload slots');
+
+// One sideways card per rocket.
+$g = fresh();
+$uids = give($g, 0, ['E02', 'T01', 'C03', 'C05']);
+$g['players'][0]['hand'] = $uids;
+sar_apply($g, 0, ['type' => 'engineering', 'add' => [$uids[0], $uids[1]], 'sideways' => $uids[2]]);
+$craftId = array_key_first($g['crafts']);
+$g['turnSeat'] = 0; $g['players'][0]['turnsUsed'] = 0;
+$threw = false;
+try { sar_apply($g, 0, ['type' => 'engineering', 'craft' => $craftId, 'sideways' => $uids[3]]); }
+catch (SarError $e) { $threw = str_contains($e->getMessage(), 'one jury-rigged'); }
+ok($threw, 'a second sideways card is rejected');
+
+// Lifecycle: never recovered, even under Recovery Trials.
+$g = fresh();
+$g['players'][0]['standingDone'] = ['M21'];
+$g['missions'] = [];
+[$eng, $tank, $chute, $jr] = give($g, 0, ['E02', 'T01', 'S04', 'C03']); // S04 reusable parafoil
+$g['players'][0]['hand'] = [$eng, $tank, $chute, $jr];
+$flew = false; $tries = 0;
+do {
+    $snap = $g;
+    sar_apply($g, 0, ['type' => 'launch', 'components' => [$eng, $tank, $chute], 'sideways' => $jr,
+        'plan' => ['path' => ['earth', 'subEarth', 'earth'],
+                   'landing' => [2 => ['method' => 'reentry', 'card' => $chute]]]]);
+    foreach ($g['crafts'] as $c) if ($c['node'] === 'earth' && $c['launchRound']) $flew = true;
+    if (!$flew) $g = $snap;
+} while (!$flew && ++$tries < 60);
+$g['event'] = 'EV14#1'; // Recovery Trials — still must not return the jury-rigged card
+foreach ($g['players'] as &$pp) { $pp['passed'] = true; }
+unset($pp);
+sar_maintenance($g);
+ok(!in_array($jr, $g['players'][0]['hand'], true), 'the jury-rigged card is never recovered (even under Recovery Trials)');
+ok(in_array($jr, $g['decks']['componentDiscard'], true), 'it is scrapped to the component discard pile');
+
 echo "\n$pass passed, $fail failed\n";
 exit($fail ? 1 : 0);

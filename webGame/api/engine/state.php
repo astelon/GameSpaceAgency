@@ -71,6 +71,25 @@ function sar_craft_payload(array $craft): ?string {
     return $p[0] ?? null;
 }
 
+// The craft's jury-rigged (sideways) card, or null. A sideways card ignores
+// its printed text/tags/Mass; only its card TYPE matters (v0.5.1 §9):
+// Engine → +1 Thrust, Tank → +1 Range at launch, anything else → a plain
+// Mass-1 payload ("mass simulator", counts as Uncrewed).
+function sar_sideways(array $craft): ?string {
+    return $craft['sideways'] ?? null;
+}
+
+function sar_sideways_is(array $craft, string ...$types): bool {
+    $s = sar_sideways($craft);
+    return $s !== null && in_array(sar_card($s)['type'], $types, true);
+}
+
+// A sideways card that is neither Engine nor Tank acts as a mass simulator.
+function sar_sideways_mass_sim(array $craft): bool {
+    $s = sar_sideways($craft);
+    return $s !== null && !in_array(sar_card($s)['type'], ['Engine', 'Tank'], true);
+}
+
 // Total rocket mass for launch capability checks (tanks + payload + support with mass).
 function sar_craft_mass(array $g, array $craft): int {
     $mass = 0; $seat = $craft['owner'];
@@ -82,6 +101,7 @@ function sar_craft_mass(array $g, array $craft): int {
         if ($c['type'] === 'Engine') continue; // engines are massless for lift
         $mass += $m;
     }
+    if (sar_sideways_mass_sim($craft)) $mass += 1; // jury-rigged mass simulator
     return $mass;
 }
 
@@ -95,6 +115,7 @@ function sar_craft_thrust(array $g, array $craft): int {
         if (explode('#', $eng)[0] === 'E05' && sar_craft_cards($craft, null, 'Cryogenic')) $et += 1;
         $t += $et;
     }
+    if (sar_sideways_is($craft, 'Engine')) $t += 1; // jury-rigged strap-on booster
     return $t;
 }
 
@@ -190,6 +211,7 @@ function sar_launch_range(array $craft): int {
         if ($c['type'] === 'Tank') $range += $c['range'];
         elseif ($c['range'] < 0) $range += $c['range']; // Deadweight
     }
+    if (sar_sideways_is($craft, 'Tank')) $range += 1; // jury-rigged drop tank
     return max(0, $range);
 }
 
@@ -221,7 +243,7 @@ function sar_new_craft(array &$g, int $seat, array $cards, string $node): string
     $name = $payload ?: ($engine ? "$engine stack" : ($names[0] ?? 'Craft'));
     $g['crafts'][$id] = [
         'id' => $id, 'owner' => $seat, 'name' => $name, 'node' => $node,
-        'cards' => array_values($cards), 'range' => 0, 'energy' => 0,
+        'cards' => array_values($cards), 'sideways' => null, 'range' => 0, 'energy' => 0,
         'deployed' => false, 'isStation' => false, 'activated' => false,
         'history' => [$node === 'assembly' ? null : $node],
         'launchRound' => null,
@@ -251,7 +273,7 @@ const SAR_PLAYER_FIELDS = ['seat', 'name', 'color', 'token', 'credits', 'vp', 'l
     'pendingLevel', 'hand', 'tableau', 'planningDone', 'turnsUsed', 'passed', 'flushedTurn',
     'missionsCompleted', 'techOrbVpRound', 'visited', 'standingDone', 'connected'];
 
-const SAR_CRAFT_FIELDS = ['id', 'owner', 'name', 'node', 'cards', 'range', 'energy',
+const SAR_CRAFT_FIELDS = ['id', 'owner', 'name', 'node', 'cards', 'sideways', 'range', 'energy',
     'deployed', 'isStation', 'activated', 'history', 'launchRound',
     'usedReentry', 'usedReusableReentry', 'docked', 'dockedHab', 'visitedLeoAfterStranded',
     'depotUsedRound', 'tugUsedTurn', 'relayUsedRound', 'p03Round', 's11Round',
@@ -285,7 +307,10 @@ function sar_validate_state(array $g): void {
         $g['decks']['mission'] ?? [], $g['decks']['missionT2'] ?? [], $g['decks']['missionT3'] ?? [],
         $g['decks']['missionDiscard'] ?? [], $g['market'], $g['missions']];
     foreach ($g['players'] as $p) { $zones[] = $p['hand']; $zones[] = $p['tableau']; }
-    foreach ($g['crafts'] as $c) $zones[] = $c['cards'];
+    foreach ($g['crafts'] as $c) {
+        $zones[] = $c['cards'];
+        if (($c['sideways'] ?? null) !== null) $zones[] = [$c['sideways']];
+    }
     foreach ($zones as $zone) {
         foreach ($zone as $uid) {
             if ($uid === null) continue;

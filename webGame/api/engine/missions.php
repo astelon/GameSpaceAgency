@@ -20,11 +20,17 @@ function sar_history_seq(array $history, array $needle): bool {
 }
 
 // All payload cards mounted on the craft (v0.5: up to 2, rideshare).
+// A jury-rigged mass simulator counts as a plain Mass-1 payload with no tags
+// (v0.5.1 §9) — it satisfies "payload" / "payload Mass 1+" requirements but
+// never tagged or Mass-2+ ones.
 function sar_payload_cards(array $craft): array {
     $out = [];
     foreach ($craft['cards'] as $uid) {
         $c = sar_card($uid);
         if ($c['type'] === 'Payload') $out[] = $c;
+    }
+    if (sar_sideways_mass_sim($craft)) {
+        $out[] = ['type' => 'Payload', 'mass' => 1, 'tags' => [], 'name' => 'Mass simulator (jury-rigged)'];
     }
     return $out;
 }

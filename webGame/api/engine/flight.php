@@ -24,9 +24,10 @@ function sar_action_launch(array &$g, int $seat, array $a): void {
     $p = &$g['players'][$seat];
 
     // Optionally combine Engineering + Launch in one command turn.
-    if (!empty($a['components'])) {
+    if (!empty($a['components']) || !empty($a['sideways']) || !empty($a['unrig'])) {
         $craftId = sar_apply_engineering($g, $seat, ['craft' => $a['craft'] ?? null,
-            'add' => $a['components'], 'remove' => $a['remove'] ?? []], false);
+            'add' => $a['components'] ?? [], 'remove' => $a['remove'] ?? [],
+            'sideways' => $a['sideways'] ?? null, 'unrig' => !empty($a['unrig'])], false);
     } else {
         $craftId = $a['craft'] ?? '';
     }
@@ -470,6 +471,7 @@ function sar_suborbital_decay(array &$g): void {
         $landing = sar_passive_landing($craft, $surface);
         if ($landing === null) {
             foreach ($craft['cards'] as $uid) $g['decks']['componentDiscard'][] = $uid;
+            if ($craft['sideways'] !== null) $g['decks']['componentDiscard'][] = $craft['sideways'];
             unset($g['crafts'][$id]);
             sar_log($g, 'fail', $craft['name'] . "'s arc over " . SAR_NODES[$surface]['name'] .
                 ' decays with no way to brake — it crashes and is destroyed. (Land during the round with a command turn, or carry a parachute, airbags, a Lander, or Landing Legs.)',

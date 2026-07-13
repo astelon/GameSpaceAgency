@@ -198,6 +198,11 @@ function sar_maintenance(array &$g): void {
                 $lost[] = sar_card($uid)['name'];
             }
         }
+        // A jury-rigged card is never recovered — not even by Recovery Trials.
+        if ($craft['sideways'] !== null) {
+            $g['decks']['componentDiscard'][] = $craft['sideways'];
+            $lost[] = sar_card($craft['sideways'])['name'] . ' (jury-rigged)';
+        }
         $msg = $p['name'] . "'s {$craft['name']} is recovered on Earth.";
         if ($recovered) $msg .= ' Returned to hand: ' . implode(', ', $recovered) . ($ev14 ? ' (Recovery Trials)' : '') . '.';
         if ($lost) $msg .= ' Expended: ' . implode(', ', $lost) . '.';

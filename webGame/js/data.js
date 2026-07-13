@@ -96,6 +96,14 @@ export function craftCards(craft, type, tag) {
 export const craftEngine = c => craftCards(c, 'Engine')[0] || null;
 export const craftPayload = c => craftCards(c, 'Payload')[0] || null;
 
+// Jury-Rigging (v0.5.1 §9): the sideways card ignores its printed stats; only
+// its TYPE matters — Engine → +1 Thrust, Tank → +1 Range at launch, anything
+// else → a plain Mass-1 payload ("mass simulator", counts as Uncrewed).
+export const sidewaysIs = (craft, ...types) =>
+  craft.sideways != null && types.includes(cardOf(craft.sideways).type);
+export const sidewaysMassSim = craft =>
+  craft.sideways != null && !['Engine', 'Tank'].includes(cardOf(craft.sideways).type);
+
 export function craftMass(g, craft) {
   let mass = 0;
   for (const u of craft.cards) {
@@ -105,6 +113,7 @@ export function craftMass(g, craft) {
     if (c.type === 'Payload' && hasTech(g, craft.owner, 'C04')) m = Math.max(1, m - 1);
     mass += m;
   }
+  if (sidewaysMassSim(craft)) mass += 1;
   return mass;
 }
 // Total Thrust of all mounted Engines (v0.5: up to 2 engines cluster).
@@ -115,6 +124,7 @@ export function craftThrust(g, craft) {
     if (cidOf(eng) === 'E05' && craftCards(craft, null, 'Cryogenic').length) et += 1;
     t += et;
   }
+  if (sidewaysIs(craft, 'Engine')) t += 1; // jury-rigged strap-on booster
   return t;
 }
 // Mirrors sar_craft_reliability: per-engine value (base + Reusable Refurb) +
@@ -165,6 +175,7 @@ export function tankRange(craft) {
     if (c.type === 'Tank') r += c.range;
     else if (c.range < 0) r += c.range;
   }
+  if (sidewaysIs(craft, 'Tank')) r += 1; // jury-rigged drop tank
   return Math.max(0, r);
 }
 // Total Deadweight currently attached (positive number, 0 if none).
@@ -435,6 +446,8 @@ function seqIn(hist, needle) {
 // Mirrors sar_payload_meets: any SINGLE payload card must satisfy the tag +
 // Mass requirement (v0.5.1 — payload masses never add up across cards).
 function payloadMeets(craft, tag, minMass = 0, orTag = null) {
+  // A jury-rigged mass simulator is a plain Mass-1, tagless payload.
+  if (sidewaysMassSim(craft) && tag === null && minMass <= 1) return true;
   return craftCards(craft, 'Payload').some(u => {
     const c = cardOf(u);
     const tagOk = tag === null || c.tags.includes(tag) || (orTag !== null && c.tags.includes(orTag));
@@ -456,7 +469,7 @@ export function checkMission(g, mid, craft) {
     c.cards.some(u => hasTag(u, 'Satellite')));
   switch (mid) {
     case 'M01': return node === 'leo' &&
-      craftCards(craft, 'Payload').some(u => !cardOf(u).tags.includes('Crewed'));
+      (sidewaysMassSim(craft) || craftCards(craft, 'Payload').some(u => !cardOf(u).tags.includes('Crewed')));
     case 'M02': return atEarth && hist.includes('moonOrbit');
     case 'M03': return node === 'moon' && (craftCards(craft, null, 'Lander').length > 0 || engineOr);
     case 'M04': return node === 'marsHigh' && payloadMeets(craft, null, 2);
