@@ -10,7 +10,33 @@ require_once __DIR__ . '/engine/bootstrap.php';
 header('Content-Type: application/json; charset=utf-8');
 header('Cache-Control: no-store');
 
+// Last line of defence against an *uncatchable* fatal (out-of-memory,
+// max_execution_time, stack overflow) killing the request before out() runs.
+// try/catch cannot catch those, so the script would otherwise die with an
+// empty 200 body — which the client reports as "Server returned an invalid
+// response", forever, on whichever action is heaviest for that room (usually
+// launch/activate, which simulate the whole flight). The shutdown handler
+// turns that empty body into a proper JSON error the client can show and
+// retry. A small pre-allocated buffer is released first so the handler still
+// has room to run even right after an OOM fatal.
+$GLOBALS['sar_responded'] = false;
+$GLOBALS['sar_mem_reserve'] = str_repeat('*', 262144); // 256 KB headroom
+register_shutdown_function(function (): void {
+    if (!empty($GLOBALS['sar_responded'])) return; // out() already sent a full body
+    $GLOBALS['sar_mem_reserve'] = null;            // free headroom for this handler
+    $e = error_get_last();
+    if ($e === null || !in_array($e['type'],
+        [E_ERROR, E_PARSE, E_CORE_ERROR, E_COMPILE_ERROR, E_USER_ERROR], true)) return;
+    error_log('SAR fatal (shutdown): ' . $e['message'] . ' @ ' . $e['file'] . ':' . $e['line']);
+    if (headers_sent()) return; // a partial body already went out — nothing clean to do
+    http_response_code(500);
+    header('Content-Type: application/json; charset=utf-8');
+    header('Cache-Control: no-store');
+    echo '{"error":"The server ran low on resources handling that action — please try again."}';
+});
+
 function out(array $data, int $code = 200): void {
+    $GLOBALS['sar_responded'] = true;
     http_response_code($code);
     // JSON_INVALID_UTF8_SUBSTITUTE: a stray invalid byte anywhere in the state
     // must degrade to U+FFFD, not turn every response into an empty body

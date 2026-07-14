@@ -30,9 +30,13 @@ export function openBuilder(g, seat, craftId, { onEngineering, onLaunch }) {
   wrap.append(body);
 
   const actions = el('div', { class: 'modal-actions' });
+  // Explicit Cancel: the ✕ / backdrop / Escape can be unreachable on some
+  // mobile browsers (Android fullscreen hides the corner button behind the
+  // system bar), so always give an in-flow way out of the builder.
+  const btnCancel = el('button', { class: 'btn ghost', onclick: () => closeModal() }, 'Cancel');
   const btnEng = el('button', { class: 'btn ghost', onclick: () => { closeModal(); onEngineering(diff()); } }, '🔧 Save configuration (1 turn)');
   const btnLaunch = el('button', { class: 'btn gold', onclick: () => { closeModal(); onLaunch(diff(), mounted, sideways); } }, '🚀 Plan Launch (1 turn)');
-  actions.append(btnEng, btnLaunch);
+  actions.append(btnCancel, btnEng, btnLaunch);
   wrap.append(actions);
 
   function diff() {
@@ -114,7 +118,8 @@ export function openBuilder(g, seat, craftId, { onEngineering, onLaunch }) {
     const content = el('div', {},
       el('h2', {}, `Choose a ${type}`),
       el('div', { class: 'picker-cards' },
-        avail.map(uid => renderCard(uid, { onClick: () => { mounted.push(uid); closeModal(); render(); } }))));
+        avail.map(uid => renderCard(uid, { onClick: () => { mounted.push(uid); closeModal(); render(); } }))),
+      el('div', { class: 'modal-actions' }, el('button', { class: 'btn ghost', onclick: () => closeModal() }, 'Cancel')));
     openModal(content);
   }
 
@@ -126,7 +131,8 @@ export function openBuilder(g, seat, craftId, { onEngineering, onLaunch }) {
         'The card\'s printed text, tags and Mass are ignored: an Engine acts as +1 Thrust, a Fuel Tank as +1 Range at launch, anything else as a plain Mass-1 payload. ' +
         'One sideways card per rocket; it can never be staged or recovered and is scrapped when the craft is discarded or returns to Earth.'),
       el('div', { class: 'picker-cards' },
-        avail.map(uid => renderCard(uid, { onClick: () => { sideways = uid; closeModal(); render(); } }))));
+        avail.map(uid => renderCard(uid, { onClick: () => { sideways = uid; closeModal(); render(); } }))),
+      el('div', { class: 'modal-actions' }, el('button', { class: 'btn ghost', onclick: () => closeModal() }, 'Cancel')));
     openModal(content);
   }
 
