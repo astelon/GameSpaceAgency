@@ -374,6 +374,20 @@ button { font-family: inherit; }
              calc(14px + env(safe-area-inset-bottom, 0px))
              calc(12px + env(safe-area-inset-left, 0px)); }
   .modal-actions .btn { padding: 13px 16px; }
+  /* Pin the action buttons (Activate / Launch / Confirm …) to the bottom of
+     the full-screen sheet so they are always visible. Without this a card-heavy
+     modal (e.g. an in-flight craft's menu) pushes the buttons below the fold on
+     short/landscape screens, and with no scroll affordance they read as missing.
+     Negative margins bleed the bar to the sheet edges (cancelling the modal's
+     own padding), then its own insets keep the buttons clear of the safe area. */
+  .modal-actions { position: sticky; bottom: 0; z-index: 4; margin-top: 16px;
+    margin-left: calc(-12px - env(safe-area-inset-left, 0px));
+    margin-right: calc(-12px - env(safe-area-inset-right, 0px));
+    margin-bottom: calc(-14px - env(safe-area-inset-bottom, 0px));
+    padding: 10px calc(12px + env(safe-area-inset-right, 0px))
+             calc(10px + env(safe-area-inset-bottom, 0px))
+             calc(12px + env(safe-area-inset-left, 0px));
+    background: var(--bg2); border-top: 1px solid var(--line); box-shadow: 0 -8px 20px #000a; }
   .modal-close { width: 44px; height: 44px; font-size: 18px; margin: -4px -2px 6px 10px;
     top: env(safe-area-inset-top, 0px); }
 
