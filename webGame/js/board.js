@@ -129,7 +129,15 @@ export function renderBoard(container, { onNodeClick = null, onCraftClick = null
           const color = g.players[c.owner].color;
           const mine = mySeats.includes(c.owner);
           const grp = svgEl('g', { class: 'craft-marker', onclick: () => onCraftClick && onCraftClick(c.id) });
+          // Markers without a click action (e.g. on the flight-planner map)
+          // must not swallow taps meant for the node circles underneath.
+          if (!onCraftClick) grp.setAttribute('pointer-events', 'none');
           const body = svgEl('g', { class: 'body', transform: `translate(${x},${y})` });
+          // Oversized invisible hit area (same trick as the node circles): the
+          // painted marker is only a few px on a phone — and its concave shape
+          // doesn't even paint its own bounding-box centre — so without this a
+          // finger tap falls through to the node and the craft is unselectable.
+          body.append(svgEl('circle', { cx: 0, cy: 0, r: 15, fill: 'transparent' }));
           const isAsset = c.deployed;
           if (isAsset) {
             body.append(svgEl('rect', { x: -6.5, y: -6.5, width: 13, height: 13, rx: 3,
