@@ -291,7 +291,14 @@ function renderGame() {
   if (!st.board) {
     st.board = renderBoard($('board-wrap'), {
       onCraftClick: id => craftMenu(id),
-      onNodeClick: () => {},
+      // A node is a far bigger touch target than the craft markers ringed
+      // around it: tapping one opens the craft stationed there.
+      onNodeClick: node => {
+        const here = Object.values(st.g.crafts).filter(c => c.node === node);
+        if (!here.length) return;
+        if (here.length === 1) craftMenu(here[0].id);
+        else craftPicker(here, `Craft at ${NODES[node].name}`);
+      },
     });
   }
   st.board.setTw(g, viewSeat());
@@ -515,7 +522,17 @@ function renderBottom() {
       bar.append(el('div', { class: 'info' }, el('b', {}, `${p.name}`), ` — command turn ${p.turnsUsed + 1}/${total} · ${p.credits} Cr`));
       bar.append(
         el('button', { class: 'btn', title: 'Assemble a rocket from hand cards, then optionally launch it in the same turn.',
-          onclick: () => openBuilderFlow(null) }, '🚀 Build / Launch'),
+          onclick: () => openBuilderFlow(null) }, '🚀 Build / Launch'));
+      const activatable = Object.values(g.crafts).filter(c =>
+        c.owner === seat && c.node !== 'assembly' && !c.activated);
+      if (activatable.length) {
+        bar.append(el('button', { class: 'btn',
+          title: 'Activate one of your craft in flight: move it and/or use its cards\' abilities (each card offers its own effects in the flight plan).',
+          onclick: () => activatable.length === 1 ? craftMenu(activatable[0].id)
+                                                  : craftPicker(activatable, 'Activate a craft') },
+          '🛰 Activate craft'));
+      }
+      bar.append(
         el('button', { class: 'btn ghost', title: 'Always-available Basic cards', onclick: basicShop }, '🛒 Basic shop'),
         el('button', { class: 'btn ghost', title: 'Develop a Technology card from your hand (pay its cost).', onclick: developMenu }, '🔬 Develop'),
         el('button', { class: 'btn ghost', title: `Level 2 costs 6 Cr (3 turns/round), Level 3 costs 14 Cr (4 turns/round). Takes effect next round.`,
@@ -693,6 +710,20 @@ function openBuilderFlow(craftId) {
       });
     },
   });
+}
+
+// Pick one craft out of several (a shared node, or the Activate button when
+// more than one craft is eligible), then open its menu.
+function craftPicker(list, title) {
+  const g = st.g;
+  const content = el('div', {},
+    el('h2', {}, title),
+    el('div', { class: 'craft-list', style: 'margin-top:10px; min-width: min(320px, 80vw);' },
+      list.map(c => el('div', { class: 'craft-item', onclick: () => { closeModal(); craftMenu(c.id); } },
+        el('div', { class: 'ci-name' }, `${c.deployed ? (c.isStation ? '🛰' : '📡') : '🚀'} ${c.name}`),
+        el('div', { class: 'ci-sub' }, `${g.players[c.owner].name} · ${NODES[c.node].name} · R${c.range} E${c.energy}` +
+          (c.activated && c.node !== 'assembly' ? ' · already activated this round' : ''))))));
+  openModal(content);
 }
 
 function craftMenu(craftId) {
