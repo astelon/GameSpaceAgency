@@ -314,6 +314,7 @@ function sar_resolve_reroll(array &$g, int $seat, bool $accept): void {
     $craftId = $data['craft'];
     if (!$accept) {
         sar_launch_failure($g, $craftId);
+        sar_recover_if_landed($g, $craftId); // failed Earth relaunch: still landed
         sar_end_command_turn($g, $seat);
         return;
     }
@@ -332,6 +333,7 @@ function sar_resolve_reroll(array &$g, int $seat, bool $accept): void {
         if ($result !== 'pending') sar_finish_flight($g, $craftId, $data['plan']);
     } else {
         sar_launch_failure($g, $craftId);
+        sar_recover_if_landed($g, $craftId); // failed Earth relaunch: still landed
         sar_end_command_turn($g, $seat);
     }
 }
@@ -710,6 +712,18 @@ function sar_check_station(array &$g, string $craftId): void {
     }
 }
 
+// Immediate recovery: a craft whose flight ends landed back on Earth does not
+// linger on the board — Reusable parts return to hand, the rest is discarded
+// (sar_recover_earth_craft). A rocket that merely moved to the pad without
+// flying (path ['earth']) stays available for the rest of the round.
+function sar_recover_if_landed(array &$g, string $craftId): void {
+    if (!isset($g['crafts'][$craftId])) return;
+    $craft = $g['crafts'][$craftId];
+    if ($craft['node'] !== 'earth' || $craft['deployed'] || $craft['launchRound'] === null) return;
+    if (count($craft['history']) < 2) return; // never left the pad
+    sar_recover_earth_craft($g, $craftId);
+}
+
 function sar_finish_flight(array &$g, string $craftId, array $plan): void {
     if (isset($g['crafts'][$craftId])) {
         $craft = &$g['crafts'][$craftId];
@@ -719,6 +733,7 @@ function sar_finish_flight(array &$g, string $craftId, array $plan): void {
         $seat = $craft['owner'];
         unset($craft);
         sar_check_missions($g, $craftId);
+        sar_recover_if_landed($g, $craftId);
     } else {
         $seat = $g['turnSeat'];
     }

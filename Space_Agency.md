@@ -363,7 +363,7 @@ If requirements are not met:
 
 #### Recovery
 
-* If a craft returns to the `Earth` node, its **unstaged Reusable parts** return to your hand during Maintenance.
+* If a craft lands back on the `Earth` node, it is recovered **immediately on touchdown**: its **unstaged Reusable parts** return to your hand, everything else is discarded, and its craft marker is freed.
 * If a part was **staged**, it is lost and does not return.
 * Non-Reusable parts do not return to your hand unless another card effect says they do.
 * Reusable recovery parts should usually cost about **1 Credit more** than their disposable versions because they trade higher setup cost for better long-term efficiency.
@@ -376,7 +376,7 @@ If requirements are not met:
 
 ### 7.4 Maintenance Phase
 
-* Reusable parts from craft that returned to `Earth` return to hand if they were not staged
+* Recover any craft still standing on `Earth` (a rocket left on the pad, or an automatic sub-orbital touchdown): unstaged Reusable parts return to hand, the rest is discarded
 * Ongoing technology effects trigger
 * **Asset Operations:** Each persistent `Satellite` or `Station` you control may trigger each of its "spend Energy" income abilities **once**, spending the asset's remaining Energy this round. Collect the Credits or VP. This is free and costs no Command Turn. **Income scales with distance:** Satellite assets pay 1 Credit at `Earth ZOI` or closer, 1 VP beyond `Earth ZOI`; Station cards pay as printed. (Energy simply refills at the start of the next Action Phase — there is no separate Energy cleanup.)
 * Discard the current round's Event card, unless its text says it persists (e.g., *Stranded Crew* stays in play until claimed)

@@ -11,7 +11,7 @@ const TYPE_ICON = {
 // Hand-written gameplay hints per card, shown on zoom. These describe what the
 // *engine* will actually do, so new players learn the scripted behaviors.
 const HINTS = {
-  E01: 'Reusable: if the craft lands back on Earth, this engine returns to your hand during Maintenance (free relaunches later).',
+  E01: 'Reusable: if the craft lands back on Earth, this engine returns to your hand on touchdown (free relaunches later).',
   E02: 'Cheap and 90% reliable, but single-use: it is discarded when the craft is recovered. As a Basic card you can always buy one, even if it is not in the market.',
   E03: 'Refuses to launch without at least one Cryo Tank on the rocket. Big thrust for heavy stacks.',
   E04: 'Only Thrust 3 — fine for light probes (Mass ≤ 3), useless for heavy stacks. 90% reliable.',
@@ -50,7 +50,7 @@ const HINTS = {
   S13: 'Station module (Scientific). On a GEO station it automatically pays 1 VP every Maintenance for 1 Energy.',
   S14: 'Propulsive landings cost no extra Range (still need an Engine). Counts as a Lander for mission requirements.',
   S15: 'One-shot +1 Energy, usable anywhere and any time — spent automatically when the craft is short on Energy. Mass 1 counts toward launch checks. Basic — always purchasable.',
-  C01: 'Your Reusable engines get +1 Reliability, and every Reusable card you recover during Maintenance pays 1 Credit.',
+  C01: 'Your Reusable engines get +1 Reliability, and every Reusable card you recover on Earth pays 1 Credit.',
   C02: 'Rockets with a Cryo Tank get +1 Reliability at launch.',
   C03: '+1 Reliability on every launch check. The simplest safety upgrade.',
   C04: 'Payload Mass counts as 1 less (min 1) for Thrust checks — small engines can lift bigger payloads.',
@@ -66,7 +66,7 @@ const HINTS = {
   M21: 'Standing contract, always available: fly Earth → Sub-Orbital → Earth and land (parachute or propulsive). No payload needed. Each agency may claim it once per game for 2 Credits + 1 VP — a guaranteed first job.',
   S16: 'Airbag landing for an Uncrewed craft, Earth or Mars — no parachute or engine needed. Single use. Also counts as a Lander for missions.',
   S17: 'Splashdown Kit — reusable Earth-only water landing; +1 Credit after recovery; returns to hand.',
-  EV14: 'Starter Event (round 1, revealed at setup): every craft that lands safely on Earth this round returns ALL its unstaged parts to hand during Maintenance, Reusable or not. Landing devices expended during touchdown stay discarded.',
+  EV14: 'Starter Event (round 1, revealed at setup): every craft that lands safely on Earth this round returns ALL its unstaged parts to hand, Reusable or not. Landing devices expended during touchdown stay discarded.',
   EV15: 'Starter Event (round 1, revealed at setup): every agency immediately gains 3 Credits — a funding-first opening.',
   EV16: 'Starter Event (round 1, revealed at setup): every agency has 1 extra command turn this round — a tempo opening.',
 };

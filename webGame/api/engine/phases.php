@@ -169,6 +169,40 @@ function sar_end_command_turn(array &$g, int $seat): void {
 // ---------------------------------------------------------------------------
 // Maintenance & end of round
 
+// Recover a craft standing on Earth: unstaged Reusable parts return to the
+// owner's hand (every unstaged part under Recovery Trials, EV14), the rest is
+// discarded, and the craft marker is freed.
+function sar_recover_earth_craft(array &$g, string $id): void {
+    $craft = $g['crafts'][$id];
+    $ev14 = sar_event_id($g) === 'EV14';
+    $seat = $craft['owner'];
+    $p = &$g['players'][$seat];
+    $recovered = []; $lost = []; $refurb = 0;
+    foreach ($craft['cards'] as $uid) {
+        if ($ev14 || sar_has_tag($uid, 'Reusable')) {
+            $p['hand'][] = $uid;
+            $recovered[] = sar_card($uid)['name'];
+            // The refurb credit stays tied to genuinely Reusable parts.
+            if (sar_has_tech($g, $seat, 'C01') && sar_has_tag($uid, 'Reusable')) { $p['credits'] += 1; $refurb++; }
+        } else {
+            $g['decks']['componentDiscard'][] = $uid;
+            $lost[] = sar_card($uid)['name'];
+        }
+    }
+    // A jury-rigged card is never recovered — not even by Recovery Trials.
+    if ($craft['sideways'] !== null) {
+        $g['decks']['componentDiscard'][] = $craft['sideways'];
+        $lost[] = sar_card($craft['sideways'])['name'] . ' (jury-rigged)';
+    }
+    $msg = $p['name'] . "'s {$craft['name']} is recovered on Earth.";
+    if ($recovered) $msg .= ' Returned to hand: ' . implode(', ', $recovered) . ($ev14 ? ' (Recovery Trials)' : '') . '.';
+    if ($lost) $msg .= ' Expended: ' . implode(', ', $lost) . '.';
+    if ($refurb) $msg .= " Reusable Refurb pays $refurb Credit(s).";
+    sar_log($g, 'recover', $msg, ['seat' => $seat]);
+    unset($p);
+    unset($g['crafts'][$id]);
+}
+
 function sar_maintenance(array &$g): void {
     $g['phase'] = 'maintenance';
     sar_log($g, 'phase', "Round {$g['round']} — Maintenance Phase.", ['phase' => 'maintenance']);
@@ -177,39 +211,13 @@ function sar_maintenance(array &$g): void {
     require_once __DIR__ . '/flight.php';
     sar_suborbital_decay($g);
 
-    // 1. Recover craft that returned to Earth. Under Recovery Trials (EV14,
-    // Starter Event) every unstaged part comes home, Reusable or not —
-    // single-use landing devices actually expended already left the craft.
-    $ev14 = sar_event_id($g) === 'EV14';
+    // 1. Recover craft still standing on Earth. Craft that landed during the
+    // round were already recovered on touchdown (sar_recover_if_landed); this
+    // sweep catches rockets left on the pad and sub-orbital decay landings.
     foreach ($g['crafts'] as $id => $craft) {
         if ($craft['node'] !== 'earth' || $craft['deployed']) continue;
         if ($craft['launchRound'] === null) continue; // never launched
-        $seat = $craft['owner'];
-        $p = &$g['players'][$seat];
-        $recovered = []; $lost = []; $refurb = 0;
-        foreach ($craft['cards'] as $uid) {
-            if ($ev14 || sar_has_tag($uid, 'Reusable')) {
-                $p['hand'][] = $uid;
-                $recovered[] = sar_card($uid)['name'];
-                // The refurb credit stays tied to genuinely Reusable parts.
-                if (sar_has_tech($g, $seat, 'C01') && sar_has_tag($uid, 'Reusable')) { $p['credits'] += 1; $refurb++; }
-            } else {
-                $g['decks']['componentDiscard'][] = $uid;
-                $lost[] = sar_card($uid)['name'];
-            }
-        }
-        // A jury-rigged card is never recovered — not even by Recovery Trials.
-        if ($craft['sideways'] !== null) {
-            $g['decks']['componentDiscard'][] = $craft['sideways'];
-            $lost[] = sar_card($craft['sideways'])['name'] . ' (jury-rigged)';
-        }
-        $msg = $p['name'] . "'s {$craft['name']} is recovered on Earth.";
-        if ($recovered) $msg .= ' Returned to hand: ' . implode(', ', $recovered) . ($ev14 ? ' (Recovery Trials)' : '') . '.';
-        if ($lost) $msg .= ' Expended: ' . implode(', ', $lost) . '.';
-        if ($refurb) $msg .= " Reusable Refurb pays $refurb Credit(s).";
-        sar_log($g, 'recover', $msg, ['seat' => $seat]);
-        unset($p);
-        unset($g['crafts'][$id]);
+        sar_recover_earth_craft($g, $id);
     }
 
     // 2. Asset Operations: persistent assets harvest income automatically.
