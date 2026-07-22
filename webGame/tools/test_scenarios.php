@@ -116,26 +116,21 @@ do {
     sar_apply($g2, 0, ['type' => 'launch', 'components' => [$eng, $tank, $crew, $chute, $bat],
         'plan' => ['path' => ['earth', 'subEarth', 'earth'],
                    'landing' => [2 => ['method' => 'reentry', 'card' => $chute]]]]);
-    $flew = false;
-    foreach ($g2['crafts'] as $c) if ($c['node'] === 'earth' && $c['launchRound']) $flew = true;
+    // A landed rocket is recovered on the spot: success = the Reusable
+    // Crew Capsule came back to hand.
+    $flew = in_array($crew, $g2['players'][0]['hand'], true);
     if (!$flew) $g2 = $snap;
 } while (!$flew);
 ok(in_array('M13#1', $g2['missions'], true), 'Tourist Hop NOT claimed without a Pressurized tank');
 
-echo "— Scenario 3: Maintenance recovery of Reusable parts\n";
-$p0hand = count($g2['players'][0]['hand']);
-$g2['players'][1]['passed'] = false;
+echo "— Scenario 3: Landing recovery — Reusable parts return on touchdown\n";
+ok(in_array($crew, $g2['players'][0]['hand'], true), 'Reusable Crew Capsule returned to hand right after the Earth landing');
+ok(!in_array($eng, $g2['players'][0]['hand'], true), 'single-use Sterling Booster was expended (not returned)');
+ok(!array_filter($g2['crafts'], fn($c) => $c['owner'] === 0), 'the landed rocket no longer occupies a craft slot');
 // force maintenance
 foreach ($g2['players'] as &$pp) { $pp['passed'] = true; }
 unset($pp);
 sar_maintenance($g2);
-$hand = $g2['players'][0]['hand'];
-$hasCrew = false;
-foreach ($hand as $u) if (explode('#', $u)[0] === 'P04') $hasCrew = true;
-ok($hasCrew, 'Reusable Crew Capsule returned to hand after Earth recovery');
-$engBack = false;
-foreach ($hand as $u) if (explode('#', $u)[0] === 'E02') $engBack = true;
-ok(!$engBack, 'single-use Sterling Booster was expended (not returned)');
 ok($g2['round'] === 2, 'round advanced to 2 after maintenance');
 ok($g2['phase'] === 'planning', 'back in planning phase');
 
@@ -391,6 +386,7 @@ ok(in_array('EV14#1', $g['decks']['eventDiscard'], true), 'the used Starter Even
 // EV14 Recovery Trials: everything unstaged comes home, expended devices don't.
 $g = fresh();
 $g['players'][0]['standingDone'] = ['M21']; // isolate from the standing contract
+$g['event'] = 'EV14#1'; // Recovery Trials active when the craft touches down
 [$eng, $tank, $probe, $chute] = give($g, 0, ['E02', 'T01', 'P05', 'S02']);
 $g['players'][0]['hand'] = [$eng, $tank, $probe, $chute];
 $flew = false; $tries = 0;
@@ -399,16 +395,13 @@ do {
     sar_apply($g, 0, ['type' => 'launch', 'components' => [$eng, $tank, $probe, $chute],
         'plan' => ['path' => ['earth', 'subEarth', 'earth'],
                    'landing' => [2 => ['method' => 'reentry', 'card' => $chute]]]]);
-    foreach ($g['crafts'] as $c) if ($c['node'] === 'earth' && $c['launchRound']) $flew = true;
+    // success = landing recovery ran and Recovery Trials returned the engine
+    $flew = in_array($eng, $g['players'][0]['hand'], true);
     if (!$flew) $g = $snap;
 } while (!$flew && ++$tries < 60);
-$g['event'] = 'EV14#1'; // Recovery Trials active during this round's Maintenance
-foreach ($g['players'] as &$pp) { $pp['passed'] = true; }
-unset($pp);
-sar_maintenance($g);
-$hand = $g['players'][0]['hand']; // compare exact uids — the round-2 draw adds unrelated cards
+$hand = $g['players'][0]['hand'];
 ok(in_array($eng, $hand, true) && in_array($tank, $hand, true) && in_array($probe, $hand, true),
-    'Recovery Trials returns non-Reusable engine, tank and payload to hand');
+    'Recovery Trials returns non-Reusable engine, tank and payload to hand on touchdown');
 ok(!in_array($chute, $hand, true), 'the parachute expended during landing is still discarded');
 
 echo "— Scenario 13: Flight Data — a failed launch pays 1 Credit\n";
@@ -661,6 +654,7 @@ ok($threw, 'a second sideways card is rejected');
 $g = fresh();
 $g['players'][0]['standingDone'] = ['M21'];
 $g['missions'] = [];
+$g['event'] = 'EV14#1'; // Recovery Trials — still must not return the jury-rigged card
 [$eng, $tank, $chute, $jr] = give($g, 0, ['E02', 'T01', 'S04', 'C03']); // S04 reusable parafoil
 $g['players'][0]['hand'] = [$eng, $tank, $chute, $jr];
 $flew = false; $tries = 0;
@@ -669,13 +663,10 @@ do {
     sar_apply($g, 0, ['type' => 'launch', 'components' => [$eng, $tank, $chute], 'sideways' => $jr,
         'plan' => ['path' => ['earth', 'subEarth', 'earth'],
                    'landing' => [2 => ['method' => 'reentry', 'card' => $chute]]]]);
-    foreach ($g['crafts'] as $c) if ($c['node'] === 'earth' && $c['launchRound']) $flew = true;
+    // success = the craft landed and was recovered on the spot
+    $flew = in_array($eng, $g['players'][0]['hand'], true);
     if (!$flew) $g = $snap;
 } while (!$flew && ++$tries < 60);
-$g['event'] = 'EV14#1'; // Recovery Trials — still must not return the jury-rigged card
-foreach ($g['players'] as &$pp) { $pp['passed'] = true; }
-unset($pp);
-sar_maintenance($g);
 ok(!in_array($jr, $g['players'][0]['hand'], true), 'the jury-rigged card is never recovered (even under Recovery Trials)');
 ok(in_array($jr, $g['decks']['componentDiscard'], true), 'it is scrapped to the component discard pile');
 

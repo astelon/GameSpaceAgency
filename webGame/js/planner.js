@@ -464,7 +464,7 @@ export function openPlanner(g, seat, { mode, cards = null, engDiff = null, craft
           : 'This will activate the craft without moving (allowed, e.g. to operate instruments).'));
       }
       if (sim.ok && sim.finalCraft.node === 'earth' && path.length > 1) {
-        side.append(el('div', { class: 'hint-box ok-box' }, '🌍 The craft ends on Earth: Reusable parts return to your hand during Maintenance.'));
+        side.append(el('div', { class: 'hint-box ok-box' }, '🌍 The craft ends on Earth: it is recovered on touchdown — Reusable parts return to your hand, the rest is discarded.'));
       }
     }
 

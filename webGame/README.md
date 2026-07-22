@@ -105,8 +105,12 @@ these calls (all in one place so they're easy to revisit):
   hint about attaching a Power card.
 * **Battery Packs discharge automatically** whenever a craft is short on
   Energy for a mandatory or requested spend.
-* **Hand-limit overflow** from Maintenance recovery is enforced at the next
-  Planning "Ready" step instead of mid-maintenance (avoids blocking a phase
+* **Earth landings recover immediately.** A flight that ends landed on Earth
+  frees its craft marker on touchdown: Reusable parts return to hand, the
+  rest is discarded. Rockets parked on the pad without flying and sub-orbital
+  decay touchdowns are recovered during Maintenance instead.
+* **Hand-limit overflow** from recovery is enforced at the next
+  Planning "Ready" step instead of mid-round (avoids blocking a phase
   nobody is watching). Acquiring is blocked while at the limit.
 * **Deployed assets come online immediately** (Energy = their Power output at
   deploy time) so a satellite deployed in round N earns income in round N's
